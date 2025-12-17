@@ -162,6 +162,8 @@ function publishPackage(packageInfo) {
       cmd += ` --otp=${otp}`;
     }
     
+    info(`[${name}] 执行命令: ${cmd}`);
+    
     const output = execSync(cmd, { 
       cwd: packagePath, 
       stdio: ['inherit', 'pipe', 'pipe'],
@@ -173,7 +175,11 @@ function publishPackage(packageInfo) {
     }
     return true;
   } catch (err) {
-    error(`[${name}] 发布失败: ${err.message}`);
+    error(`[${name}] 发布失败:`);
+    error(`错误代码: ${err.code}`);
+    error(`错误信号: ${err.signal}`);
+    error(`错误信息: ${err.message}`);
+    error(`堆栈跟踪: ${err.stack}`);
     throw err;
   }
 }
