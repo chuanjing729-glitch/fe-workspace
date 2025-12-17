@@ -4,11 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: '要发布的包名 (例如 core-utils，留空则尝试发布所有已更改的包)'
+        description: '要发布的包 (留空则发布所有包)'
         required: false
-        type: string # 改为 string 比较灵活，或者你保持 choice 也可以
+        type: choice
+        options:
+          - ''
+          - 'core-utils'
+          - 'vue2-toolkit'
+          - 'webpack-spec-plugin'
       version-type:
-        description: '版本更新类型 (将执行 pnpm version <type>)'
+        description: '版本更新类型'
         required: true
         type: choice
         default: 'patch'
@@ -17,30 +22,21 @@ on:
           - 'minor'
           - 'major'
 
-# 需要添加权限设置，以便后续 git push
-permissions:
-  contents: write
-
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          # 需要拉取完整历史以便 git 操作，并且使用具有写权限的 token
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: pnpm/action-setup@v2
         with:
           version: 9.15.0
-      - uses: setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Build packages
         run: pnpm build
@@ -48,45 +44,14 @@ jobs:
       - name: Run tests
         run: pnpm test
 
-      # 配置 Git 用户信息，用于提交版本更迭
-      - name: Configure Git
+      - name: Publish packages
         run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-
-      - name: Bump Version and Publish
-        run: |
-          # 1. 定义过滤参数
           if [ -z "${{ github.event.inputs.package }}" ]; then
-            # 如果没指定包，则对所有子包进行操作 (-r)
-            FILTER_ARG="-r"
-            echo "No specific package selected. Performing operation recursively on all packages."
+            # 发布所有包
+            pnpm publish ${{ github.event.inputs.version-type }}
           else
-            # 如果指定了包，则使用 --filter
-            FILTER_ARG="--filter ${{ github.event.inputs.package }}"
-            echo "Package '${{ github.event.inputs.package }}' selected."
+            # 发布指定包
+            pnpm publish:${{ github.event.inputs.package }} ${{ github.event.inputs.version-type }}
           fi
-          
-          # 2. 更新版本号 (pnpm version 会自动修改 package.json 并打 git tag)
-          # --no-git-tag-version 可以阻止 pnpm 自动打 tag 和 commit，如果你想自己控制 git 操作的话。
-          # 这里为了简单，我们让 pnpm 帮我们完成 commit 和 tag
-          echo "Bumping version (${{ github.event.inputs.version-type }})..."
-          pnpm $FILTER_ARG version ${{ github.event.inputs.version-type }}
-
-          # 3. 发布到 npm
-          # --no-git-checks 在 CI 环境中是必要的
-          echo "Publishing to npm..."
-          pnpm $FILTER_ARG publish --no-git-checks --access public
-          
-          # 4. 将 pnpm version 生成的 commit 和 tag 推送到 GitHub
-          # 注意：这步操作可能会触发其他 workflow (如果没做限制的话)
-          echo "Pushing changes and tags to GitHub..."
-          git push --follow-tags
-
         env:
-          # 使用 Automation Token，不需要 OTP
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-
-
-          
