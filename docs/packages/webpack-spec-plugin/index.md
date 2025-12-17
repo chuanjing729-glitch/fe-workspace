@@ -642,10 +642,10 @@ chmod +x .git/hooks/commit-msg
 
 ## 📚 更多文档
 
-- [快速开始](/fe-workspace/packages/webpack-spec-plugin/quick-start) - 快速上手指南
-- [完整功能列表](/fe-workspace/packages/webpack-spec-plugin/features) - 所有功能详解
-- [更新日志](/fe-workspace/packages/webpack-spec-plugin/changelog) - 版本更新记录
-- [真实项目验证报告](/fe-workspace/packages/webpack-spec-plugin/validation-report) - 实际测试结果
+- [快速开始](/fe-workspace/packages/webpack-spec-plugin/quick-start.md) - 快速上手指南
+- [完整功能列表](/fe-workspace/packages/webpack-spec-plugin/features.md) - 所有功能详解
+- [更新日志](/fe-workspace/packages/webpack-spec-plugin/changelog.md) - 版本更新记录
+- [真实项目验证报告](/fe-workspace/packages/webpack-spec-plugin/validation-report.md) - 实际测试结果
 
 ## 🤝 参与贡献
 
