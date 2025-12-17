@@ -8,6 +8,7 @@ on:
         required: false
         type: choice
         options:
+          - ''
           - 'core-utils'
           - 'vue2-toolkit'
           - 'webpack-spec-plugin'
