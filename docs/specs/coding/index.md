@@ -100,6 +100,6 @@ trim_trailing_whitespace = false
 
 ## 相关规范
 
-- [工程化规范](/fe-workspace/specs/engineering/) - Git工作流、代码审查、测试规范
-- [设计规范](/fe-workspace/specs/design/) - 技术方案设计、架构设计
-- [优化规范](/fe-workspace/specs/optimization/) - 性能优化、内存管理
+- [工程化规范](/fe-workspace/specs/engineering) - Git工作流、代码审查、测试规范
+- [设计规范](/fe-workspace/specs/design) - 技术方案设计、架构设计
+- [优化规范](/fe-workspace/specs/optimization) - 性能优化、内存管理

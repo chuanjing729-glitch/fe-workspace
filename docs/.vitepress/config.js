@@ -6,7 +6,6 @@ export default defineConfig({
   base: '/fe-workspace/',
   title: "前端工程效率空间",
   description: "前端工程效率平台提升开发质量、效率和性能",
-  ignoreDeadLinks: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
