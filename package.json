@@ -1,0 +1,12 @@
+{
+  "name": "fe-workspace",
+  "version": "1.0.0",
+  "description": "A monorepo for front-end development, including toolkits, documentation, and a Next.js server.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["frontend", "monorepo", "toolkit", "nextjs"],
+  "author": "chuanjing729-glitch",
+  "license": "ISC"
+}
