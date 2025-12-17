@@ -11,7 +11,7 @@
     "docs:preview": "vitepress preview docs"
   },
   "keywords": [],
-  "author": "",
+  "author": "chuanjing.li",
   "license": "ISC",
   "devDependencies": {
     "vitepress": "^1.0.0-rc.4"

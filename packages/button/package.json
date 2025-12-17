@@ -9,7 +9,7 @@
   "keywords": [
     "button"
   ],
-  "author": "",
+  "author": "chuanjing.li",
   "license": "ISC",
   "dependencies": {
     "vue": "^3.4.31"

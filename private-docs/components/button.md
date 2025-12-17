@@ -5,7 +5,7 @@ This document contains internal-facing notes for the `@fe-workspace/button` comp
 ## Development Status
 
 - **Status**: Alpha
-- **Owner**: @Gemini
+- **Owner**: chuanjing.li
 - **Roadmap**: 
   - Add support for different sizes (small, medium, large).
   - Implement a `disabled` state.
