@@ -48,3 +48,19 @@ github托管地址：https://github.com/chuanjing729-glitch/fe-workspace.git
     *   根据用户指令，暂停了在 `server` 目录中初始化 Next.js 的操作。
     *   **新规则**: `docs` 和 `private-docs` 目录内容需要保持严格一致，进行双向同步。在更新前需要先理解文档内容。
 
+## Gemini Actions (2025-12-17T09:30:00+00:00) - GitHub Pages 部署
+
+*   **目标**: 自动化部署 `docs` 目录到 GitHub Pages。
+*   **Action 1**: 创建了 GitHub Actions 工作流文件 `.github/workflows/docs.yml`，用于将 `docs` 目录部署到 `gh-pages` 分支。
+    *   在 `docs` 目录中创建了 `README.md` 以便有内容可以部署。
+*   **[错误 1]**: 工作流因 `No event triggers defined in 'on'` 错误而失败。
+*   **Fix 1**: 修正工作流文件，添加了 `on: push: branches: [ "main" ]` 触发器，使其在 `main` 分支有推送时运行。
+*   **[错误 2]**: 工作流再次失败，错误为 `Permission to ... denied to github-actions[bot]` (403 Forbidden)。
+*   **Fix 2**: 诊断为工作流缺少写入权限。修改工作流文件，在 `job` 中添加 `permissions: contents: write`，为 Action 授予将 `gh-pages` 分支推送到仓库的权限。
+*   **[成功]**: 工作流成功执行，`gh-pages` 分支被成功创建和推送。
+*   **指导**: 指导用户前往仓库 "Settings" -> "Pages"，选择 `gh-pages` 分支作为源，完成网站的最终发布。
+*   **用户新需求**: 用户询问当前架构是否支持组件库的**在线交互 Demo**，并指出我**忘记记录本次对话**。
+*   **响应与规划**:
+    1.  承认忘记记录对话的失误，并承诺立即补上（即当前这次更新）。
+    2.  解释当前简单的静态文件部署**不支持**交互式 Demo。
+    3.  提出解决方案：引入专业的静态站点生成器 **VitePress** 来升级 `docs` 目录，以实现可在文档中直接渲染和交互的组件 Demo。等待用户确认后开始实施。
