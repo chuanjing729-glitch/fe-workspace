@@ -47,16 +47,11 @@ jobs:
       - name: Publish packages
         run: |
           if [ -z "${{ github.event.inputs.package }}" ]; then
-            # 发布所有包
-            pnpm publish ${{ github.event.inputs.version-type }}
+            # 发布所有包，添加了 --verbose
+            pnpm publish ${{ github.event.inputs.version-type }} --verbose
           else
-            # 发布指定包
-            pnpm publish:${{ github.event.inputs.package }} ${{ github.event.inputs.version-type }}
+            # 发布指定包，添加了 --verbose
+            pnpm publish:${{ github.event.inputs.package }} ${{ github.event.inputs.version-type }} --verbose
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-
-
-
-
