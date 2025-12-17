@@ -155,7 +155,14 @@ function publishPackage(packageInfo) {
   
   try {
     info(`[${name}] 开始发布...`);
-    const output = execSync('pnpm publish --access public --no-git-checks', { 
+    // 检查是否提供了 OTP
+    const otp = process.env.NPM_OTP || process.env.OTP;
+    let cmd = 'pnpm publish --access public --no-git-checks';
+    if (otp) {
+      cmd += ` --otp=${otp}`;
+    }
+    
+    const output = execSync(cmd, { 
       cwd: packagePath, 
       stdio: ['inherit', 'pipe', 'pipe'],
       encoding: 'utf-8'
