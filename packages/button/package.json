@@ -1,5 +1,5 @@
 {
-  "name": "@fe-workspace/button",
+  "name": "@jbs/button",
   "version": "0.0.1",
   "description": "A simple button component.",
   "main": "index.js",
