@@ -1,21 +1,17 @@
 {
-  "name": "@jbs/button",
+  "name": "@51jbs/button",
   "version": "0.0.1",
-  "description": "A simple button component.",
+  "description": "A simple button component",
   "main": "index.js",
-  "files": [
-    "index.js"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "button",
-    "component"
+    "button"
   ],
-  "author": "Gemini",
-  "license": "MIT"
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^3.4.31"
+  }
 }
