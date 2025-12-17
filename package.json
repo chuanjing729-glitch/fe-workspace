@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "fe-efficiency-workspace",
+  "name": "fe-workspace",
   "version": "1.0.0",
   "description": "前端工程效率平台工作空间",
   "main": "index.js",

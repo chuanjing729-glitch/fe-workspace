@@ -5,7 +5,7 @@
 ## 目录结构
 
 ```
-fe-efficiency/
+fe-workspace/
 ├── packages/                     # 所有前端工程项目存放目录
 │   ├── fe-quality-tools/         # 开发质量工具包
 │   ├── fe-performance-utils/     # 性能优化工具集
