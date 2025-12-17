@@ -6,13 +6,13 @@
 
 ## 目录
 
-- [基础使用技巧](/fe-workspace/ai-guidelines/basic-usage.md)
-- [高阶使用技巧](/fe-workspace/ai-guidelines/advanced-techniques.md)
-- [提示词与指令规范](/fe-workspace/ai-guidelines/prompt-engineering.md)
-- [代码质量保障](/fe-workspace/ai-guidelines/code-quality.md)
-- [安全使用规范](/fe-workspace/ai-guidelines/security-guidelines.md)
-- [团队协作最佳实践](/fe-workspace/ai-guidelines/team-collaboration.md)
-- [项目集成指南](/fe-workspace/ai-guidelines/project-integration.md)
+- [基础使用技巧](/ai-guidelines/basic-usage)
+- [高阶使用技巧](/ai-guidelines/advanced-techniques)
+- [提示词与指令规范](/ai-guidelines/prompt-engineering)
+- [代码质量保障](/ai-guidelines/code-quality)
+- [安全使用规范](/ai-guidelines/security-guidelines)
+- [团队协作最佳实践](/ai-guidelines/team-collaboration)
+- [项目集成指南](/ai-guidelines/project-integration)
 
 ## 适用范围
 

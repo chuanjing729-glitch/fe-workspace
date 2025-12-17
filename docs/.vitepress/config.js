@@ -10,7 +10,10 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: '介绍', link: '/' },
-      { text: '开始', link: '/guides/getting-started' }
+      { text: '规范', link: '/specs/' },
+      { text: '插件', link: '/packages/webpack-spec-plugin/' },
+      { text: '工具库', link: '/packages/' },
+      { text: 'AI 指南', link: '/ai-guidelines/' }
     ],
 
     sidebar,

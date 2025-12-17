@@ -1,4 +1,22 @@
 export const sidebar = {
+  // 工具库总览
+  '/packages/': [
+    {
+      text: '工具库总览',
+      items: [
+        { text: '总览', link: '/packages/' }
+      ]
+    },
+    {
+      text: '工具库分类',
+      items: [
+        { text: 'Core Utils 核心工具库', link: '/packages/core-utils/' },
+        { text: 'Vue2 Toolkit Vue2工具库', link: '/packages/vue2-toolkit/' },
+        { text: 'Webpack 规范检查插件', link: '/packages/webpack-spec-plugin/' }
+      ]
+    }
+  ],
+
   // Webpack 规范检查插件
   '/packages/webpack-spec-plugin/': [
     {
@@ -25,7 +43,19 @@ export const sidebar = {
         { text: '格式化工具', link: '/packages/core-utils/format' },
         { text: '事件管理', link: '/packages/core-utils/event' },
         { text: 'HTTP 请求', link: '/packages/core-utils/http' },
-        { text: 'Mixins 资源管理', link: '/packages/vue2-toolkit/mixins' }
+        { text: '数组操作', link: '/packages/core-utils/array' }
+      ]
+    }
+  ],
+
+  // Vue2 工具库
+  '/packages/vue2-toolkit/': [
+    {
+      text: 'Vue2 工具库',
+      items: [
+        { text: '总览', link: '/packages/vue2-toolkit/' },
+        { text: 'Mixins 资源管理', link: '/packages/vue2-toolkit/mixins' },
+        { text: '更新日志', link: '/packages/vue2-toolkit/changelog' }
       ]
     }
   ],
@@ -33,18 +63,12 @@ export const sidebar = {
   // 完整规范
   '/specs/': [
     {
-      text: '规范总览',
-      items: [
-        { text: '总览', link: '/specs/' }
-      ]
-    },
-    {
       text: '代码编写规范',
       collapsed: false,
       items: [
         { text: '编码规范总览', link: '/specs/coding/' },
         { text: '命名规范', link: '/specs/coding/naming' },
-        { text: 'JS/TS 规范', link: '/specs/coding/javascript' },
+        { text: 'JavaScript/TypeScript 规范', link: '/specs/coding/javascript' },
         { text: 'Vue 组件规范', link: '/specs/coding/vue' },
         { text: 'CSS 样式规范', link: '/specs/coding/css' },
         { text: '注释规范', link: '/specs/coding/comments' },
@@ -55,28 +79,28 @@ export const sidebar = {
       ]
     },
     {
-      text: '工程化规范',
+      text: '🔧 工程化规范',
       collapsed: false,
       items: [
         { text: '工程化总览', link: '/specs/engineering/' },
         { text: 'Git 工作流', link: '/specs/engineering/git-workflow' },
-        { text: 'Code Review', link: '/specs/engineering/code-review' },
+        { text: 'Code Review 规范', link: '/specs/engineering/code-review' },
         { text: '构建与部署', link: '/specs/engineering/build-deploy' },
         { text: '测试规范', link: '/specs/engineering/testing' }
       ]
     },
     {
-      text: '设计规范',
+      text: '🎨 设计规范',
       collapsed: false,
       items: [
         { text: '设计规范总览', link: '/specs/design/' },
-        { text: '技术方案设计', link: '/specs/design/technical-design' },
+        { text: '技术方案设计规范', link: '/specs/design/technical-design' },
         { text: '技术设计文档模板', link: '/specs/design/technical-document' },
         { text: '架构设计规范', link: '/specs/design/architecture' }
       ]
     },
     {
-      text: '性能优化规范',
+      text: '⚡ 性能优化规范',
       collapsed: false,
       items: [
         { text: '优化总览', link: '/specs/optimization/' },
@@ -86,22 +110,18 @@ export const sidebar = {
       ]
     },
     {
-      text: '前端开发规范',
-      collapsed: true,
+      text: '🚀 快速开始',
+      collapsed: false,
       items: [
-        { text: '前端规范总览', link: '/specs/frontend/' },
-        { text: '代码规范', link: '/specs/frontend/coding-standards' },
-        { text: 'JavaScript 规范', link: '/specs/frontend/javascript' },
-        { text: 'Vue 规范', link: '/specs/frontend/vue' },
-        { text: 'CSS 规范', link: '/specs/frontend/css' },
-        { text: '文件命名规范', link: '/specs/frontend/file-naming' },
-        { text: '性能优化规范', link: '/specs/frontend/performance' },
-        { text: '内存管理规范', link: '/specs/frontend/memory-management' }
+        { text: '快速开始', link: '/specs/#快速开始' }
       ]
-    },
+    }
+  ],
+
+  // AI 使用规范
+  '/ai-guidelines/': [
     {
       text: 'AI 使用规范',
-      collapsed: false,
       items: [
         { text: '总览', link: '/ai-guidelines/' },
         { text: '基础使用技巧', link: '/ai-guidelines/basic-usage' },
