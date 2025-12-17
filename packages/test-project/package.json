@@ -6,7 +6,7 @@
     "dev": "webpack serve --mode development"
   },
   "devDependencies": {
-    "@51jbs/webpack-spec-plugin": "workspace:^0.0.1",
+    "@51jbs/webpack-spec-plugin": "workspace:^1.0.3",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   },
