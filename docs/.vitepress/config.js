@@ -1,15 +1,15 @@
 export default {
+  base: '/fe-workspace/',
   title: 'FE Workspace Docs',
-  description: 'Component and utility documentation.',
+  description: 'FE Workspace Documentation',
   themeConfig: {
     sidebar: [
       {
         text: 'Introduction',
         items: [
-          { text: 'What is this?', link: '/' },
+          { text: 'What is this?', link: '/introduction' }
         ]
-      },
-      // ... more sidebar items here in the future
+      }
     ]
   }
 }
