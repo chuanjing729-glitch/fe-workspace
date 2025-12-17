@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mall-portal-front 项目规范检查详细报告</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    /* 头部样式 */
+    .header {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .header .icon {
+      font-size: 36px;
+    }
+    
+    .header .meta {
+      color: #666;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    
+    .header .meta div {
+      margin: 5px 0;
+    }
+    
+    /* 评分卡片 */
+    .score-card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .score-circle {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    
+    .score-value {
+      font-size: 64px;
+      font-weight: bold;
+      color: #f56c6c;
+    }
+    
+    .score-label {
+      font-size: 18px;
+      color: #666;
+      margin-top: 10px;
+    }
+    
+    .score-rating {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+    
+    /* 概览卡片 */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .summary-card {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-left: 4px solid #409eff;
+    }
+    
+    .summary-card.error {
+      border-left-color: #f56c6c;
+    }
+    
+    .summary-card.warning {
+      border-left-color: #e6a23c;
+    }
+    
+    .summary-card.success {
+      border-left-color: #67c23a;
+    }
+    
+    .summary-card.info {
+      border-left-color: #909399;
+    }
+    
+    .summary-card h3 {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .summary-card .value {
+      font-size: 36px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .summary-card.error .value {
+      color: #f56c6c;
+    }
+    
+    .summary-card.warning .value {
+      color: #e6a23c;
+    }
+    
+    .summary-card.success .value {
+      color: #67c23a;
+    }
+    
+    .summary-card .sub-value {
+      font-size: 14px;
+      color: #999;
+      margin-top: 5px;
+    }
+    
+    /* 章节样式 */
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .section h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+    
+    .section h3 {
+      font-size: 18px;
+      margin: 20px 0 15px;
+      color: #555;
+    }
+    
+    /* 图表样式 */
+    .chart {
+      margin: 20px 0;
+    }
+    
+    .bar-chart {
+      margin: 15px 0;
+    }
+    
+    .bar-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    
+    .bar-label {
+      width: 320px;
+      color: #666;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+    }
+    
+    .bar-track {
+      flex: 1;
+      height: 28px;
+      background: #f5f5f5;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #409eff, #66b1ff);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: white;
+      font-weight: 500;
+      font-size: 12px;
+      transition: width 0.3s ease;
+    }
+    
+    .bar-fill.error {
+      background: linear-gradient(90deg, #f56c6c, #f78989);
+    }
+    
+    .bar-fill.warning {
+      background: linear-gradient(90deg, #e6a23c, #ebb563);
+    }
+    
+    .bar-count {
+      margin-left: 10px;
+      font-weight: 600;
+      color: #333;
+      min-width: 80px;
+    }
+    
+    /* 表格样式 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+    
+    thead {
+      background: #f9f9f9;
+    }
+    
+    th {
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    tr:hover {
+      background: #fafafa;
+    }
+    
+    /* 徽章样式 */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .badge.error {
+      background: #fef0f0;
+      color: #f56c6c;
+      border: 1px solid #fde2e2;
+    }
+    
+    .badge.warning {
+      background: #fdf6ec;
+      color: #e6a23c;
+      border: 1px solid #faecd8;
+    }
+    
+    .badge.info {
+      background: #f4f4f5;
+      color: #909399;
+      border: 1px solid #e9e9eb;
+    }
+    
+    /* 代码样式 */
+    .code-block {
+      background: #f6f8fa;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      padding: 16px;
+      margin: 15px 0;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+    
+    .code-block.error {
+      background: #fef0f0;
+      border-color: #fde2e2;
+    }
+    
+    .code-block.success {
+      background: #f0f9ff;
+      border-color: #d1eaff;
+    }
+    
+    .file-path {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      color: #666;
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    
+    /* 问题示例样式 */
+    .issue-example {
+      background: #fafafa;
+      border-left: 4px solid #409eff;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    
+    .issue-example.error {
+      border-left-color: #f56c6c;
+      background: #fef0f0;
+    }
+    
+    .issue-example.warning {
+      border-left-color: #e6a23c;
+      background: #fdf6ec;
+    }
+    
+    .issue-example h4 {
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 16px;
+    }
+    
+    .issue-meta {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    
+    /* 进度条 */
+    .progress-bar {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #67c23a, #85ce61);
+      transition: width 0.3s ease;
+    }
+    
+    .progress-fill.low {
+      background: linear-gradient(90deg, #f56c6c, #f78989);
+    }
+    
+    .progress-fill.medium {
+      background: linear-gradient(90deg, #e6a23c, #ebb563);
+    }
+    
+    /* 优先级标签 */
+    .priority {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    
+    .priority.p0 {
+      background: #f56c6c;
+      color: white;
+    }
+    
+    .priority.p1 {
+      background: #e6a23c;
+      color: white;
+    }
+    
+    .priority.p2 {
+      background: #409eff;
+      color: white;
+    }
+    
+    /* 提示框 */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid;
+    }
+    
+    .alert.error {
+      background: #fef0f0;
+      border-color: #f56c6c;
+      color: #f56c6c;
+    }
+    
+    .alert.warning {
+      background: #fdf6ec;
+      border-color: #e6a23c;
+      color: #e6a23c;
+    }
+    
+    .alert.info {
+      background: #f4f4f5;
+      border-color: #909399;
+      color: #606266;
+    }
+    
+    .alert.success {
+      background: #f0f9ff;
+      border-color: #67c23a;
+      color: #67c23a;
+    }
+    
+    /* 建议卡片 */
+    .recommendation {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    .recommendation h3 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: white;
+    }
+    
+    .recommendation ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .recommendation li {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .recommendation li:last-child {
+      border-bottom: none;
+    }
+    
+    /* 页脚 */
+    .footer {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .bar-label {
+        width: 200px;
+        font-size: 12px;
+      }
+    }
+    
+    /* 打印样式 */
+    @media print {
+      body {
+        background: white;
+      }
+      
+      .section {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 头部 -->
+    <div class="header">
+      <h1>
+        <span class="icon">📋</span>
+        mall-portal-front 项目规范检查详细报告
+      </h1>
+      <div class="meta">
+        <div>📁 <strong>项目路径：</strong>/Users/chuanjiing.li/Documents/51jbs/project/mall-portal-front</div>
+        <div>🕐 <strong>检查时间：</strong>2025-12-15 17:40:00</div>
+        <div>🔧 <strong>检查工具：</strong>webpack-spec-plugin v2.2.0</div>
+        <div>📊 <strong>检查方式：</strong>随机采样 100 个文件（共 655 个代码文件）</div>
+      </div>
+    </div>
+
+    <!-- 评分卡片 -->
+    <div class="score-card">
+      <div class="score-circle">
+        <div class="score-value">20</div>
+        <div class="score-label">规范符合度</div>
+      </div>
+      <div class="score-rating">⭐ 不及格</div>
+      <div class="progress-bar" style="width: 300px; margin: 20px auto;">
+        <div class="progress-fill low" style="width: 20%"></div>
+      </div>
+      <div class="alert error">
+        <strong>⚠️ 严重警告：</strong>项目存在大量规范问题，特别是空指针安全问题占比 68.6%，可能导致生产环境崩溃！
+      </div>
+    </div>
+
+    <!-- 概览统计 -->
+    <div class="summary">
+      <div class="summary-card">
+        <h3>项目文件总数</h3>
+        <div class="value">655</div>
+        <div class="sub-value">Vue、JS、TS 文件</div>
+      </div>
+      
+      <div class="summary-card">
+        <h3>采样检查文件</h3>
+        <div class="value">100</div>
+        <div class="sub-value">随机抽取</div>
+      </div>
+      
+      <div class="summary-card error">
+        <h3>问题文件数</h3>
+        <div class="value">97</div>
+        <div class="sub-value">问题文件比例: 97.0%</div>
+      </div>
+      
+      <div class="summary-card error">
+        <h3>问题总数</h3>
+        <div class="value">3,513</div>
+        <div class="sub-value">平均每文件 35.1 个</div>
+      </div>
+      
+      <div class="summary-card error">
+        <h3>🔴 错误</h3>
+        <div class="value">1,441</div>
+        <div class="sub-value">41.0% - 必须修复</div>
+      </div>
+      
+      <div class="summary-card warning">
+        <h3>⚠️ 警告</h3>
+        <div class="value">2,072</div>
+        <div class="sub-value">59.0% - 建议修复</div>
+      </div>
+    </div>
+
+    <!-- Top 10 问题分布 -->
+    <div class="section">
+      <h2>🔝 Top 10 规范问题分布</h2>
+      <div class="chart">
+        <div class="bar-chart">
+          <div class="bar-item">
+            <div class="bar-label">null-safety/unsafe-function-call</div>
+            <div class="bar-track">
+              <div class="bar-fill error" style="width: 100%">
+                1,143 个 (32.5%)
+              </div>
+            </div>
+            <div class="bar-count">🔴 错误</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">null-safety/unsafe-property-access</div>
+            <div class="bar-track">
+              <div class="bar-fill error" style="width: 68.8%">
+                786 个 (22.4%)
+              </div>
+            </div>
+            <div class="bar-count">🔴 错误</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">null-safety/unsafe-array-access</div>
+            <div class="bar-track">
+              <div class="bar-fill error" style="width: 28.2%">
+                322 个 (9.2%)
+              </div>
+            </div>
+            <div class="bar-count">🔴 错误</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">javascript/no-loose-equality</div>
+            <div class="bar-track">
+              <div class="bar-fill warning" style="width: 24.3%">
+                278 个 (7.9%)
+              </div>
+            </div>
+            <div class="bar-count">⚠️ 警告</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">javascript/no-console</div>
+            <div class="bar-track">
+              <div class="bar-fill warning" style="width: 15.9%">
+                182 个 (5.2%)
+              </div>
+            </div>
+            <div class="bar-count">⚠️ 警告</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">null-safety/vue-props-access</div>
+            <div class="bar-track">
+              <div class="bar-fill error" style="width: 13.7%">
+                157 个 (4.5%)
+              </div>
+            </div>
+            <div class="bar-count">🔴 错误</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">javascript/prefer-template-literals</div>
+            <div class="bar-track">
+              <div class="bar-fill warning" style="width: 9.4%">
+                108 个 (3.1%)
+              </div>
+            </div>
+            <div class="bar-count">⚠️ 警告</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">null-safety/vue-async-data-access</div>
+            <div class="bar-track">
+              <div class="bar-fill error" style="width: 6.1%">
+                70 个 (2.0%)
+              </div>
+            </div>
+            <div class="bar-count">🔴 错误</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">vue/props-type-definition</div>
+            <div class="bar-track">
+              <div class="bar-fill warning" style="width: 4.7%">
+                54 个 (1.5%)
+              </div>
+            </div>
+            <div class="bar-count">⚠️ 警告</div>
+          </div>
+          
+          <div class="bar-item">
+            <div class="bar-label">event/prefer-event-name</div>
+            <div class="bar-track">
+              <div class="bar-fill warning" style="width: 3.7%">
+                42 个 (1.2%)
+              </div>
+            </div>
+            <div class="bar-count">⚠️ 警告</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="alert error">
+        <strong>🔴 关键发现：</strong>空指针安全问题占所有问题的 <strong>68.6%</strong>（2,408/3,513），这是导致生产环境崩溃的主要原因！
+      </div>
+    </div>
+
+    <!-- 典型问题示例 -->
+    <div class="section">
+      <h2>🔍 典型问题示例</h2>
+      
+      <div class="issue-example error">
+        <h4>问题 1：🔴 不安全的属性访问（786 处）</h4>
+        <div class="issue-meta">
+          <strong>文件：</strong><span class="file-path">/src/views/home/components/deliverModal.vue</span><br>
+          <strong>规则：</strong><span class="badge error">null-safety/unsafe-property-access</span><br>
+          <strong>严重程度：</strong>错误 - 可能导致运行时崩溃
+        </div>
+        
+        <div class="code-block error">
+// ❌ 错误写法
+const desc = res.data.desc
+const pro = res.data.pro
+const email = user.profile.email
+        </div>
+        
+        <div class="code-block success">
+// ✅ 正确写法 1：使用可选链
+const desc = res?.data?.desc
+const pro = res?.data?.pro
+const email = user?.profile?.email
+
+// ✅ 正确写法 2：使用默认值
+const desc = res?.data?.desc ?? '默认描述'
+const pro = res?.data?.pro ?? 0
+const email = user?.profile?.email ?? 'no-email@example.com'
+        </div>
+      </div>
+      
+      <div class="issue-example error">
+        <h4>问题 2：🔴 不安全的数组访问（322 处）</h4>
+        <div class="issue-meta">
+          <strong>文件：</strong><span class="file-path">/src/views/home/components/deliverModal.vue</span><br>
+          <strong>规则：</strong><span class="badge error">null-safety/unsafe-array-access</span><br>
+          <strong>严重程度：</strong>错误 - 数组为空时崩溃
+        </div>
+        
+        <div class="code-block error">
+// ❌ 错误写法
+const first = arr[0]
+const second = arr[1]
+const user = users[index]
+        </div>
+        
+        <div class="code-block success">
+// ✅ 正确写法 1：使用可选链
+const first = arr?.[0]
+const second = arr?.[1]
+const user = users?.[index]
+
+// ✅ 正确写法 2：检查长度
+if (arr && arr.length > 1) {
+  const first = arr[0]
+  const second = arr[1]
+}
+        </div>
+      </div>
+      
+      <div class="issue-example error">
+        <h4>问题 3：🔴 不安全的函数调用（1,143 处）</h4>
+        <div class="issue-meta">
+          <strong>规则：</strong><span class="badge error">null-safety/unsafe-function-call</span><br>
+          <strong>严重程度：</strong>错误 - 最常见的崩溃原因
+        </div>
+        
+        <div class="code-block error">
+// ❌ 错误写法
+this.$refs.qrcodeWrap.clearTimeOut()
+this.$refs.successNote.handleShow()
+obj.method()
+        </div>
+        
+        <div class="code-block success">
+// ✅ 正确写法：使用可选链
+this.$refs.qrcodeWrap?.clearTimeOut()
+this.$refs.successNote?.handleShow()
+obj?.method?.()
+        </div>
+      </div>
+      
+      <div class="issue-example warning">
+        <h4>问题 4：⚠️ 使用宽松相等 (==)（278 处）</h4>
+        <div class="issue-meta">
+          <strong>规则：</strong><span class="badge warning">javascript/no-loose-equality</span><br>
+          <strong>严重程度：</strong>警告 - 可能产生隐藏 bug
+        </div>
+        
+        <div class="code-block error">
+// ❌ 错误写法
+if (value == null) { }
+if (count == 0) { }
+if (str == '') { }
+        </div>
+        
+        <div class="code-block success">
+// ✅ 正确写法
+if (value === null || value === undefined) { }
+if (count === 0) { }
+if (str === '') { }
+        </div>
+      </div>
+      
+      <div class="issue-example warning">
+        <h4>问题 5：⚠️ Vue 组件命名不规范（38 处）</h4>
+        <div class="issue-meta">
+          <strong>规则：</strong><span class="badge warning">naming/vue-component</span><br>
+          <strong>严重程度：</strong>警告 - 影响代码可维护性
+        </div>
+        
+        <div class="code-block error">
+// ❌ 错误文件名
+deliverModal.vue
+userInfo.vue
+jobList.vue
+        </div>
+        
+        <div class="code-block success">
+// ✅ 正确文件名（PascalCase）
+DeliverModal.vue
+UserInfo.vue
+JobList.vue
+        </div>
+      </div>
+    </div>
+
+    <!-- 完整问题清单 -->
+    <div class="section">
+      <h2>📋 完整问题清单（35 项）</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px">#</th>
+            <th>规则</th>
+            <th style="width: 80px">数量</th>
+            <th style="width: 80px">占比</th>
+            <th style="width: 100px">严重程度</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><code>null-safety/unsafe-function-call</code></td>
+            <td>1,143</td>
+            <td>32.5%</td>
+            <td><span class="badge error">🔴 错误</span></td>
+            <td>不安全的函数调用</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>null-safety/unsafe-property-access</code></td>
+            <td>786</td>
+            <td>22.4%</td>
+            <td><span class="badge error">🔴 错误</span></td>
+            <td>不安全的属性访问</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><code>null-safety/unsafe-array-access</code></td>
+            <td>322</td>
+            <td>9.2%</td>
+            <td><span class="badge error">🔴 错误</span></td>
+            <td>不安全的数组访问</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><code>javascript/no-loose-equality</code></td>
+            <td>278</td>
+            <td>7.9%</td>
+            <td><span class="badge warning">⚠️ 警告</span></td>
+            <td>使用了宽松相等 (==)</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><code>javascript/no-console</code></td>
+            <td>182</td>
+            <td>5.2%</td>
+            <td><span class="badge warning">⚠️ 警告</span></td>
+            <td>使用了 console</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><code>null-safety/vue-props-access</code></td>
+            <td>157</td>
+            <td>4.5%</td>
+            <td><span class="badge error">🔴 错误</span></td>
+            <td>Vue Props 不安全访问</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><code>javascript/prefer-template-literals</code></td>
+            <td>108</td>
+            <td>3.1%</td>
+            <td><span class="badge warning">⚠️ 警告</span></td>
+            <td>建议使用模板字符串</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><code>null-safety/vue-async-data-access</code></td>
+            <td>70</td>
+            <td>2.0%</td>
+            <td><span class="badge error">🔴 错误</span></td>
+            <td>Vue 异步数据不安全访问</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><code>vue/props-type-definition</code></td>
+            <td>54</td>
+            <td>1.5%</td>
+            <td><span class="badge warning">⚠️ 警告</span></td>
+            <td>Props 缺少类型定义</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td><code>event/prefer-event-name</code></td>
+            <td>42</td>
+            <td>1.2%</td>
+            <td><span class="badge warning">⚠️ 警告</span></td>
+            <td>事件参数使用缩写 e</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="text-align: center; color: #999;">
+              还有 25 项规则问题，共 449 个问题（12.8%）
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 优先级修复建议 -->
+    <div class="section">
+      <h2>🎯 修复优先级建议</h2>
+      
+      <h3><span class="priority p0">P0</span> 必须立即修复（严重影响稳定性）</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>问题类型</th>
+            <th style="width: 100px">数量</th>
+            <th style="width: 150px">预计工作量</th>
+            <th>收益</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>空指针安全问题</strong></td>
+            <td>2,408</td>
+            <td>3-5 天</td>
+            <td>⭐⭐⭐⭐⭐ 大幅减少生产环境崩溃</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="alert error">
+        <strong>修复重点：</strong>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+          <li>不安全的函数调用 - 1,143 处</li>
+          <li>不安全的属性访问 - 786 处</li>
+          <li>不安全的数组访问 - 322 处</li>
+          <li>Vue Props 不安全访问 - 157 处</li>
+        </ul>
+      </div>
+      
+      <h3><span class="priority p1">P1</span> 建议尽快修复（影响代码质量）</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>问题类型</th>
+            <th style="width: 100px">数量</th>
+            <th style="width: 150px">预计工作量</th>
+            <th>收益</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>使用宽松相等 (==)</td>
+            <td>278</td>
+            <td>1 天</td>
+            <td>⭐⭐⭐⭐ 减少隐藏 bug</td>
+          </tr>
+          <tr>
+            <td>使用 console</td>
+            <td>182</td>
+            <td>0.5 天</td>
+            <td>⭐⭐⭐ 提升生产环境质量</td>
+          </tr>
+          <tr>
+            <td>字符串拼接</td>
+            <td>108</td>
+            <td>0.5 天</td>
+            <td>⭐⭐⭐ 提升可读性</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h3><span class="priority p2">P2</span> 逐步改进（提升规范性）</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>问题类型</th>
+            <th style="width: 100px">数量</th>
+            <th style="width: 150px">预计工作量</th>
+            <th>收益</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Vue 组件命名</td>
+            <td>38</td>
+            <td>0.5 天</td>
+            <td>⭐⭐⭐ 统一代码风格</td>
+          </tr>
+          <tr>
+            <td>事件命名规范</td>
+            <td>21</td>
+            <td>0.3 天</td>
+            <td>⭐⭐ 提升一致性</td>
+          </tr>
+          <tr>
+            <td>Props 类型定义</td>
+            <td>54</td>
+            <td>1 天</td>
+            <td>⭐⭐⭐ 增强类型安全</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 修复方案 -->
+    <div class="section">
+      <h2>🛠️ 修复方案</h2>
+      
+      <h3>方案一：渐进式修复（推荐）</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 100px">时间</th>
+            <th>任务</th>
+            <th>目标</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>第 1 周</strong></td>
+            <td>修复核心业务模块的空指针问题</td>
+            <td>修复 P0 问题的 20%，降低崩溃风险</td>
+          </tr>
+          <tr>
+            <td><strong>第 2-3 周</strong></td>
+            <td>扩展到其他模块，团队 Code Review</td>
+            <td>修复 P0 问题的 80%</td>
+          </tr>
+          <tr>
+            <td><strong>第 4 周</strong></td>
+            <td>修复 P1 代码质量问题</td>
+            <td>统一使用 ===，移除 console</td>
+          </tr>
+          <tr>
+            <td><strong>第 5 周</strong></td>
+            <td>修复 P2 规范问题</td>
+            <td>统一命名规范，完善类型定义</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h3>方案二：新代码强制规范</h3>
+      <div class="code-block">
+// webpack.config.js
+const SpecPlugin = require('@51jbs/webpack-spec-plugin')
+
+module.exports = {
+  plugins: [
+    new SpecPlugin({
+      mode: 'incremental',  // 只检查增量代码
+      severity: 'strict',   // 严格模式，发现问题中断构建
+      rules: {
+        event: true,        // 事件规范检查
+        nullSafety: true,   // 空指针防护检查
+        javascript: true,   // JavaScript 规范
+        vue: true           // Vue 规范
+      }
+    })
+  ]
+}
+      </div>
+      
+      <div class="alert success">
+        <strong>✅ 立即执行：</strong>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+          <li>在 CI/CD 中集成 webpack-spec-plugin</li>
+          <li>新增代码必须通过规范检查</li>
+          <li>老代码逐步重构，设置每周修复目标</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 规范评估 -->
+    <div class="section">
+      <h2>📊 规范评估</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th style="width: 100px">评分</th>
+            <th style="width: 100px">等级</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>空指针安全</strong></td>
+            <td>15/100</td>
+            <td>⭐</td>
+            <td>问题严重，高风险，必须立即修复</td>
+          </tr>
+          <tr>
+            <td><strong>代码质量</strong></td>
+            <td>25/100</td>
+            <td>⭐</td>
+            <td>存在大量不规范代码，需改进</td>
+          </tr>
+          <tr>
+            <td><strong>Vue 规范</strong></td>
+            <td>30/100</td>
+            <td>⭐⭐</td>
+            <td>组件命名、Props 定义需改进</td>
+          </tr>
+          <tr>
+            <td><strong>事件处理</strong></td>
+            <td>40/100</td>
+            <td>⭐⭐</td>
+            <td>事件命名、清理需规范化</td>
+          </tr>
+          <tr>
+            <td><strong>命名规范</strong></td>
+            <td>35/100</td>
+            <td>⭐⭐</td>
+            <td>文件、组件命名不统一</td>
+          </tr>
+          <tr style="background: #fef0f0; font-weight: bold;">
+            <td><strong>综合评分</strong></td>
+            <td style="color: #f56c6c;">20/100</td>
+            <td>⭐</td>
+            <td>不及格，需要系统性改进</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 改进建议 -->
+    <div class="recommendation">
+      <h3>💡 改进建议</h3>
+      
+      <div style="margin-bottom: 20px;">
+        <strong>立即行动（本周）：</strong>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+          <li>✅ 在开发环境启用 webpack-spec-plugin</li>
+          <li>✅ 修复核心业务模块的空指针问题（优先用户、订单相关）</li>
+          <li>✅ 团队培训：可选链 (?.) 和空值合并 (??) 操作符使用</li>
+        </ul>
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <strong>短期目标（1 个月）：</strong>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+          <li>🎯 空指针问题减少 80%</li>
+          <li>🎯 新代码 100% 通过规范检查</li>
+          <li>🎯 规范评分提升到 60 分</li>
+        </ul>
+      </div>
+      
+      <div>
+        <strong>长期目标（3 个月）：</strong>
+        <ul style="margin-top: 10px; padding-left: 20px;">
+          <li>🎯 全量问题减少 90%</li>
+          <li>🎯 规范评分提升到 85 分</li>
+          <li>🎯 建立自动化检查机制</li>
+          <li>🎯 制定团队代码规范手册</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 学习资源 -->
+    <div class="section">
+      <h2>🎓 学习资源</h2>
+      
+      <h3>空指针防护</h3>
+      <ul style="padding-left: 20px; margin-bottom: 20px;">
+        <li>📖 <a href="../../docs/specs/coding/null-safety-specification.md">空指针防护规范指南</a>（682 行详细文档）</li>
+        <li>💡 可选链操作符 (?.) - ES2020 新特性</li>
+        <li>💡 空值合并操作符 (??) - ES2020 新特性</li>
+        <li>💡 防御性编程最佳实践</li>
+      </ul>
+      
+      <h3>Vue 开发规范</h3>
+      <ul style="padding-left: 20px; margin-bottom: 20px;">
+        <li>📖 <a href="../../docs/specs/frontend/vue-specification.md">Vue 开发规范</a></li>
+        <li>📖 <a href="../../docs/specs/coding/file-naming-specification.md">组件命名规范</a></li>
+        <li>💡 Props 类型定义最佳实践</li>
+      </ul>
+      
+      <h3>事件处理规范</h3>
+      <ul style="padding-left: 20px;">
+        <li>📖 <a href="../../docs/specs/coding/event-specification.md">事件规范指南</a>（729 行详细文档）</li>
+        <li>💡 事件命名规范 - kebab-case vs camelCase</li>
+        <li>💡 事件监听器清理 - 避免内存泄漏</li>
+      </ul>
+    </div>
+
+    <!-- 全量估算 -->
+    <div class="section">
+      <h2>📈 全量估算</h2>
+      <div class="alert warning">
+        <strong>根据采样结果估算：</strong><br><br>
+        全量检查预计发现约 <strong style="font-size: 24px;">23,010 个</strong> 规范问题！
+      </div>
+      
+      <table style="margin-top: 20px;">
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th style="width: 120px">采样数量</th>
+            <th style="width: 120px">估算全量</th>
+            <th>建议</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>空指针安全</td>
+            <td>2,408</td>
+            <td>~15,772</td>
+            <td>优先修复，使用自动化工具辅助</td>
+          </tr>
+          <tr>
+            <td>代码质量</td>
+            <td>568</td>
+            <td>~3,718</td>
+            <td>ESLint 自动修复 + 人工审核</td>
+          </tr>
+          <tr>
+            <td>规范统一</td>
+            <td>537</td>
+            <td>~3,520</td>
+            <td>逐步重构，新代码严格规范</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="footer">
+      <div style="margin-bottom: 10px;">
+        <strong>报告生成时间：</strong>2025-12-15 17:40:00
+      </div>
+      <div style="margin-bottom: 10px;">
+        <strong>检查工具：</strong>webpack-spec-plugin v2.2.0
+      </div>
+      <div style="color: #999;">
+        📞 如需技术支持，请查看文档：/docs/specs/ 或联系团队技术负责人
+      </div>
+      <div style="margin-top: 15px; color: #999;">
+        💡 建议每周进行一次规范检查，跟踪改进进度
+      </div>
+    </div>
+  </div>
+</body>
+</html>

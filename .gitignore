@@ -13,6 +13,9 @@ node_modules/
 dist/
 build/
 
+# VitePress cache
+docs/.vitepress/cache/
+
 # Logs and private files
 *.log
 *.tmp

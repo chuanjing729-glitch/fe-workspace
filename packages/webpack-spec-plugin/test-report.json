@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-12-15T08:08:56.653Z",
+  "summary": {
+    "total": 23,
+    "passed": 21,
+    "failed": 2,
+    "passRate": 91.30434782608695,
+    "score": 91.30434782608695
+  },
+  "performance": {
+    "totalTime": 4,
+    "avgTime": 0.17391304347826086,
+    "maxTime": 1,
+    "minTime": 0
+  },
+  "errors": [
+    {
+      "test": "Vue2-10: 组件代码过长",
+      "error": "should detect long component"
+    },
+    {
+      "test": "安全-02: XSS 风险检测",
+      "error": "should detect XSS risk"
+    }
+  ],
+  "recommendation": "✅ 强烈推荐上线 - 质量优秀"
+}

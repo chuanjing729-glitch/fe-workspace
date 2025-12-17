@@ -1,0 +1,6 @@
+/* 自定义样式 */
+
+/* 调整主页副标题字体大小 */
+.VPHero .tagline {
+  font-size: 18px !important;
+}
