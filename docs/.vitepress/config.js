@@ -1,3 +1,5 @@
+import { fileURLToPath, URL } from 'node:url'
+
 export default {
   base: '/fe-workspace/',
   title: 'FE Workspace Docs',
@@ -21,7 +23,7 @@ export default {
   vite: {
     resolve: {
       alias: {
-        '@fe-workspace/button': '../../../packages/button/index.js'
+        '@fe-workspace/button': fileURLToPath(new URL('../../packages/button/index.js', import.meta.url))
       }
     }
   }
