@@ -155,12 +155,17 @@ function publishPackage(packageInfo) {
   
   try {
     info(`[${name}] 开始发布...`);
-    // 检查是否提供了 OTP
+    // 检查是否提供了 OTP 或使用令牌
     const otp = process.env.NPM_OTP || process.env.OTP;
+    const token = process.env.NPM_TOKEN || process.env.NODE_AUTH_TOKEN;
     let cmd = 'pnpm publish --access public --no-git-checks';
+    
+    // 如果提供了 OTP，则添加到命令中
     if (otp) {
       cmd += ` --otp=${otp}`;
     }
+    
+    // 如果提供了令牌，pnpm 会自动使用它进行认证
     
     info(`[${name}] 执行命令: ${cmd}`);
     
