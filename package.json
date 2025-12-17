@@ -11,7 +11,10 @@
     "publish": "node scripts/publish-packages.cjs",
     "publish:webpack-spec-plugin": "node scripts/publish-packages.cjs webpack-spec-plugin",
     "publish:minor": "node scripts/publish-packages.cjs \"\" minor",
-    "publish:major": "node scripts/publish-packages.cjs \"\" major"
+    "publish:major": "node scripts/publish-packages.cjs \"\" major",
+    "build": "pnpm -r --stream build",
+    "test": "pnpm -r --stream test",
+    "dev": "pnpm -r --stream --parallel dev"
   },
   "keywords": [
     "frontend",

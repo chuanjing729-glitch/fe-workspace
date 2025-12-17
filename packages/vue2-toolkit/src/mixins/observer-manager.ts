@@ -5,7 +5,18 @@
 
 type ObserverType = ResizeObserver | IntersectionObserver | MutationObserver
 
-export default {
+import Vue from 'vue'
+
+interface ObserverData {
+  $_observers: ObserverType[]
+  $_createResizeObserver(target: Element, callback: ResizeObserverCallback): ResizeObserver | null
+  $_createIntersectionObserver(target: Element, callback: IntersectionObserverCallback, options?: IntersectionObserverInit): IntersectionObserver | null
+  $_createMutationObserver(target: Node, callback: MutationCallback, options?: MutationObserverInit): MutationObserver | null
+  $_disconnectObserver(observer: any): void
+  $_disconnectAllObservers(): void
+}
+
+export default Vue.extend({
   data() {
     return {
       // 存储 Observers
@@ -127,6 +138,6 @@ export default {
   
   beforeDestroy() {
     // 自动断开所有 Observer
-    this.$_disconnectAllObservers()
+    (this as unknown as ObserverData).$_disconnectAllObservers()
   }
-}
+})

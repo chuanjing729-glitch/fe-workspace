@@ -3,7 +3,14 @@
  * 提供权限检查和权限相关功能
  */
 
-export default {
+import Vue from 'vue'
+
+interface PermissionData {
+  $_userPermissions: string[]
+  $_userRoles: string[]
+}
+
+export default Vue.extend({
   computed: {
     /**
      * 当前用户权限列表
@@ -93,4 +100,4 @@ export default {
       return this.$_hasPermission(requiredPermissions)
     }
   }
-}
+})

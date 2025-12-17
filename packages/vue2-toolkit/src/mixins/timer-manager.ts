@@ -3,7 +3,20 @@
  * 自动管理定时器的创建和清理，防止内存泄漏
  */
 
-export default {
+import Vue from 'vue'
+
+interface TimerData {
+  $_timers: number[]
+  $_intervals: number[]
+  $_setTimeout(fn: Function, delay?: number): number | undefined
+  $_setInterval(fn: Function, interval: number): number | undefined
+  $_clearTimeout(timerId: number): void
+  $_clearInterval(intervalId: number): void
+  $_clearAllTimers(): void
+  $_debounceTimeout(fn: Function, delay?: number): number | undefined
+}
+
+export default Vue.extend({
   data() {
     return {
       // 存储定时器
@@ -99,6 +112,6 @@ export default {
   
   beforeDestroy() {
     // 自动清理所有定时器
-    this.$_clearAllTimers()
+    (this as unknown as TimerData).$_clearAllTimers()
   }
-}
+})

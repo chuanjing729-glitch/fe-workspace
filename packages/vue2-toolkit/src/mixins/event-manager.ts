@@ -3,7 +3,7 @@
  * 自动管理事件监听器的添加和移除，防止内存泄漏
  */
 
-interface EventListener {
+interface ManagedEventListener {
   target?: EventTarget
   bus?: any
   event: string
@@ -12,11 +12,22 @@ interface EventListener {
   type?: 'vue' | 'dom'
 }
 
-export default {
+import Vue from 'vue'
+
+interface EventListenerData {
+  $_eventListeners: ManagedEventListener[]
+  $_addEventListener(target: EventTarget, event: string, handler: EventListener, options?: boolean | AddEventListenerOptions): void
+  $_on(bus: any, event: string, handler: Function): void
+  $_off(bus: any, event: string, handler: Function): void
+  $_removeEventListener(target: EventTarget, event: string, handler: EventListener): void
+  $_clearAllListeners(): void
+}
+
+export default Vue.extend({
   data() {
     return {
       // 存储事件监听器
-      $_eventListeners: [] as EventListener[]
+      $_eventListeners: [] as ManagedEventListener[]
     }
   },
   
@@ -32,14 +43,14 @@ export default {
       target: EventTarget, 
       event: string, 
       handler: EventListener, 
-      options?: AddEventListenerOptions | boolean
+      options?: boolean | AddEventListenerOptions
     ) {
       if (!target || !event || !handler) {
         console.warn('[EventManager] Invalid parameters for $_addEventListener')
         return
       }
       
-      target.addEventListener(event, handler as EventListener, options)
+      target.addEventListener(event, handler, options)
       this.$_eventListeners.push({ target, event, handler, options, type: 'dom' })
     },
     
@@ -90,7 +101,7 @@ export default {
         return
       }
       
-      target.removeEventListener(event, handler as EventListener)
+      target.removeEventListener(event, handler)
       const index = this.$_eventListeners.findIndex(item => 
         item.target === target && item.event === event && item.handler === handler
       )
@@ -123,6 +134,6 @@ export default {
   
   beforeDestroy() {
     // 自动清理所有事件监听器
-    this.$_clearAllListeners()
+    (this as unknown as EventListenerData).$_clearAllListeners()
   }
-}
+})
