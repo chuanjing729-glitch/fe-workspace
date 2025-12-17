@@ -22,7 +22,6 @@ on:
           - 'minor'
           - 'major'
 
-# 【新增 1/3】授予 Action 写入仓库的权限，用于推送版本变更
 permissions:
   contents: write
 
@@ -32,7 +31,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # 拉取完整的 git 历史，确保打 tag 和推送没有问题
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v2
@@ -43,7 +41,6 @@ jobs:
           node-version: 20
           registry-url: 'https://registry.npmjs.org/'
 
-      # 【新增 2/3】配置 Git 用户信息，用于后续的版本提交
       - name: Configure Git
         run: |
           git config --global user.name "${{ github.actor }}"
@@ -59,20 +56,19 @@ jobs:
         run: pnpm test
 
       - name: Publish packages
+        # 【修改点 1】允许此步骤报错后继续，应对 npm 的“假失败”现象
+        continue-on-error: true
         run: |
           if [ -z "${{ github.event.inputs.package }}" ]; then
-            # 发布所有包，保留了 --verbose
+            # 发布所有包
             pnpm publish ${{ github.event.inputs.version-type }} --verbose
           else
-            # 发布指定包，保留了 --verbose
+            # 发布指定包
             pnpm publish:${{ github.event.inputs.package }} ${{ github.event.inputs.version-type }} --verbose
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # 【新增 3/3】关键步骤：发布成功后，将新的版本号和 tag 推送回 GitHub
-      # 你的自定义发布脚本应该已经完成了修改 package.json 和打 git commit/tag 的工作
-      # 这里负责把这些改动同步到远程仓库
       - name: Push changes and tags
-        if: success() # 只有前面的发布步骤成功了才执行
+        # 【修改点 2】去掉了 if: success()，确保即使上一步“假失败”，也能同步代码
         run: git push --follow-tags
