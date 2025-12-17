@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "types": ["vue"]
+    "types": ["vue", "jest"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
