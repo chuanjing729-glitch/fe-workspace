@@ -7,7 +7,7 @@ This page demonstrates the usage of the button component directly from the sourc
 <div id="button-demo-container"></div>
 
 <script setup>
-  import { createButton } from '@jbs/button';
+  import { createButton } from '../../packages/button/index.js';
   import { onMounted } from 'vue';
 
   onMounted(() => {
