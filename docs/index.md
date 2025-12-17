@@ -38,7 +38,7 @@ features:
   - icon: ✅
     title: 真实项目验证
     details: 在 mall-portal-front 验证，发现 793 个边界问题，100% 准确率
-    link: /packages/webpack-spec-plugin/validation-report
+    link: /fe-workspace/packages/webpack-spec-plugin/validation-report
     
   - icon: 📊
     title: HTML 可视化报告
