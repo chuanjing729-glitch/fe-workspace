@@ -4,9 +4,21 @@
   "description": "A monorepo for front-end development, including toolkits, documentation, and a Next.js server.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
-  "keywords": ["frontend", "monorepo", "toolkit", "nextjs"],
+  "keywords": [
+    "frontend",
+    "monorepo",
+    "toolkit",
+    "nextjs"
+  ],
   "author": "chuanjing729-glitch",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.25"
+  }
 }
