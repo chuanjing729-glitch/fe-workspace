@@ -1,20 +1,24 @@
 # Button Component
 
-This page demonstrates the usage of the `@fe-workspace/button` component.
+This page demonstrates the usage of the button component directly from the source code.
 
 ## Live Demo
 
 <div id="button-demo-container"></div>
 
-<script>
-  import { createButton } from '@fe-workspace/button';
-  const container = document.getElementById('button-demo-container');
-  const button = createButton('Click Me! I am a real button');
-  container.appendChild(button);
+<script setup>
+  import { createButton } from '../../packages/button/index.js';
+  import { onMounted } from 'vue';
+
+  onMounted(() => {
+    const container = document.getElementById('button-demo-container');
+    const button = createButton('Click Me! I am a real button');
+    container.appendChild(button);
+  });
 </script>
 
 ## Usage Notes
 
-The button is created programmatically and attached to the DOM. You can inspect the element above to see the final HTML structure.
+The button is created programmatically and attached to the DOM using Vue's `onMounted` lifecycle hook to ensure the container element is available.
 
 For more details, see the [component's README file](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/button/README.md).

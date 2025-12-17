@@ -1,5 +1,3 @@
-import { fileURLToPath, URL } from 'node:url'
-
 export default {
   base: '/fe-workspace/',
   title: 'FE Workspace Docs',
@@ -21,9 +19,10 @@ export default {
     ]
   },
   vite: {
-    resolve: {
-      alias: {
-        '@fe-workspace/button': fileURLToPath(new URL('../../packages/button/index.js', import.meta.url))
+    server: {
+      fs: {
+        // Allow serving files from one level up to the project root
+        allow: ['..']
       }
     }
   }
