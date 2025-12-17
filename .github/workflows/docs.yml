@@ -34,6 +34,5 @@ jobs:
         with:
           # The directory where the VitePress site is built
           build_dir: docs/.vitepress/dist
-          # A Personal Access Token is required to push to the gh-pages branch
-          # You need to create this token in your GitHub settings and add it as a secret named GH_PAGES_TOKEN
-          # This is no longer needed if using the default GITHUB_TOKEN with correct permissions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
