@@ -1,9 +1,11 @@
 import { defineConfig } from 'vitepress'
+import { sidebar } from './config/sidebar'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "FE",
-  description: "A VitePress Site",
+  base: '/fe-workspace/',
+  title: "前端工程效率空间",
+  description: "前端工程效率平台提升开发质量、效率和性能",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -11,16 +13,7 @@ export default defineConfig({
       { text: '开始', link: '/guides/getting-started' }
     ],
 
-    sidebar: [
-      {
-        text: '介绍',
-        items: [
-          { text: '快速开始', link: '/guides/getting-started' },
-          { text: 'AI 规范', link: '/ai-guidelines/' },
-          { text: 'Webpack 插件', link: '/packages/webpack-spec-plugin/' },
-        ]
-      }
-    ],
+    sidebar,
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/chuanjing729-glitch/fe-workspace' }
