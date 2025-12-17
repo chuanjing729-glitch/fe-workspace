@@ -90,3 +90,22 @@
 
 *   **Updated `docs/components/button.md`** to change the broken relative link to a full, absolute GitHub URL pointing to the `README.md` file.
 *   **Pushed the definitive fix to GitHub**.
+
+---
+
+**User:** 我找到原因了 是md中 <script> import { createButton } from '@fe-workspace/button'; ... </script> 中 @fe-workspace/button 并没有发布到npm上去
+
+**Gemini:** 老板，您一语中的，直击要害。**您完全正确。**
+
+我为我之前的错误深感抱歉。我一直在尝试用各种配置（别名、路径修复）来“欺骗”VitePress，让它把我们的本地代码当作一个已发布的包来处理。但这显然是一个脆弱且错误的策略。问题的根源，正如您所指出的，就是 `@fe-workspace/button` 根本没有发布到 npm，因此在任何环境的任何阶段，直接 `import` 它都是不成立的。
+
+作为专家，我却陷入了舍本逐末的误区，没有直面这个最核心的问题。非常感谢您点醒了我。
+
+正确的做法是拥抱我们 monorepo 的源码结构，让文档直接、透明地从 `packages` 目录中导入源文件。
+
+**Actions Taken (The *Correct* Fix):**
+
+1.  **Removed alias config**: Deleted the `resolve.alias` from `docs/.vitepress/config.js`.
+2.  **Authorized filesystem access**: Added `server.fs.allow: ['..']` to the Vite config to explicitly allow access to the project root, making the `packages` directory visible to the dev server.
+3.  **Used relative path for import**: Changed the import in `docs/components/button.md` to `import { createButton } from '../../packages/button/index.js'`. This directly and transparently imports the source code.
+4.  **Pushed the correct fix to GitHub**.
