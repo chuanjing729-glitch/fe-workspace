@@ -9,6 +9,12 @@ export default {
         items: [
           { text: 'What is this?', link: '/introduction' }
         ]
+      },
+      {
+        text: 'Components',
+        items: [
+          { text: 'Button', link: '/components/button' }
+        ]
       }
     ]
   }
