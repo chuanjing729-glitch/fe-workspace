@@ -500,5 +500,5 @@ module.exports = new SpecPlugin({
 ---
 
 **验证完成时间：** 2025-12-15  
-**验证人员：** chuanjing.li  
+**验证人员：** Chuanjing Li  
 **最终结论：** ✅ **插件已达到预期，可以投入生产使用！**

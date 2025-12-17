@@ -355,7 +355,7 @@ git commit -m "test: verify pre-commit hook"
 ## 功能：[功能名称]
 
 **验证日期：** YYYY-MM-DD
-**验证人员：** chuanjing.li
+**验证人员：** Chuanjing Li
 **项目：** mall-portal-front
 
 ### 测试步骤

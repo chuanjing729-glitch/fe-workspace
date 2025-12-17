@@ -34,7 +34,7 @@ const packageJson = {
     'type-check': 'tsc --noEmit'
   },
   keywords: [],
-  author: 'chuanjing.li',
+  author: 'Chuanjing Li',
   license: 'MIT',
   dependencies: {},
   devDependencies: {}

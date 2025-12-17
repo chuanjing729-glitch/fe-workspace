@@ -141,6 +141,159 @@ storage.set('key', 'value', 60000)  // 60秒后过期
 storage.get('key')  // 自动检查过期
 ```
 
+### 数组操作
+
+```javascript
+import { unique, groupBy, flatten, shuffle, sum, average, intersection, union, difference, chunk, paginate } from '@51jbs/core-utils'
+
+// 数组去重
+unique([1, 2, 2, 3])  // [1, 2, 3]
+
+// 数组分组
+groupBy([{name: 'Alice', age: 25}, {name: 'Bob', age: 25}], item => item.age)
+// { '25': [{name: 'Alice', age: 25}, {name: 'Bob', age: 25}] }
+
+// 数组扁平化
+flatten([1, [2, [3, 4]]], 2)  // [1, 2, 3, 4]
+
+// 数组乱序
+shuffle([1, 2, 3, 4, 5])  // [3, 1, 4, 5, 2]
+
+// 数组求和与平均值
+sum([1, 2, 3, 4, 5])  // 15
+average([1, 2, 3, 4, 5])  // 3
+
+// 数组交集、并集、差集
+intersection([1, 2, 3], [2, 3, 4])  // [2, 3]
+union([1, 2], [2, 3])  // [1, 2, 3]
+difference([1, 2, 3], [2, 3])  // [1]
+
+// 数组分块和分页
+chunk([1, 2, 3, 4, 5], 2)  // [[1, 2], [3, 4], [5]]
+paginate([1, 2, 3, 4, 5], 2, 2)  // { data: [3, 4], total: 5, page: 2, pageSize: 2, totalPages: 3 }
+```
+
+### URL 操作
+
+```javascript
+import { parseUrlParams, buildUrlParams, buildFullUrl, isExternal, getQueryParam } from '@51jbs/core-utils'
+
+// 解析 URL 参数
+parseUrlParams('https://example.com?a=1&b=2')  // { a: '1', b: '2' }
+
+// 构建 URL 参数
+buildUrlParams({ a: 1, b: 2 })  // "a=1&b=2"
+
+// 构建完整 URL
+buildFullUrl('https://example.com', { a: 1 })  // "https://example.com?a=1"
+
+// 检查是否为外部链接
+isExternal('https://example.com')  // true
+
+// 获取查询参数
+getQueryParam('a', 'https://example.com?a=1')  // "1"
+```
+
+### 表单验证
+
+```javascript
+import { isPhone, isEmail, isIdCard, validatePassword, validateUsername } from '@51jbs/core-utils'
+
+// 验证手机号、邮箱、身份证
+isPhone('13800138000')  // true
+isEmail('test@example.com')  // true
+isIdCard('110101199001011234')  // true
+
+// 密码验证
+validatePassword('Abc123')  // { valid: true, message: '密码符合要求' }
+
+// 用户名验证
+validateUsername('test_user')  // { valid: true, message: '用户名符合要求' }
+```
+
+### 设备检测
+
+```javascript
+import { isMobile, isIOS, isAndroid, isWechat, getBrowserInfo } from '@51jbs/core-utils'
+
+// 设备类型检测
+isMobile()  // true/false
+isIOS()  // true/false
+isAndroid()  // true/false
+isWechat()  // true/false
+
+// 浏览器信息
+getBrowserInfo()  // { name: 'Chrome', version: '98.0.4758.102' }
+```
+
+### DOM 操作
+
+```javascript
+import { addClass, removeClass, hasClass, scrollToElement, isInViewport } from '@51jbs/core-utils'
+
+// 类名操作
+addClass(element, 'active')
+removeClass(element, 'active')
+hasClass(element, 'active')
+
+// 滚动到指定元素
+scrollToElement('#target', { offset: 50 })
+
+// 检查元素是否在视口中
+isInViewport(element)
+```
+
+### 格式化工具
+
+```javascript
+import { formatPhone, formatCurrency, formatDate, formatFileSize, formatBankCard, formatIdCard } from '@51jbs/core-utils'
+
+// 格式化手机号
+formatPhone('13800138000')  // "138****8000"
+
+// 格式化金额
+formatCurrency(1234.56)  // "¥1,234.56"
+
+// 格式化文件大小
+formatFileSize(1024)  // "1 KB"
+
+// 格式化银行卡号
+formatBankCard('6222021234567890')  // "6222 0212 3456 7890"
+
+// 格式化身份证号
+formatIdCard('110101199001011234')  // "110101********1234"
+```
+
+### 事件管理
+
+```javascript
+import { EventBus, createEventBus, globalEventBus } from '@51jbs/core-utils'
+
+// 使用全局事件总线
+globalEventBus.on('update', (data) => console.log(data))
+globalEventBus.emit('update', { message: 'hello' })
+
+// 创建自定义事件总线
+const bus = createEventBus()
+const unsubscribe = bus.on('custom-event', (data) => console.log(data))
+bus.emit('custom-event', { value: 123 })
+unsubscribe()  // 取消订阅
+```
+
+### HTTP 请求
+
+```javascript
+import { http, createHttpClient } from '@51jbs/core-utils'
+
+// 使用默认 HTTP 客户端
+http.get('/api/users').then(data => console.log(data))
+http.post('/api/users', { name: 'John' }).then(data => console.log(data))
+
+// 创建自定义 HTTP 客户端
+const client = createHttpClient({ baseURL: 'https://api.example.com' })
+client.get('/users').then(data => console.log(data))
+```
+
 ## 🎯 解决的问题
 
 | 问题 | 解决方案 |
@@ -150,13 +303,16 @@ storage.get('key')  // 自动检查过期
 | **日期格式化重复** | `formatDate()` 统一格式化 |
 | **数据脱敏不统一** | `maskPhone/maskEmail/maskIdCard()` |
 | **存储操作繁琐** | `local/session/storage` 封装 |
+| **数组操作复杂** | `unique/groupBy/shuffle/sum` 等丰富数组工具 |
+| **表单验证重复** | `isPhone/isEmail/validatePassword` 统一验证 |
+| **设备检测困难** | `isMobile/isIOS/isWechat` 一键检测 |
 
 ## 📊 功能统计
 
-- **609行**源码
-- **5个模块**（object、number、date、string、storage）
-- **30+个函数**
+- **2000+行**源码
+- **13个模块**（object、number、date、string、storage、array、url、validation、device、dom、format、event、http）
+- **100+个函数**
 
 ## 📄 License
 
-MIT © 51jbs Frontend Team
+MIT © Chuanjing Li

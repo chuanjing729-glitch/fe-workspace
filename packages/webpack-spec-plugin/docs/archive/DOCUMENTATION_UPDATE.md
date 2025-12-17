@@ -235,4 +235,4 @@ cat docs/packages/webpack-spec-plugin/production-evaluation.md
 ---
 
 **更新时间**：2025-12-15  
-**更新人员**：chuanjing.li
+**更新人员**：Chuanjing Li

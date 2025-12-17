@@ -19,7 +19,7 @@
     "performance",
     "code-quality"
   ],
-  "author": "chuanjing.li",
+  "author": "Chuanjing Li",
   "license": "MIT",
   "peerDependencies": {
     "webpack": "^5.0.0"

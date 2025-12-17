@@ -21,7 +21,7 @@
     "directives",
     "51jbs"
   ],
-  "author": "chuanjing.li",
+  "author": "Chuanjing Li",
   "license": "MIT",
   "peerDependencies": {
     "vue": "^2.6.0"
