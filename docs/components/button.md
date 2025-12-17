@@ -17,4 +17,4 @@ This page demonstrates the usage of the `@fe-workspace/button` component.
 
 The button is created programmatically and attached to the DOM. You can inspect the element above to see the final HTML structure.
 
-For more details, see the [component's README file](/packages/button/README.md).
+For more details, see the [component's README file](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/button/README.md).
