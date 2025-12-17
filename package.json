@@ -14,7 +14,9 @@
     "publish:major": "node scripts/publish-packages.cjs \"\" major",
     "build": "pnpm -r --stream build",
     "test": "pnpm -r --stream test",
-    "dev": "pnpm -r --stream --parallel dev"
+    "dev": "pnpm -r --stream --parallel dev",
+    "publish:core-utils": "node scripts/publish-packages.cjs core-utils",
+    "publish:vue2-toolkit": "node scripts/publish-packages.cjs vue2-toolkit"
   },
   "keywords": [
     "frontend",
