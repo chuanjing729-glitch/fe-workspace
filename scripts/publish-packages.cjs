@@ -222,11 +222,26 @@ function rebuildDocs() {
 }
 
 /**
+ * 检查 NPM_TOKEN 是否存在
+ */
+function checkNpmToken() {
+  const npmToken = process.env.NODE_AUTH_TOKEN || process.env.NPM_TOKEN;
+  if (!npmToken) {
+    warning('NODE_AUTH_TOKEN 或 NPM_TOKEN 环境变量未设置，可能无法发布到 npm');
+    return false;
+  }
+  return true;
+}
+
+/**
  * 主函数
  */
 async function main() {
   try {
     info(`开始执行发布流程 (${versionType} 版本)...`);
+    
+    // 检查 NPM token
+    checkNpmToken();
     
     // 获取要处理的包
     const packages = getPackages();

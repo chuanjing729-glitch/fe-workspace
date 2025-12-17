@@ -1,0 +1,28 @@
+# 忽略测试文件
+test/
+*.test.*
+*.spec.*
+
+# 忽略配置文件
+.eslintrc.*
+.prettierrc
+.editorconfig
+.gitignore
+
+# 忽略构建产物（因为我们已经在 package.json 中指定了 files 字段）
+# dist/  # 不要忽略 dist，因为我们想要发布它
+
+# 忽略开发依赖
+node_modules/
+
+# 忽略文档
+docs/
+README.md
+
+# 忽略示例和脚本
+examples/
+scripts/
+
+# 忽略其他不必要的文件
+*.log
+.DS_Store

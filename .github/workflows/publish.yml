@@ -1,24 +1,57 @@
-name: Publish to npm
+name: Publish Packages to npm
 
 on:
   workflow_dispatch:
+    inputs:
+      package:
+        description: '要发布的包 (留空则发布所有包)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - 'core-utils'
+          - 'vue2-toolkit'
+          - 'webpack-spec-plugin'
+      version-type:
+        description: '版本更新类型'
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - 'patch'
+          - 'minor'
+          - 'major'
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
         with:
-          version: 8
-      - uses: actions/setup-node@v3
+          version: 9.15.0
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           registry-url: 'https://registry.npmjs.org/'
 
-      - name: Publish package
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Publish packages
         run: |
-          cd packages/button
-          npm publish
+          if [ -z "${{ github.event.inputs.package }}" ]; then
+            # 发布所有包
+            pnpm publish "" ${{ github.event.inputs.version-type }}
+          else
+            # 发布指定包
+            pnpm publish:${{ github.event.inputs.package }} ${{ github.event.inputs.version-type }}
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "dev": "tsc --watch",
     "publish": "node ../../scripts/publish-packages.cjs vue2-toolkit"
   },
   "keywords": [
