@@ -7,7 +7,7 @@ This page demonstrates the usage of the `@fe-workspace/button` component.
 <div id="button-demo-container"></div>
 
 <script>
-  import { createButton } from '../../../packages/button/index.js';
+  import { createButton } from '@fe-workspace/button';
   const container = document.getElementById('button-demo-container');
   const button = createButton('Click Me! I am a real button');
   container.appendChild(button);

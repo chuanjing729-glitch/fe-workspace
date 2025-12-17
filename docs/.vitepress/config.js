@@ -17,5 +17,12 @@ export default {
         ]
       }
     ]
+  },
+  vite: {
+    resolve: {
+      alias: {
+        '@fe-workspace/button': '../../../packages/button/index.js'
+      }
+    }
   }
 }
