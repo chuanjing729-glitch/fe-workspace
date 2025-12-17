@@ -20,3 +20,7 @@ docs/.vitepress/cache/
 *.log
 *.tmp
 .DS_Store
+
+# Coverage reports
+coverage/
+*/coverage/
