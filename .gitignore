@@ -1,1 +1,4 @@
 conversation/
+
+# Dependencies
+node_modules/
