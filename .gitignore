@@ -1,15 +1,19 @@
-# IDE-specific files
-.idea/
-.vscode/
+conversation/
+.gemini-rules.md
 
 # Dependencies
 node_modules/
 **/node_modules/
+
+# IDE-specific files
+.idea/
+.vscode/
 
 # Build outputs
 dist/
 build/
 
 # Logs and private files
-conversation/
-.gemini-rules.md
+*.log
+*.tmp
+.DS_Store
