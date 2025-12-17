@@ -23,7 +23,8 @@
   "author": "chuanjing.li",
   "license": "MIT",
   "devDependencies": {
-    "vitepress": "^1.0.0",
-    "@types/node": "^18.0.0"
+    "@types/node": "^18.0.0",
+    "favicons": "^7.2.0",
+    "vitepress": "^1.0.0"
   }
 }

@@ -6,6 +6,11 @@ export default defineConfig({
   base: '/fe-workspace/',
   title: "前端工程效率空间",
   description: "前端工程效率平台提升开发质量、效率和性能",
+  head: [
+    ['link', { rel: 'icon', href: '/fe-workspace/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/x-icon', href: '/fe-workspace/favicon.ico' }],
+    ['link', { rel: 'shortcut icon', href: '/fe-workspace/favicon.ico' }]
+  ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
