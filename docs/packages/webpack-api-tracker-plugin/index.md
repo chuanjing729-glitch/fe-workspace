@@ -35,10 +35,6 @@ module.exports = {
 };
 ```
 
-## 配置选项
-
-详细的配置选项请参考[需求文档](../../../requirements/api-tracker-requirement.md)。
-
 ## 许可证
 
 MIT
