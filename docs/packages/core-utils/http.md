@@ -18,390 +18,230 @@ import { HttpClient, createHttpClient, http } from '@51jbs/core-utils'
 
 ### HttpClient 类
 
-HTTP 客户端类
+HTTP 客户端类，提供完整的 HTTP 请求功能。
 
-**构造函数**
-
-```typescript
-new HttpClient(config?: RequestConfig)
-```
-
-**配置项 RequestConfig**
+#### 构造函数
 
 ```typescript
-interface RequestConfig {
-  baseURL?: string           // 基础URL
-  timeout?: number          // 超时时间(ms)，默认10000
-  headers?: Record<string, string>  // 默认请求头
-  credentials?: RequestCredentials  // 凭证模式，默认'same-origin'
-  mode?: RequestMode        // 请求模式，默认'cors'
-}
+constructor(config?: RequestConfig)
 ```
+
+**参数**
+- `config` - 配置对象（可选）
+  - `baseURL` - 基础URL前缀
+  - `timeout` - 超时时间（毫秒），默认10000
+  - `headers` - 默认请求头
+  - `credentials` - 凭证模式，默认'same-origin'
+  - `mode` - 请求模式，默认'cors'
 
 **示例**
-
 ```typescript
+// 创建自定义配置的HTTP客户端
 const client = new HttpClient({
   baseURL: 'https://api.example.com',
   timeout: 5000,
   headers: {
-    'Custom-Header': 'value'
+    'Content-Type': 'application/json',
+    'X-Custom-Header': 'value'
   }
-})
+});
 ```
 
----
+#### get 方法
 
-### GET 请求
+发起 GET 请求。
 
+**类型签名**
 ```typescript
-get<T>(url: string, params?: Record<string, any>, options?: RequestOptions): Promise<T>
+get<T = any>(url: string, params?: Record<string, any>, options?: RequestOptions): Promise<T>
 ```
+
+**参数**
+- `url` - 请求URL
+- `params` - 查询参数（可选）
+- `options` - 请求选项（可选）
+
+**返回值**
+- Promise，解析为响应数据
 
 **示例**
-
 ```typescript
-// 基础请求
-const data = await client.get('/users')
+// 基础GET请求
+const users = await client.get('/users');
 
-// 带参数
-const user = await client.get('/users/1', { include: 'profile' })
+// 带参数的GET请求
+const user = await client.get('/users', { id: 123 });
 
-// 自定义选项
-const list = await client.get('/list', { page: 1 }, { timeout: 3000 })
+// 带选项的GET请求
+const data = await client.get('/users', { page: 1 }, { 
+  headers: { 'Authorization': 'Bearer token' } 
+});
 ```
 
----
+#### post 方法
 
-### POST 请求
+发起 POST 请求。
 
+**类型签名**
 ```typescript
-post<T>(url: string, data?: any, options?: RequestOptions): Promise<T>
+post<T = any>(url: string, data?: any, options?: RequestOptions): Promise<T>
 ```
+
+**参数**
+- `url` - 请求URL
+- `data` - 请求体数据（可选）
+- `options` - 请求选项（可选）
+
+**返回值**
+- Promise，解析为响应数据
 
 **示例**
-
 ```typescript
-// 创建用户
-const newUser = await client.post('/users', {
-  name: '张三',
-  email: 'zhang@example.com'
-})
+// 基础POST请求
+const newUser = await client.post('/users', { name: 'John', email: 'john@example.com' });
 
-// 上传表单
-const formData = new FormData()
-formData.append('file', file)
-await client.post('/upload', formData)
+// 带选项的POST请求
+const result = await client.post('/users', { name: 'John' }, { 
+  headers: { 'Authorization': 'Bearer token' } 
+});
 ```
 
----
+#### put 方法
 
-### PUT 请求
+发起 PUT 请求。
 
+**类型签名**
 ```typescript
-put<T>(url: string, data?: any, options?: RequestOptions): Promise<T>
+put<T = any>(url: string, data?: any, options?: RequestOptions): Promise<T>
 ```
+
+**参数**
+- `url` - 请求URL
+- `data` - 请求体数据（可选）
+- `options` - 请求选项（可选）
+
+**返回值**
+- Promise，解析为响应数据
 
 **示例**
-
 ```typescript
-// 更新用户
-await client.put('/users/1', {
-  name: '李四'
-})
+// PUT请求
+const updatedUser = await client.put('/users/123', { name: 'John Doe' });
 ```
 
----
+#### delete 方法
 
-### DELETE 请求
+发起 DELETE 请求。
 
+**类型签名**
 ```typescript
-delete<T>(url: string, options?: RequestOptions): Promise<T>
+delete<T = any>(url: string, options?: RequestOptions): Promise<T>
 ```
+
+**参数**
+- `url` - 请求URL
+- `options` - 请求选项（可选）
+
+**返回值**
+- Promise，解析为响应数据
 
 **示例**
-
 ```typescript
-// 删除用户
-await client.delete('/users/1')
+// DELETE请求
+await client.delete('/users/123');
 ```
 
----
+#### patch 方法
 
-### PATCH 请求
+发起 PATCH 请求。
 
+**类型签名**
 ```typescript
-patch<T>(url: string, data?: any, options?: RequestOptions): Promise<T>
+patch<T = any>(url: string, data?: any, options?: RequestOptions): Promise<T>
 ```
+
+**参数**
+- `url` - 请求URL
+- `data` - 请求体数据（可选）
+- `options` - 请求选项（可选）
+
+**返回值**
+- Promise，解析为响应数据
 
 **示例**
-
 ```typescript
-// 部分更新
-await client.patch('/users/1', {
-  email: 'newemail@example.com'
-})
+// PATCH请求
+const patchedUser = await client.patch('/users/123', { name: 'John Smith' });
 ```
 
 ---
 
-### createHttpClient
+### createHttpClient 函数
 
-创建 HTTP 客户端实例
+创建HTTP客户端实例。
 
+**类型签名**
 ```typescript
 function createHttpClient(config?: RequestConfig): HttpClient
 ```
 
-**示例**
+**参数**
+- `config` - 配置对象（可选）
 
+**返回值**
+- HttpClient实例
+
+**示例**
 ```typescript
-// 为不同API创建独立客户端
-const apiV1 = createHttpClient({ baseURL: 'https://api.example.com/v1' })
-const apiV2 = createHttpClient({ baseURL: 'https://api.example.com/v2' })
+// 创建自定义HTTP客户端
+const apiClient = createHttpClient({
+  baseURL: 'https://api.myapp.com',
+  timeout: 8000
+});
+
+// 使用客户端发起请求
+const data = await apiClient.get('/endpoint');
 ```
 
 ---
 
-### http
+### http 实例
 
-默认 HTTP 客户端实例（单例）
+默认HTTP客户端实例（单例）。
 
 **示例**
-
 ```typescript
 import { http } from '@51jbs/core-utils'
 
 // 直接使用默认实例
 const data = await http.get('/api/users')
+
+// 发起POST请求
+const newUser = await http.post('/api/users', { name: 'John' })
 ```
 
-## 特性
+## 功能特性
 
-### 1. 自动Token管理
+### 请求拦截器
 
-HTTP客户端自动从 localStorage 读取 token 并添加到请求头：
+自动添加认证token和防止缓存的时间戳。
 
-```typescript
-// 自动添加 Authorization: Bearer <token>
-const data = await client.get('/protected-api')
-```
+### 响应拦截器
 
-### 2. 请求拦截
+统一处理HTTP错误和业务错误。
 
-- 自动添加时间戳到 GET 请求（防止缓存）
-- 自动添加认证 token
+### 超时控制
 
-### 3. 响应拦截
+可配置的请求超时时间，超时后自动中止请求。
 
-- 自动处理 HTTP 错误状态码（401、403、404、500等）
-- 自动处理业务错误（code !== 200）
-- 401自动清除token
+### 错误处理
 
-### 4. 超时控制
+完善的错误处理机制：
+- HTTP状态码错误（401、403、404、500等）
+- 网络错误
+- 超时错误
+- 业务错误（基于响应中的code字段）
 
-```typescript
-const client = new HttpClient({ timeout: 5000 })
+### TypeScript支持
 
-// 单个请求覆盖超时
-await client.get('/slow-api', {}, { timeout: 10000 })
-```
-
-### 5. 错误处理
-
-```typescript
-try {
-  const data = await client.get('/api/users')
-} catch (error) {
-  if (error.message.includes('timeout')) {
-    // 处理超时
-  } else if (error.message.includes('HTTP Error')) {
-    // 处理HTTP错误
-  } else {
-    // 处理其他错误
-  }
-}
-```
-
-## 使用场景
-
-### 1. Vue项目集成
-
-```typescript
-// api/http.ts
-import { createHttpClient } from '@51jbs/core-utils'
-
-export const http = createHttpClient({
-  baseURL: process.env.VUE_APP_API_BASE_URL,
-  timeout: 10000
-})
-
-// api/user.ts
-import { http } from './http'
-
-export const userApi = {
-  getList: (params) => http.get('/users', params),
-  getById: (id) => http.get(`/users/${id}`),
-  create: (data) => http.post('/users', data),
-  update: (id, data) => http.put(`/users/${id}`, data),
-  delete: (id) => http.delete(`/users/${id}`)
-}
-```
-
-### 2. 多环境配置
-
-```typescript
-// config/http.ts
-const baseURLs = {
-  development: 'http://localhost:3000/api',
-  staging: 'https://staging-api.example.com',
-  production: 'https://api.example.com'
-}
-
-export const http = createHttpClient({
-  baseURL: baseURLs[process.env.NODE_ENV],
-  timeout: 10000
-})
-```
-
-### 3. 请求封装
-
-```typescript
-// services/user.service.ts
-import { http } from '@/config/http'
-
-class UserService {
-  async login(username: string, password: string) {
-    const res = await http.post('/auth/login', { username, password })
-    // 保存token
-    localStorage.setItem('token', res.token)
-    return res.user
-  }
-  
-  async getProfile() {
-    return http.get('/user/profile')
-  }
-  
-  async updateProfile(data: any) {
-    return http.put('/user/profile', data)
-  }
-}
-
-export default new UserService()
-```
-
-### 4. 错误统一处理
-
-```typescript
-class ApiService {
-  private http: HttpClient
-  
-  constructor() {
-    this.http = createHttpClient({
-      baseURL: process.env.API_BASE_URL
-    })
-  }
-  
-  async request<T>(
-    method: string, 
-    url: string, 
-    data?: any
-  ): Promise<T> {
-    try {
-      return await this.http[method](url, data)
-    } catch (error) {
-      // 统一错误处理
-      this.handleError(error)
-      throw error
-    }
-  }
-  
-  private handleError(error: any) {
-    if (error.message.includes('401')) {
-      // 跳转登录
-      window.location.href = '/login'
-    } else if (error.message.includes('timeout')) {
-      // 提示超时
-      this.$message.error('请求超时，请重试')
-    }
-  }
-}
-```
-
-## 最佳实践
-
-### 1. API模块化
-
-```typescript
-// api/modules/user.ts
-export default {
-  getList: (params) => http.get('/users', params),
-  getDetail: (id) => http.get(`/users/${id}`),
-  create: (data) => http.post('/users', data),
-  update: (id, data) => http.put(`/users/${id}`, data),
-  delete: (id) => http.delete(`/users/${id}`)
-}
-
-// api/index.ts
-import user from './modules/user'
-import product from './modules/product'
-
-export default {
-  user,
-  product
-}
-
-// 使用
-import api from '@/api'
-const users = await api.user.getList({ page: 1 })
-```
-
-### 2. TypeScript类型定义
-
-```typescript
-interface User {
-  id: number
-  name: string
-  email: string
-}
-
-interface ApiResponse<T> {
-  code: number
-  data: T
-  message: string
-}
-
-// 带类型的请求
-const res = await http.get<ApiResponse<User[]>>('/users')
-const users = res.data
-```
-
-### 3. 请求取消（配合AbortController）
-
-```typescript
-const controller = new AbortController()
-
-// 发起可取消的请求
-http.get('/api/search', { keyword: 'vue' }, {
-  signal: controller.signal
-})
-
-// 取消请求
-controller.abort()
-```
-
-## 与 axios 对比
-
-| 特性 | @51jbs/http | axios |
-|------|-------------|-------|
-| 包大小 | ~3KB | ~15KB |
-| 依赖 | 零依赖 | 多个依赖 |
-| API | 现代化 fetch | XMLHttpRequest |
-| TypeScript | 原生支持 | 需配置 |
-| 浏览器兼容 | 现代浏览器 | IE11+ |
-
-## Changelog
-
-| 版本 | 变更内容 | 修改人 | 日期 |
-|------|---------|--------|------|
-| 1.0.0 | 初始版本，基于fetch实现零依赖HTTP客户端 | Chuanjing Li | 2024-12-15 |
+完整的TypeScript类型定义，提供良好的开发体验和类型检查。
