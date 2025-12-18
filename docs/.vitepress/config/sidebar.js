@@ -8,28 +8,18 @@ export const sidebar = {
       ]
     },
     {
-      text: '工具库分类',
+      text: '前端工具库',
       items: [
         { text: 'Core Utils 核心工具库', link: '/packages/core-utils/' },
-        { text: 'Vue2 Toolkit Vue2工具库', link: '/packages/vue2-toolkit/' },
+        { text: 'Vue2 Toolkit Vue2工具库', link: '/packages/vue2-toolkit/' }
+      ]
+    },
+    {
+      text: 'Webpack 插件',
+      items: [
         { text: 'Webpack 规范检查插件', link: '/packages/webpack-spec-plugin/' },
         { text: 'Webpack 覆盖率插件', link: '/packages/webpack-coverage-plugin/' },
         { text: 'Webpack API 跟踪插件', link: '/packages/webpack-api-tracker-plugin/' }
-      ]
-    }
-  ],
-
-  // Webpack 规范检查插件
-  '/packages/webpack-spec-plugin/': [
-    {
-      text: 'Webpack 规范检查插件',
-      items: [
-        { text: '总览', link: '/packages/webpack-spec-plugin/' },
-        { text: '快速开始', link: '/packages/webpack-spec-plugin/quick-start' },
-        { text: '功能特性', link: '/packages/webpack-spec-plugin/features' },
-        { text: '真实项目验证', link: '/packages/webpack-spec-plugin/validation-report' },
-        { text: '生产环境评估', link: '/packages/webpack-spec-plugin/production-evaluation' },
-        { text: '更新日志', link: '/packages/webpack-spec-plugin/changelog' }
       ]
     }
   ],
@@ -45,7 +35,10 @@ export const sidebar = {
         { text: '格式化工具', link: '/packages/core-utils/format' },
         { text: '事件管理', link: '/packages/core-utils/event' },
         { text: 'HTTP 请求', link: '/packages/core-utils/http' },
-        { text: '数组操作', link: '/packages/core-utils/array' }
+        { text: '数组操作', link: '/packages/core-utils/array' },
+        { text: '对象操作', link: '/packages/core-utils/object' },
+        { text: '配置说明', link: '/packages/core-utils/configuration' },
+        { text: '贡献指南', link: '/packages/core-utils/contributing' }
       ]
     }
   ],
@@ -122,6 +115,38 @@ export const sidebar = {
     }
   ],
 
+    // AI 使用规范
+  '/ai-guidelines/': [
+    {
+      text: 'AI 使用规范',
+      items: [
+        { text: '总览', link: '/ai-guidelines/' },
+        { text: '基础使用技巧', link: '/ai-guidelines/basic-usage' },
+        { text: '高阶使用技巧', link: '/ai-guidelines/advanced-techniques' },
+        { text: '提示词与指令规范', link: '/ai-guidelines/prompt-engineering' },
+        { text: '代码质量保障', link: '/ai-guidelines/code-quality' },
+        { text: '安全使用规范', link: '/ai-guidelines/security-guidelines' },
+        { text: '团队协作最佳实践', link: '/ai-guidelines/team-collaboration' },
+        { text: '项目集成指南', link: '/ai-guidelines/project-integration' }
+      ]
+    }
+  ],
+
+  // Webpack 规范检查插件
+  '/packages/webpack-spec-plugin/': [
+    {
+      text: 'Webpack 规范检查插件',
+      items: [
+        { text: '总览', link: '/packages/webpack-spec-plugin/' },
+        { text: '快速开始', link: '/packages/webpack-spec-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/webpack-spec-plugin/features' },
+        { text: '真实项目验证', link: '/packages/webpack-spec-plugin/validation-report' },
+        { text: '生产环境评估', link: '/packages/webpack-spec-plugin/production-evaluation' },
+        { text: '更新日志', link: '/packages/webpack-spec-plugin/changelog' }
+      ]
+    }
+  ],
+
   // Webpack 覆盖率插件
   '/packages/webpack-coverage-plugin/': [
     {
@@ -140,23 +165,6 @@ export const sidebar = {
       items: [
         { text: '总览', link: '/packages/webpack-api-tracker-plugin/' },
         { text: '更新日志', link: '/packages/webpack-api-tracker-plugin/changelog' }
-      ]
-    }
-  ],
-
-  // AI 使用规范
-  '/ai-guidelines/': [
-    {
-      text: 'AI 使用规范',
-      items: [
-        { text: '总览', link: '/ai-guidelines/' },
-        { text: '基础使用技巧', link: '/ai-guidelines/basic-usage' },
-        { text: '高阶使用技巧', link: '/ai-guidelines/advanced-techniques' },
-        { text: '提示词与指令规范', link: '/ai-guidelines/prompt-engineering' },
-        { text: '代码质量保障', link: '/ai-guidelines/code-quality' },
-        { text: '安全使用规范', link: '/ai-guidelines/security-guidelines' },
-        { text: '团队协作最佳实践', link: '/ai-guidelines/team-collaboration' },
-        { text: '项目集成指南', link: '/ai-guidelines/project-integration' }
       ]
     }
   ]
