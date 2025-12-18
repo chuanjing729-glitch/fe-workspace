@@ -16,7 +16,7 @@ export default defineConfig({
     nav: [
       { text: '介绍', link: '/' },
       { text: '规范', link: '/specs/' },
-      { text: '插件', link: '/packages/webpack-spec-plugin/' },
+      { text: '插件', link: '/packages/' },
       { text: '工具库', link: '/packages/' },
       { text: 'AI 指南', link: '/ai-guidelines/' }
     ],

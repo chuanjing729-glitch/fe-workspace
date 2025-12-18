@@ -39,7 +39,7 @@ module.exports = {
 
 ## 配置选项
 
-详细的配置选项请参考[需求文档](../../requirements/api-tracker-requirement.md)。
+详细的配置选项请参考相关文档。
 
 ## License
 

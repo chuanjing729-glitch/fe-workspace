@@ -40,16 +40,16 @@
 
 ## 📚 文档
 
-- **[👋 快速开始](./docs/guides/quick-start.md)** - 5 分钟上手
-- **[✨ 功能特性](./docs/guides/features.md)** - 完整功能列表
-- **[📖 Vue2 开发规范](../../docs/specs/coding/vue2-guide.md)** - 1160 行详细指南
-- **[📖 JavaScript 开发规范](../../docs/specs/coding/javascript-typescript-guide.md)** - 1200 行详细指南
-- **[🎭 事件规范](../../docs/specs/coding/event-specification.md)** - 9 项事件处理规范
-- **[🛡️ 空指针防护规范](../../docs/specs/coding/null-safety-specification.md)** - 9 项防空检查
-- **[📊 HTML 报告](./docs/reports/html-report-guide.md)** - 报告功能详解
-- **[✅ 真实项目验证](./docs/reports/real-project-validation.md)** - 生产项目验证报告
-- **[🧪 生产环境评估](./docs/reports/final-validation.md)** - 综合评分 94.05/100
-- **[📝 更新日志](./docs/guides/changelog.md)** - 版本更新记录
+- **[👋 快速开始](/packages/webpack-spec-plugin/quick-start)** - 5 分钟上手
+- **[✨ 功能特性](/packages/webpack-spec-plugin/features)** - 完整功能列表
+- **[📖 Vue2 开发规范](/specs/coding/vue2-guide)** - 1160 行详细指南
+- **[📖 JavaScript 开发规范](/specs/coding/javascript-typescript-guide)** - 1200 行详细指南
+- **[🎭 事件规范](/specs/coding/event-specification)** - 9 项事件处理规范
+- **[🛡️ 空指针防护规范](/specs/coding/null-safety-specification)** - 9 项防空检查
+- **[📊 HTML 报告](/packages/webpack-spec-plugin/validation-report)** - 报告功能详解
+- **[✅ 真实项目验证](/packages/webpack-spec-plugin/production-evaluation)** - 生产项目验证报告
+- **[🧪 生产环境评估](/packages/webpack-spec-plugin/production-evaluation)** - 综合评分 94.05/100
+- **[📝 更新日志](/packages/webpack-spec-plugin/changelog)** - 版本更新记录
 
 ---
 
@@ -194,7 +194,7 @@ npm run build
 - 加载速度：提升 50-70%
 - 首屏时间：8s → 2-3s
 
-[查看完整验证报告](./docs/reports/real-project-validation.md)
+[查看完整验证报告](/packages/webpack-spec-plugin/production-evaluation)
 
 ---
 
@@ -232,8 +232,6 @@ export default {
   }
 }
 ```
-
-[查看更多示例](./docs/mall-portal-front规范检查详细报告.html)
 
 ### Vue2 规范 - 组件命名
 
@@ -290,7 +288,7 @@ axios.get('/api/user')
   })
 ```
 
-[查看完整规范文档](../../docs/specs/coding/vue2-guide.md)
+[查看完整规范文档](/specs/coding/vue2-guide)
 
 ---
 
@@ -350,7 +348,7 @@ MIT © 2025
 
 ## 🔗 相关链接
 
-- [📚 文档中心](./docs/)
-- [🚀 快速开始](./docs/guides/quick-start.md)
-- [✅ 真实验证](./docs/reports/real-project-validation.md)
-- [📊 HTML 报告](./docs/reports/html-report-guide.md)
+- [📚 文档中心](/packages/webpack-spec-plugin/)
+- [🚀 快速开始](/packages/webpack-spec-plugin/quick-start)
+- [✅ 真实验证](/packages/webpack-spec-plugin/production-evaluation)
+- [📊 HTML 报告](/packages/webpack-spec-plugin/validation-report)

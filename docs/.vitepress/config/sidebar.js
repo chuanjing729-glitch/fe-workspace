@@ -12,7 +12,9 @@ export const sidebar = {
       items: [
         { text: 'Core Utils 核心工具库', link: '/packages/core-utils/' },
         { text: 'Vue2 Toolkit Vue2工具库', link: '/packages/vue2-toolkit/' },
-        { text: 'Webpack 规范检查插件', link: '/packages/webpack-spec-plugin/' }
+        { text: 'Webpack 规范检查插件', link: '/packages/webpack-spec-plugin/' },
+        { text: 'Webpack 覆盖率插件', link: '/packages/webpack-coverage-plugin/' },
+        { text: 'Webpack API 跟踪插件', link: '/packages/webpack-api-tracker-plugin/' }
       ]
     }
   ],
@@ -116,6 +118,28 @@ export const sidebar = {
       collapsed: false,
       items: [
         { text: '快速开始', link: '/specs/#快速开始' }
+      ]
+    }
+  ],
+
+  // Webpack 覆盖率插件
+  '/packages/webpack-coverage-plugin/': [
+    {
+      text: 'Webpack 覆盖率插件',
+      items: [
+        { text: '总览', link: '/packages/webpack-coverage-plugin/' },
+        { text: '更新日志', link: '/packages/webpack-coverage-plugin/changelog' }
+      ]
+    }
+  ],
+
+  // Webpack API 跟踪插件
+  '/packages/webpack-api-tracker-plugin/': [
+    {
+      text: 'Webpack API 跟踪插件',
+      items: [
+        { text: '总览', link: '/packages/webpack-api-tracker-plugin/' },
+        { text: '更新日志', link: '/packages/webpack-api-tracker-plugin/changelog' }
       ]
     }
   ],
