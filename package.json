@@ -2,7 +2,7 @@
   "type": "module",
   "name": "fe-workspace",
   "version": "1.0.0",
-  "description": "前端工程效率平台工作空间",
+  "description": "前端工程效率平台",
   "main": "index.js",
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -10,13 +10,19 @@
     "docs:preview": "vitepress preview docs",
     "publish": "node scripts/publish-packages.cjs",
     "publish:webpack-spec-plugin": "node scripts/publish-packages.cjs webpack-spec-plugin",
+    "publish:core-utils": "node scripts/publish-packages.cjs core-utils",
+    "publish:vue2-toolkit": "node scripts/publish-packages.cjs vue2-toolkit",
     "publish:minor": "node scripts/publish-packages.cjs \"\" minor",
     "publish:major": "node scripts/publish-packages.cjs \"\" major",
     "build": "pnpm -r --stream build",
     "test": "pnpm -r --stream test",
     "dev": "pnpm -r --stream --parallel dev",
-    "publish:core-utils": "node scripts/publish-packages.cjs core-utils",
-    "publish:vue2-toolkit": "node scripts/publish-packages.cjs vue2-toolkit"
+    "publish:webpack-coverage-plugin": "node scripts/publish-packages.cjs webpack-coverage-plugin",
+    "build:webpack-coverage-plugin": "cd packages/webpack-coverage-plugin && npm run build",
+    "test:webpack-coverage-plugin": "cd packages/webpack-coverage-plugin && npm test",
+    "publish:webpack-api-tracker-plugin": "node scripts/publish-packages.cjs webpack-api-tracker-plugin",
+    "build:webpack-api-tracker-plugin": "cd packages/webpack-api-tracker-plugin && npm run build",
+    "test:webpack-api-tracker-plugin": "cd packages/webpack-api-tracker-plugin && npm test"
   },
   "keywords": [
     "frontend",

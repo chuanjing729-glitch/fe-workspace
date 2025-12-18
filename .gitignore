@@ -1,5 +1,6 @@
+requirements/
 conversation/
-.gemini-rules.md
+.ai-rules.md
 
 # Dependencies
 node_modules/

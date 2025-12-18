@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运行时小气泡演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        button {
+            background-color: #42b983;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #359c6d;
+        }
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>运行时小气泡演示</h1>
+        <p>这是一个演示页面，用于测试 webpack-coverage-plugin 的运行时小气泡功能。</p>
+        
+        <div class="demo-section">
+            <h2>功能演示</h2>
+            <button onclick="simulateCodeExecution()">模拟代码执行</button>
+            <button onclick="simulateTestCompletion()">模拟测试完成</button>
+            <button onclick="updateCoverageData()">更新覆盖率数据</button>
+        </div>
+        
+        <div class="demo-section">
+            <h2>说明</h2>
+            <p>在开发环境中启用 webpack-coverage-plugin 后，页面右下角会显示一个绿色的小气泡。</p>
+            <p>点击小气泡可以展开详细信息面板，查看覆盖率信息和影响范围分析结果。</p>
+            <p>小气泡的颜色会根据覆盖率自动变化：</p>
+            <ul>
+                <li>🔴 红色：覆盖率 &lt; 50%</li>
+                <li>🟡 黄色：覆盖率 50-80%</li>
+                <li>🟢 绿色：覆盖率 &gt; 80%</li>
+            </ul>
+        </div>
+        
+        <div class="demo-section">
+            <h2>小气泡功能</h2>
+            <ul>
+                <li>📌 悬浮气泡：显示当前覆盖率百分比</li>
+                <li>👆 点击展开：显示详细覆盖率信息</li>
+                <li>✋ 拖拽移动：可拖拽到任意位置</li>
+                <li>🔽 最小化：点击面板上的"-"按钮最小化</li>
+                <li>📤 导出报告：可导出详细的自测报告</li>
+                <li>🔄 刷新数据：可手动刷新覆盖率数据</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 在实际应用中，这些资源会由插件自动注入 -->
+    <!-- <link rel="stylesheet" href="/__coverage_overlay.css"> -->
+    <!-- <script src="/__coverage_overlay.js"></script> -->
+    
+    <script>
+        function simulateCodeExecution() {
+            alert('模拟代码执行完成');
+        }
+        
+        function simulateTestCompletion() {
+            alert('模拟测试完成');
+        }
+        
+        function updateCoverageData() {
+            alert('模拟更新覆盖率数据');
+        }
+    </script>
+</body>
+</html>

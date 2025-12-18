@@ -1,0 +1,44 @@
+{
+  "name": "@51jbs/webpack-coverage-plugin",
+  "version": "1.0.0",
+  "description": "Webpack plugin for collecting code coverage during development and generating incremental self-testing reports",
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "test": "jest",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "webpack",
+    "plugin",
+    "coverage",
+    "istanbul",
+    "self-testing"
+  ],
+  "author": "chuanjing.li",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/parser": "^7.28.5",
+    "@babel/traverse": "^7.28.5",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^18.0.0",
+    "@types/webpack": "^5.28.5",
+    "babel-plugin-istanbul": "^7.0.1",
+    "express": "^5.2.1",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^4.9.0",
+    "webpack": "^5.104.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "peerDependencies": {
+    "webpack": "^5.0.0"
+  }
+}

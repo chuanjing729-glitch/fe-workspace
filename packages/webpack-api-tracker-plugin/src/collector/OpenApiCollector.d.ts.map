@@ -1,0 +1,1 @@
+{"version":3,"file":"OpenApiCollector.d.ts","sourceRoot":"","sources":["OpenApiCollector.ts"],"names":[],"mappings":"AAGA,OAAO,EAAE,uBAAuB,EAAE,MAAM,UAAU,CAAC;AAKnD,qBAAa,gBAAgB;IACf,OAAO,CAAC,QAAQ,CAAC,OAAO;gBAAP,OAAO,EAAE,uBAAuB;IAKvD,OAAO,IAAI,OAAO,CAAC,GAAG,CAAC;IAiD7B,OAAO,CAAC,mBAAmB;IAiB3B,OAAO,CAAC,cAAc;IA2BtB,OAAO,CAAC,oBAAoB;IAe5B,OAAO,CAAC,YAAY;CAIrB"}

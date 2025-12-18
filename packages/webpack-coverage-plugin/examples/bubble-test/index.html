@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试运行时小气泡功能</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 5px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>测试运行时小气泡功能</h1>
+        
+        <div class="test-section">
+            <h2>测试说明</h2>
+            <p>此页面用于测试 webpack-coverage-plugin 的运行时小气泡功能。</p>
+            <p>页面右下角应该显示一个小气泡，点击可以展开详细信息面板。</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试操作</h2>
+            <button onclick="updateCoverage(30)">设置覆盖率 30%</button>
+            <button onclick="updateCoverage(60)">设置覆盖率 60%</button>
+            <button onclick="updateCoverage(90)">设置覆盖率 90%</button>
+            <button onclick="updateCoverageData()">更新详细数据</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试结果</h2>
+            <p id="result">等待测试...</p>
+        </div>
+    </div>
+
+    <script>
+        // 模拟 CoverageBubble 类
+        class CoverageBubble {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                // 创建小气泡元素
+                this.bubble = document.createElement('div');
+                this.bubble.id = 'webpack-coverage-bubble';
+                this.bubble.className = 'coverage-bubble';
+                
+                // 设置初始样式
+                this.bubble.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    width: 60px;
+                    height: 60px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 50%;
+                    cursor: pointer;
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 12px;
+                    text-align: center;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    transition: all 0.3s ease;
+                `;
+                
+                // 添加悬停效果
+                this.bubble.addEventListener('mouseenter', () => {
+                    this.bubble.style.transform = 'scale(1.1)';
+                });
+                
+                this.bubble.addEventListener('mouseleave', () => {
+                    this.bubble.style.transform = 'scale(1)';
+                });
+                
+                // 添加点击事件
+                this.bubble.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    alert('小气泡点击事件触发！');
+                });
+                
+                // 添加到页面
+                document.body.appendChild(this.bubble);
+                
+                // 初始化显示内容
+                this.updateBubbleContent(0);
+                
+                document.getElementById('result').textContent = '小气泡已成功创建并显示在页面右下角';
+            }
+            
+            updateBubbleContent(coveragePercentage) {
+                // 根据覆盖率设置颜色
+                let backgroundColor = '';
+                if (coveragePercentage >= 80) {
+                    backgroundColor = 'linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%)'; // 绿色
+                } else if (coveragePercentage >= 50) {
+                    backgroundColor = 'linear-gradient(135deg, #ffd89b 0%, #19547b 100%)'; // 黄色
+                } else {
+                    backgroundColor = 'linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)'; // 红色
+                }
+                
+                this.bubble.style.background = backgroundColor;
+                
+                // 更新内容
+                this.bubble.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="font-size: 14px; font-weight: bold;">${Math.round(coveragePercentage)}%</div>
+                        <div style="font-size: 10px; opacity: 0.9;">覆盖率</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // 初始化小气泡
+        const bubble = new CoverageBubble();
+        
+        // 测试函数
+        function updateCoverage(percentage) {
+            bubble.updateBubbleContent(percentage);
+            document.getElementById('result').textContent = `覆盖率已更新为 ${percentage}%`;
+        }
+        
+        function updateCoverageData() {
+            document.getElementById('result').textContent = '详细数据更新功能已触发';
+        }
+    </script>
+</body>
+</html>

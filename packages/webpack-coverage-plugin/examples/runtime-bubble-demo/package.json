@@ -1,0 +1,19 @@
+{
+  "name": "runtime-bubble-demo",
+  "version": "1.0.0",
+  "description": "这是一个演示项目，用于展示 webpack-coverage-plugin 的运行时小气泡功能。",
+  "main": "webpack.config.js",
+  "scripts": {
+    "build": "webpack",
+    "dev": "ENABLE_SELF_TEST=true webpack serve",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@51jbs/webpack-coverage-plugin": "file:../..",
+    "webpack": "^5.104.0",
+    "webpack-cli": "^6.0.1"
+  }
+}
