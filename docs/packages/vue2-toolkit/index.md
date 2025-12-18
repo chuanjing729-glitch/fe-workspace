@@ -1,4 +1,4 @@
-# Vue2 Toolkit Vue2工具库
+# @51jbs/vue2-toolkit
 
 > Vue2 专用工具库，提供统一的消息提示、指令、mixins 等，解决项目中127处消息提示不一致问题
 

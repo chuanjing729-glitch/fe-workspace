@@ -53,6 +53,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Sync package documentation
+        run: node scripts/sync-package-docs.cjs
+
       - name: Build documentation
         run: pnpm docs:build
         
