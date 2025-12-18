@@ -187,7 +187,7 @@ class SpecPlugin {
         // 输出报告
         reporter.print(rootDir)
 
-        // 生成 HTML 报告
+          // 生成 HTML 报告
         if (this.options.htmlReport) {
           const htmlReporter = new HtmlReporter()
           htmlReporter.addAll([...reporter['errors'], ...reporter['warnings']])
