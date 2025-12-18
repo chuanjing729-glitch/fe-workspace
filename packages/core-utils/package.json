@@ -1,6 +1,6 @@
 {
   "name": "@51jbs/core-utils",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "纯JS工具库，框架无关，提供深拷贝、日期、数字精确计算等核心功能",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
