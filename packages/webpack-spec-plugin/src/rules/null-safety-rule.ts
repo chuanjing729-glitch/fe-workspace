@@ -1,4 +1,6 @@
 import { RuleChecker, CheckResult, PluginOptions } from '../types'
+import * as fs from 'fs'
+import * as path from 'path'
 
 /**
  * 空指针防护模块
@@ -35,14 +37,18 @@ export const nullSafetyRule: RuleChecker = {
       scriptContent = scriptMatch[1]
     }
     
+    // 提取本地导入信息
+    const currentDir = path.dirname(filePath)
+    const localImports = collectLocalImports(scriptContent, currentDir)
+    
     // 1. 检查不安全的属性访问
-    results.push(...checkUnsafePropertyAccess(filePath, content, scriptContent))
+    results.push(...checkUnsafePropertyAccess(filePath, content, scriptContent, localImports))
     
     // 2. 检查数组访问
     results.push(...checkArrayAccess(filePath, content, scriptContent))
     
     // 3. 检查函数调用
-    results.push(...checkFunctionCall(filePath, content, scriptContent))
+    results.push(...checkFunctionCall(filePath, content, scriptContent, localImports))
     
     // 4. 检查 null/undefined 比较
     results.push(...checkNullComparison(filePath, content, scriptContent))
@@ -67,10 +73,112 @@ export const nullSafetyRule: RuleChecker = {
 }
 
 /**
+ * 收集本地导入的模块
+ */
+function collectLocalImports(content: string, currentDir: string): Map<string, string> {
+  const imports = new Map<string, string>()
+  
+  // 匹配 import { a } from './b' 或 import a from './b' 或 import * as a from './b'
+  const importPattern = /import\s+(?:([\w\s{},*]+)\s+from\s+)?['"](\.{1,2}\/.*?)['"]/g
+  let match
+  
+  while ((match = importPattern.exec(content)) !== null) {
+    const importClause = match[1]
+    const sourcePath = match[2]
+    
+    if (!importClause) continue
+    
+    const fullPath = resolveLocalPath(currentDir, sourcePath)
+    if (!fullPath) continue
+    
+    // 处理 default import: import a from './b'
+    if (!importClause.includes('{') && !importClause.includes('*')) {
+      imports.set(importClause.trim(), fullPath)
+    }
+    // 处理 namespace import: import * as a from './b'
+    else if (importClause.includes('* as')) {
+      const name = importClause.split('as')[1].trim()
+      imports.set(name, fullPath)
+    }
+    // 处理 named imports: import { a, b } from './b'
+    else if (importClause.includes('{')) {
+      const namedMatches = importClause.match(/\{([\s\S]*?)\}/)
+      if (namedMatches) {
+        const names = namedMatches[1].split(',').map(n => n.trim().split(/\s+as\s+/).pop()!)
+        names.forEach(name => {
+          if (name) imports.set(name, fullPath)
+        })
+      }
+    }
+  }
+  
+  // 匹配 require('./b')
+  const requirePattern = /(?:const|let|var)\s+([\w\s{},:]+)\s*=\s*require\s*\(\s*['"](\.{1,2}\/.*?)['"]\s*\)/g
+  while ((match = requirePattern.exec(content)) !== null) {
+    const requireClause = match[1]
+    const sourcePath = match[2]
+    const fullPath = resolveLocalPath(currentDir, sourcePath)
+    if (!fullPath) continue
+    
+    if (requireClause.includes('{')) {
+      const namedMatches = requireClause.match(/\{([\s\S]*?)\}/)
+      if (namedMatches) {
+        const names = namedMatches[1].split(',').map(n => n.trim().split(':').pop()!.trim())
+        names.forEach(name => {
+          if (name) imports.set(name, fullPath)
+        })
+      }
+    } else {
+      imports.set(requireClause.trim(), fullPath)
+    }
+  }
+  
+  return imports
+}
+
+/**
+ * 解析本地文件路径
+ */
+function resolveLocalPath(currentDir: string, relativePath: string): string | null {
+  const exts = ['.ts', '.js', '.vue', '.tsx', '.jsx', '/index.ts', '/index.js']
+  const base = path.resolve(currentDir, relativePath)
+  
+  if (fs.existsSync(base) && fs.statSync(base).isFile()) return base
+  
+  for (const ext of exts) {
+    const full = base + ext
+    if (fs.existsSync(full) && fs.statSync(full).isFile()) return full
+  }
+  
+  return null
+}
+
+/**
+ * 检查成员是否在源文件中定义
+ */
+function checkMemberExists(sourcePath: string, memberName: string): boolean {
+  try {
+    const content = fs.readFileSync(sourcePath, 'utf8')
+    // 简单的正则检查：检查 export, function 定义或对象属性定义
+    const patterns = [
+      new RegExp(`export\\s+(?:const|let|var|function|class)\\s+${memberName}\\b`),
+      new RegExp(`\\b${memberName}\\s*[:(]`),
+      new RegExp(`export\\s+{\\s*[^}]*\\b${memberName}\\b[^}]*\\}`),
+      new RegExp(`get\\s+${memberName}\\s*\\(`),
+      new RegExp(`set\\s+${memberName}\\s*\\(`)
+    ]
+    
+    return patterns.some(p => p.test(content))
+  } catch (e) {
+    return false
+  }
+}
+
+/**
  * 检查不安全的属性访问 (P0)
  * 检测可能导致 "Cannot read property 'xxx' of undefined" 的代码
  */
-function checkUnsafePropertyAccess(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
+function checkUnsafePropertyAccess(filePath: string, fullContent: string, scriptContent: string, localImports: Map<string, string>): CheckResult[] {
   const results: CheckResult[] = []
   
   // 匹配多层属性访问，如 obj.a.b.c（不包括可选链）
@@ -80,6 +188,7 @@ function checkUnsafePropertyAccess(filePath: string, fullContent: string, script
   while ((match = deepAccessPattern.exec(scriptContent)) !== null) {
     const fullMatch = match[0]
     const rootObj = match[1]
+    const memberName = match[2]
     
     // 跳过已经使用可选链的情况
     const before = scriptContent.substring(Math.max(0, match.index - 10), match.index)
@@ -89,9 +198,18 @@ function checkUnsafePropertyAccess(filePath: string, fullContent: string, script
       continue
     }
     
-    // 跳过 this.xxx 的情况（通常是安全的）
-    if (rootObj === 'this' || rootObj === 'window' || rootObj === 'document' || rootObj === 'console') {
+    // 跳过 this.xxx 的情况以及常见的第三方库/全局对象（通常是安全的）
+    const safeObjects = ['this', 'window', 'document', 'console', 'Vue', 'Vuex', 'VueRouter', 'axios', 'lodash', '_', 'moment', 'dayjs']
+    if (safeObjects.includes(rootObj)) {
       continue
+    }
+
+    // 如果是本地导入的对象访问，检查成员是否存在
+    if (localImports.has(rootObj)) {
+      const sourcePath = localImports.get(rootObj)!
+      if (checkMemberExists(sourcePath, memberName)) {
+        continue
+      }
     }
     
     // 检查前后是否有空值检查
@@ -174,7 +292,7 @@ function checkArrayAccess(filePath: string, fullContent: string, scriptContent: 
  * 检查函数调用 (P0)
  * 调用函数前应检查是否为函数
  */
-function checkFunctionCall(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
+function checkFunctionCall(filePath: string, fullContent: string, scriptContent: string, localImports: Map<string, string>): CheckResult[] {
   const results: CheckResult[] = []
   
   // 匹配对象方法调用 obj.method()
@@ -186,10 +304,18 @@ function checkFunctionCall(filePath: string, fullContent: string, scriptContent:
     const method = match[2]
     const fullMatch = match[0]
     
-    // 跳过常见的安全调用
-    const safeObjects = ['this', 'console', 'Math', 'JSON', 'Object', 'Array', 'String', 'Number', 'Date']
+    // 跳过常见的安全调用和第三方库
+    const safeObjects = ['this', 'console', 'Math', 'JSON', 'Object', 'Array', 'String', 'Number', 'Date', 'Vue', 'Vuex', 'VueRouter', 'axios', 'lodash', '_', 'moment', 'dayjs']
     if (safeObjects.includes(obj)) {
       continue
+    }
+
+    // 如果是本地导入的对象访问，尝试检查方法是否存在
+    if (localImports.has(obj)) {
+      const sourcePath = localImports.get(obj)!
+      if (checkMemberExists(sourcePath, method)) {
+        continue
+      }
     }
     
     // 跳过已知的全局函数

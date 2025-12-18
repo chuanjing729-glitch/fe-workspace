@@ -390,7 +390,7 @@ export class HtmlReporter {
       ${Object.entries(grouped).map(([file, results]) => `
         <div class="file-group">
           <div class="file-header">
-            📄 ${path.relative(rootDir, file)}
+            📄 ${this.escapeHtml(path.relative(rootDir, file))}
             ${results.filter(r => r.type === 'error').length > 0 ? `<span class="badge error">${results.filter(r => r.type === 'error').length} 错误</span>` : ''}
             ${results.filter(r => r.type === 'warning').length > 0 ? `<span class="badge warning">${results.filter(r => r.type === 'warning').length} 警告</span>` : ''}
           </div>
@@ -399,11 +399,11 @@ export class HtmlReporter {
               <div class="issue-icon">${result.type === 'error' ? '✖' : '⚠'}</div>
               <div class="issue-content">
                 <div class="issue-message">
-                  ${result.message}
+                  ${this.escapeHtml(result.message)}
                   ${this.getPriorityTag(result)}
                 </div>
                 <div class="issue-meta">
-                  <span class="rule-tag">${result.rule}</span>
+                  <span class="rule-tag">${this.escapeHtml(result.rule)}</span>
                   ${result.line ? `<span>行 ${result.line}</span>` : ''}
                 </div>
                 ${this.generateSolution(result)}

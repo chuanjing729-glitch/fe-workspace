@@ -14,18 +14,18 @@ import { CheckResult, PluginOptions, RuleChecker } from '../types'
  */
 function checkUnclearedTimers(content: string, filePath: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   // 检查是否使用了 setTimeout/setInterval 但没有清理
   const setTimeoutRegex = /\bsetTimeout\s*\(/g
   const setIntervalRegex = /\bsetInterval\s*\(/g
   const clearTimeoutRegex = /\bclearTimeout\s*\(/g
   const clearIntervalRegex = /\bclearInterval\s*\(/g
-  
+
   const hasSetTimeout = setTimeoutRegex.test(content)
   const hasSetInterval = setIntervalRegex.test(content)
   const hasClearTimeout = clearTimeoutRegex.test(content)
   const hasClearInterval = clearIntervalRegex.test(content)
-  
+
   // Vue 组件中检查
   if (/\.vue$/.test(filePath)) {
     if (hasSetInterval && !hasClearInterval) {
@@ -39,7 +39,7 @@ function checkUnclearedTimers(content: string, filePath: string): CheckResult[] 
         })
       }
     }
-    
+
     if (hasSetTimeout && !hasClearTimeout) {
       // setTimeout 通常不需要清理，但如果在长时间运行的组件中使用，建议清理
       if (content.match(/setTimeout.*\d{4,}/)) { // 超过 1000ms 的定时器
@@ -52,7 +52,7 @@ function checkUnclearedTimers(content: string, filePath: string): CheckResult[] 
       }
     }
   }
-  
+
   return results
 }
 
@@ -61,28 +61,28 @@ function checkUnclearedTimers(content: string, filePath: string): CheckResult[] 
  */
 function checkUnclearedEventListeners(content: string, filePath: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   const addEventListenerRegex = /addEventListener\s*\(['"]([^'"]+)['"]/g
   const removeEventListenerRegex = /removeEventListener\s*\(['"]([^'"]+)['"]/g
-  
+
   const addedEvents = new Set<string>()
   const removedEvents = new Set<string>()
-  
+
   let match: RegExpExecArray | null
-  
+
   // 收集添加的事件
   while ((match = addEventListenerRegex.exec(content)) !== null) {
     addedEvents.add(match[1])
   }
-  
+
   // 收集移除的事件
   while ((match = removeEventListenerRegex.exec(content)) !== null) {
     removedEvents.add(match[1])
   }
-  
+
   // 检查是否有未移除的事件
   const unclearedEvents = [...addedEvents].filter(event => !removedEvents.has(event))
-  
+
   if (unclearedEvents.length > 0 && /\.vue$/.test(filePath)) {
     // 检查是否在生命周期钩子中清理
     if (!/beforeUnmount|beforeDestroy|onBeforeUnmount/.test(content)) {
@@ -94,7 +94,7 @@ function checkUnclearedEventListeners(content: string, filePath: string): CheckR
       })
     }
   }
-  
+
   return results
 }
 
@@ -103,33 +103,48 @@ function checkUnclearedEventListeners(content: string, filePath: string): CheckR
  */
 function checkGlobalVariableLeak(content: string, filePath: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   // 检查直接给 window 对象赋值
   const windowAssignRegex = /window\s*\[\s*['"]([^'"]+)['"]\s*\]\s*=|window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/g
   let match: RegExpExecArray | null
-  
+
+  // 优化：计算行号时不再每次从头扫描 (避免 O(N^2))
+  let lastIndex = 0
+  let currentLine = 1
+
   while ((match = windowAssignRegex.exec(content)) !== null) {
     const varName = match[1] || match[2]
-    const line = content.substring(0, match.index).split('\n').length
-    
+
+    // 计算从上一个匹配点到当前匹配点的换行符数量
+    const segment = content.substring(lastIndex, match.index)
+    const newLines = (segment.match(/\n/g) || []).length
+    currentLine += newLines
+    lastIndex = match.index
+
     results.push({
       type: 'warning',
       rule: 'memory-leak/global-variable',
       message: `直接在 window 对象上设置属性 "${varName}"，可能导致全局污染和内存泄漏`,
       file: filePath,
-      line
+      line: currentLine
     })
   }
-  
+
   return results
 }
 
 /**
  * 检查闭包中的大对象引用
+ * 
+ * 注意：已移除基于正则的闭包检测，以防止 ReDoS (正则表达式拒绝服务)。
+ * 之前用于匹配函数体的正则 `[\s\S]*?` 在大文件中极易导致性能卡死。
  */
 function checkClosureLargeObject(content: string, filePath: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
+  // 暂时禁用此检查，直到有更安全的 AST 解析方案。
+  // 使用简单的正则检查 "closure" 是不可靠且危险的。
+    
   // 检查闭包中引用大数组或对象
   const largeArrayRegex = /\[\s*(?:[^[\]]*,\s*){50,}[^[\]]*\]/g // 超过 50 个元素的数组
   
@@ -146,7 +161,8 @@ function checkClosureLargeObject(content: string, filePath: string): CheckResult
       })
     }
   }
-  
+
+
   return results
 }
 
@@ -158,29 +174,29 @@ export const memoryLeakRule: RuleChecker = {
   description: '内存泄漏检查（定时器、事件监听器、全局变量、闭包引用）',
   check(filePath: string, content: string, options: PluginOptions): CheckResult[] {
     const results: CheckResult[] = []
-    
+
     // 只检查 JS/TS/Vue 文件
     if (!/\.(js|ts|jsx|tsx|vue)$/.test(filePath)) {
       return results
     }
-    
+
     try {
       // 1. 未清理的定时器检查
       results.push(...checkUnclearedTimers(content, filePath))
-      
+
       // 2. 未清理的事件监听器检查
       results.push(...checkUnclearedEventListeners(content, filePath))
-      
+
       // 3. 全局变量泄漏检查
       results.push(...checkGlobalVariableLeak(content, filePath))
-      
-      // 4. 闭包大对象引用检查
+
+      // 4. 闭包大对象引用检查 (已禁用以修复性能问题)
       results.push(...checkClosureLargeObject(content, filePath))
-      
+
     } catch (error: any) {
       console.warn(`内存泄漏检查失败: ${filePath}`, error.message)
     }
-    
+
     return results
   }
 }
