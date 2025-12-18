@@ -55,10 +55,10 @@ export const sidebar = {
     }
   ],
 
-  // 完整规范
+  // 技术规范
   '/specs/': [
     {
-      text: '代码编写规范',
+      text: '编码规范',
       collapsed: false,
       items: [
         { text: '编码规范总览', link: '/specs/coding/' },
@@ -74,20 +74,19 @@ export const sidebar = {
       ]
     },
     {
-      text: '🔧 工程化规范',
+      text: '工程规范',
       collapsed: false,
       items: [
         { text: '工程化总览', link: '/specs/engineering/' },
         { text: 'Git 工作流', link: '/specs/engineering/git-workflow' },
-        { text: '分支管理规范', link: '/specs/engineering/branch-management' },
         { text: 'Code Review 规范', link: '/specs/engineering/code-review' },
-        { text: '代码审查模板', link: '/specs/engineering/code-review-template' },
+        { text: '分支管理规范', link: '/specs/engineering/branch-management' },
         { text: '构建与部署', link: '/specs/engineering/build-deploy' },
         { text: '测试规范', link: '/specs/engineering/testing' }
       ]
     },
     {
-      text: '🎨 设计规范',
+      text: '设计规范',
       collapsed: false,
       items: [
         { text: '设计规范总览', link: '/specs/design/' },
@@ -97,20 +96,13 @@ export const sidebar = {
       ]
     },
     {
-      text: '⚡ 性能优化规范',
+      text: '优化规范',
       collapsed: false,
       items: [
         { text: '优化总览', link: '/specs/optimization/' },
         { text: '性能优化', link: '/specs/optimization/performance' },
         { text: '内存管理', link: '/specs/optimization/memory' },
         { text: '资源处理', link: '/specs/optimization/assets' }
-      ]
-    },
-    {
-      text: '🚀 快速开始',
-      collapsed: false,
-      items: [
-        { text: '快速开始', link: '/specs/#快速开始' }
       ]
     }
   ],
@@ -128,6 +120,16 @@ export const sidebar = {
         { text: '安全使用规范', link: '/ai-guidelines/security-guidelines' },
         { text: '团队协作最佳实践', link: '/ai-guidelines/team-collaboration' },
         { text: '项目集成指南', link: '/ai-guidelines/project-integration' }
+      ]
+    }
+  ],
+
+  // 使用指南
+  '/guides/': [
+    {
+      text: '使用指南',
+      items: [
+        { text: '入门指南', link: '/guides/getting-started' }
       ]
     }
   ],
