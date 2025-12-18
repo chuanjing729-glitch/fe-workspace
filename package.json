@@ -17,10 +17,10 @@
     "build": "pnpm -r --stream build",
     "test": "pnpm -r --stream test",
     "dev": "pnpm -r --stream --parallel dev",
-    "publish:webpack-coverage-plugin": "node scripts/publish-packages.cjs webpack-coverage-plugin",
+    "publish:webpack-coverage-plugin": "node scripts/publish-packages.cjs @51jbs/webpack-coverage-plugin",
     "build:webpack-coverage-plugin": "cd packages/webpack-coverage-plugin && npm run build",
     "test:webpack-coverage-plugin": "cd packages/webpack-coverage-plugin && npm test",
-    "publish:webpack-api-tracker-plugin": "node scripts/publish-packages.cjs webpack-api-tracker-plugin",
+    "publish:webpack-api-tracker-plugin": "node scripts/publish-packages.cjs @51jbs/webpack-api-tracker-plugin",
     "build:webpack-api-tracker-plugin": "cd packages/webpack-api-tracker-plugin && npm run build",
     "test:webpack-api-tracker-plugin": "cd packages/webpack-api-tracker-plugin && npm test"
   },

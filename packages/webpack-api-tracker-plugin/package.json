@@ -1,5 +1,5 @@
 {
-  "name": "webpack-api-tracker-plugin",
+  "name": "@51jbs/webpack-api-tracker-plugin",
   "version": "1.0.0",
   "description": "A Webpack plugin for API contract tracking and change detection",
   "main": "lib/index.js",
