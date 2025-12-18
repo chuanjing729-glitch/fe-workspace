@@ -27,4 +27,4 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/chuanjing729-glitch/fe-workspace' }
     ]
   }
-})
+});

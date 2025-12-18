@@ -85,6 +85,7 @@ export const sidebar = {
         { text: '工程化总览', link: '/specs/engineering/' },
         { text: 'Git 工作流', link: '/specs/engineering/git-workflow' },
         { text: 'Code Review 规范', link: '/specs/engineering/code-review' },
+        { text: '代码审查模板', link: '/specs/engineering/code-review-template' },
         { text: '构建与部署', link: '/specs/engineering/build-deploy' },
         { text: '测试规范', link: '/specs/engineering/testing' }
       ]
