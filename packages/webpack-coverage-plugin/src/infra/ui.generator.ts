@@ -1,6 +1,6 @@
 /**
  * UI 资源生成器
- * 负责生成运行时小气泡的 HTML/CSS/JS 代码
+ * 负责生成运行时小气泡的 HTML/CSS/JS 代码 (v3.0 专家级)
  */
 export class UiGenerator {
   /**
@@ -8,7 +8,6 @@ export class UiGenerator {
    */
   static generateOverlayCss(): string {
     return `
-      /* 运行时小气泡样式 */
       #webpack-coverage-overlay {
         position: fixed;
         bottom: 20px;
@@ -17,22 +16,34 @@ export class UiGenerator {
         height: 60px;
         background: #999;
         border-radius: 50%;
-        cursor: pointer;
+        cursor: move;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 9999;
+        z-index: 10000;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: bold;
-        transition: transform 0.2s, background 0.3s;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        font-size: 14px;
+        transition: transform 0.2s, background 0.3s, opacity 0.3s;
+        font-family: Menlo, Monaco, Consolas, monospace;
+        font-size: 13px;
         user-select: none;
+        opacity: 0.85;
       }
       
       #webpack-coverage-overlay:hover {
-        transform: scale(1.1);
+        transform: scale(1.05);
+        opacity: 1;
+      }
+
+      #webpack-coverage-overlay.syncing {
+        animation: coverage-pulse 1.5s infinite;
+      }
+
+      @keyframes coverage-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(66, 185, 131, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(66, 185, 131, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(66, 185, 131, 0); }
       }
       
       #webpack-coverage-overlay-panel {
@@ -42,98 +53,119 @@ export class UiGenerator {
         width: 320px;
         background: white;
         border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        z-index: 9999;
-        padding: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        z-index: 10000;
+        padding: 0;
         display: none;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        flex-direction: column;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: #333;
-        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.08);
       }
       
       #webpack-coverage-overlay-panel.visible {
-        display: block;
-        animation: slideIn 0.2s ease-out;
+        display: flex;
+        animation: coverage-slide-up 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      @keyframes slideIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+      @keyframes coverage-slide-up {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
       }
       
-      .coverage-header {
+      .coverage-panel-header {
+        padding: 16px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 15px;
       }
 
-      .coverage-title {
-        font-size: 16px;
-        font-weight: 600;
+      .coverage-panel-title {
+        font-size: 12px;
+        font-weight: 700;
         margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #888;
       }
 
-      .coverage-progress {
-        height: 10px;
-        background: #f0f0f0;
-        border-radius: 5px;
-        overflow: hidden;
-        margin: 15px 0;
+      .coverage-content {
+        padding: 16px;
+        max-height: 400px;
+        overflow-y: auto;
       }
-      
-      .coverage-progress-bar {
+
+      .coverage-main-stat {
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: baseline;
+      }
+
+      .coverage-main-stat small {
+        font-size: 14px;
+        font-weight: 400;
+        margin-left: 4px;
+        color: #666;
+      }
+
+      .coverage-progress-bg {
+        height: 6px;
+        background: #eee;
+        border-radius: 3px;
+        margin-bottom: 16px;
+      }
+
+      .coverage-progress-fill {
         height: 100%;
         background: #42b983;
-        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 3px;
+        transition: width 0.6s ease;
       }
 
-      .coverage-stats {
-        font-size: 13px;
-        color: #666;
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 15px;
+      .file-item {
+        margin-bottom: 12px;
+        padding: 10px;
+        border-radius: 8px;
+        background: #fafafa;
+        border: 1px solid #f0f0f0;
       }
 
-      .uncovered-list {
-         max-height: 200px;
-         overflow-y: auto;
-         font-size: 12px;
-         margin-top: 15px;
-         border-top: 1px solid #eee;
-         padding-top: 15px;
-      }
-      
-      .uncovered-item {
-        padding: 8px;
-        border-radius: 6px;
-        background: #fff5f5;
-        margin-bottom: 8px;
-        border: 1px solid #ffebeb;
-      }
-
-      .uncovered-item strong {
-        display: block;
-        color: #e74c3c;
+      .file-item-name {
+        font-size: 12px;
+        font-weight: 600;
         margin-bottom: 4px;
         word-break: break-all;
+        font-family: monospace;
       }
-      
+
+      .file-item-lines {
+        font-size: 11px;
+        color: #888;
+      }
+
       .refresh-btn {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        padding: 6px 12px;
+        background: #1890ff;
+        color: white;
+        border: none;
+        padding: 4px 12px;
         border-radius: 4px;
-        cursor: pointer;
         font-size: 12px;
-        color: #666;
-        transition: all 0.2s;
+        font-weight: 600;
+        cursor: pointer;
       }
-      
-      .refresh-btn:hover {
-        background: #e9ecef;
-        color: #333;
+
+      .shortcut-hint {
+        font-size: 10px;
+        color: #999;
+        text-align: center;
+        padding: 10px 0;
+        border-top: 1px solid #f0f0f0;
+        background: #fafafa;
       }
     `;
   }
@@ -144,111 +176,195 @@ export class UiGenerator {
   static generateOverlayJs(): string {
     return `
       (function() {
-        if (document.getElementById('webpack-coverage-overlay')) return;
+        if (window.__coverage_plugin_loaded) return;
+        window.__coverage_plugin_loaded = true;
 
-        // UI 构建 helper
-        function el(tag, className, html) {
-          const e = document.createElement(tag);
-          if (className) e.className = className;
-          if (html) e.innerHTML = html;
-          return e;
-        }
-
-        const overlay = el('div', '', '<span>...</span>');
-        overlay.id = 'webpack-coverage-overlay';
+        const STORAGE_KEY = '__coverage_v3_state';
         
-        const panel = el('div', '', '');
+        const overlay = document.createElement('div');
+        overlay.id = 'webpack-coverage-overlay';
+        overlay.innerHTML = '0%';
+        
+        const panel = document.createElement('div');
         panel.id = 'webpack-coverage-overlay-panel';
         
-        // 事件绑定
-        overlay.addEventListener('click', (e) => {
-          e.stopPropagation();
-          panel.classList.toggle('visible');
+        // 1. 持久化位置恢复
+        function restoreState() {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+             try {
+               const state = JSON.parse(saved);
+               if (state.pos) {
+                  overlay.style.left = state.pos.x + 'px';
+                  overlay.style.top = state.pos.y + 'px';
+                  overlay.style.bottom = 'auto';
+                  overlay.style.right = 'auto';
+               }
+             } catch(e) {}
+          }
+        }
+
+        // 2. HMR 数据合并逻辑
+        function mergeCoverage(target, source) {
+          if (!target || !source) return;
+          for (const file in source) {
+            if (target[file]) {
+              const oldS = source[file].s;
+              const newS = target[file].s;
+              for (const key in oldS) {
+                if (newS[key] !== undefined) newS[key] += oldS[key];
+              }
+            } else {
+              target[file] = source[file];
+            }
+          }
+        }
+
+        if (window.__coverage__ && window.__coverage_backup__) {
+          mergeCoverage(window.__coverage__, window.__coverage_backup__);
+        }
+
+        // 3. 拖拽逻辑 (Drag & Snap)
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        overlay.onmousedown = (e) => {
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          initialX = overlay.offsetLeft;
+          initialY = overlay.offsetTop;
+          overlay.style.transition = 'none';
+        };
+
+        document.onmousemove = (e) => {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          overlay.style.left = (initialX + dx) + 'px';
+          overlay.style.top = (initialY + dy) + 'px';
+          overlay.style.bottom = 'auto';
+          overlay.style.right = 'auto';
+        };
+
+        document.onmouseup = () => {
+          if (!isDragging) return;
+          isDragging = false;
+          overlay.style.transition = 'all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
+          
+          const centerX = overlay.offsetLeft + 30;
+          const winW = window.innerWidth;
+          let finalX = centerX < winW / 2 ? 20 : winW - 80;
+          overlay.style.left = finalX + 'px';
+          
+          const pos = { x: finalX, y: overlay.offsetTop };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ pos }));
+        };
+
+        // 4. 快捷键
+        window.addEventListener('keydown', (e) => {
+          if (e.altKey && (e.key === 'c' || e.key === 'ç')) {
+            e.preventDefault();
+            panel.classList.toggle('visible');
+          }
+          if (e.altKey && (e.key === 'r' || e.key === '®')) {
+            e.preventDefault();
+            fetchData();
+          }
         });
-        
-        document.addEventListener('click', () => panel.classList.remove('visible'));
-        panel.addEventListener('click', (e) => e.stopPropagation());
 
-        window.__coverage_refresh = fetchData;
+        overlay.onclick = (e) => {
+           if (Math.abs(e.clientX - startX) < 5) {
+             panel.classList.toggle('visible');
+           }
+        };
 
-        function fetchData() {
+        const uploadedFiles = new Set();
+        async function fetchData() {
+          overlay.classList.add('syncing');
+          if (window.__coverage__) {
+            try {
+              // v3.0 Smart Incremental Protocol: 首次上报全量 Map，后续只报计数器 (压缩比 > 90%)
+              const payload = {};
+              for (const file in window.__coverage__) {
+                const full = window.__coverage__[file];
+                if (uploadedFiles.has(file)) {
+                  payload[file] = { s: full.s, f: full.f, b: full.b };
+                } else {
+                  payload[file] = full;
+                  uploadedFiles.add(file);
+                }
+              }
+              
+              await fetch('/__coverage_upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              // 备份当前数据用于 HMR 合并
+              window.__coverage_backup__ = JSON.parse(JSON.stringify(window.__coverage__));
+            } catch (e) {}
+          }
+          
           fetch('/__coverage_info')
             .then(r => r.json())
             .then(res => {
-              if (res.success && res.data) {
-                updateUI(res.data);
-              } else {
-                renderEmpty();
-              }
+              overlay.classList.remove('syncing');
+              if (res.success) updateUI(res.data);
             })
-            .catch(() => renderError());
-        }
-
-        function renderEmpty() {
-           overlay.style.background = '#999';
-           overlay.innerHTML = '<span>N/A</span>';
-           panel.innerHTML = '<div class="coverage-header"><h3 class="coverage-title">暂无数据</h3></div><p>请修改源文件触发增量计算。</p>';
-        }
-
-        function renderError() {
-           overlay.style.background = '#e74c3c';
-           overlay.innerHTML = '<span>Err</span>';
+            .catch(() => overlay.classList.remove('syncing'));
         }
 
         function updateUI(data) {
           const rate = data.coverageRate;
+          overlay.innerHTML = rate + '%';
           
-          overlay.innerHTML = '<span>' + rate + '%</span>';
-          if (rate >= 80) overlay.style.background = '#42b983'; 
-          else if (rate >= 50) overlay.style.background = '#f39c12'; 
-          else overlay.style.background = '#e74c3c'; 
+          if (rate >= 90) overlay.style.background = '#52c41a';
+          else if (rate >= 70) overlay.style.background = '#1890ff';
+          else if (rate >= 40) overlay.style.background = '#faad14';
+          else if (rate > 0) overlay.style.background = '#f5222d';
+          else overlay.style.background = '#999';
 
-          let listHtml = '';
-          if (data.uncoveredFiles.length > 0) {
-             listHtml = data.uncoveredFiles.map(f => 
-               '<div class="uncovered-item">' +
-                 '<strong>' + f.file + ' (' + f.rate + '%)</strong>' +
-                 '<span style="color:#666">Line: ' + f.uncoveredLines.join(', ') + '</span>' +
-               '</div>'
-             ).join('');
-          } else {
-             listHtml = '<div style="text-align:center;padding:10px;color:#42b983">✨ 太棒了！所有增量代码已覆盖</div>';
-          }
+          let filesHtml = data.uncoveredFiles.slice(0, 5).map(f => \`
+            <div class="file-item">
+              <div class="file-item-name">\${f.file}</div>
+              <div class="file-item-lines">Uncovered: \${f.uncoveredLines.join(', ') || 'None'}</div>
+            </div>
+          \`).join('');
 
-          panel.innerHTML = 
-            '<div class="coverage-header">' +
-              '<h3 class="coverage-title">增量覆盖率: ' + rate + '%</h3>' +
-              '<button class="refresh-btn" onclick="window.__coverage_refresh()">刷新</button>' +
-            '</div>' +
-            '<div class="coverage-stats">' +
-              '<span>变更行: ' + data.totalLines + '</span>' +
-              '<span>已覆盖: ' + data.coveredLines + '</span>' +
-            '</div>' +
-            '<div class="coverage-progress">' +
-              '<div class="coverage-progress-bar" style="width: ' + rate + '%"></div>' +
-            '</div>' +
-            '<div class="uncovered-list">' + listHtml + '</div>';
+          panel.innerHTML = \`
+            <div class="coverage-panel-header">
+              <span class="coverage-panel-title">Smart Coverage v3.0</span>
+              <button class="refresh-btn" id="cv-refresh">SYNC</button>
+            </div>
+            <div class="coverage-content">
+              <div class="coverage-main-stat">\${rate}% <small>Covered</small></div>
+              <div class="coverage-progress-bg">
+                <div class="coverage-progress-fill" style="width: \${rate}%"></div>
+              </div>
+              <div style="font-size:11px; color:#888; margin-bottom:12px">
+                 Lines: \${data.coveredLines} / \${data.totalLines}
+              </div>
+              \${filesHtml}
+            </div>
+            <div class="shortcut-hint">Alt+C Panel | Alt+R Sync</div>
+          \`;
+          document.getElementById('cv-refresh').onclick = fetchData;
         }
-        
+
         function init() {
-            if (document.body) {
-                document.body.appendChild(overlay);
-                document.body.appendChild(panel);
-            } else {
-                document.addEventListener('DOMContentLoaded', () => {
-                   document.body.appendChild(overlay);
-                   document.body.appendChild(panel); 
-                });
-            }
-            fetchData();
-            setInterval(fetchData, 3000);
+          if (!document.body) {
+            document.addEventListener('DOMContentLoaded', init);
+            return;
+          }
+          document.body.appendChild(overlay);
+          document.body.appendChild(panel);
+          restoreState();
+          setInterval(fetchData, 5000);
+          fetchData();
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
+        init();
       })();
     `;
   }

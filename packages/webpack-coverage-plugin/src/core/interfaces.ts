@@ -27,6 +27,8 @@ export interface IGitService {
 export interface ICoverageService {
     /** 计算增量覆盖率 */
     calculate(coverageMap: CoverageMap): Promise<IncrementalCoverageResult>;
+    /** 注册基准元数据 (v3.0) */
+    registerBaseline(filename: string, metadata: any): void;
 }
 
 /**

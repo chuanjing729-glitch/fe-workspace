@@ -1,6 +1,6 @@
 # 通用前端覆盖率插件 (Universal Coverage Plugin)
 
-> 🚀 **3.0 架构升级**: 基于 Unplugin 的通用架构，同时支持 Webpack, Vite 和 Rspack。
+> 🚀 **架构升级**: 基于 Unplugin 的通用架构，同时支持 Webpack, Vite 和 Rspack。
 
 本插件用于在开发阶段收集代码覆盖率，并生成增量自测报告。即时反馈变更影响，提升前端研发质量。
 

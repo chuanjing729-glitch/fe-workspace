@@ -63,6 +63,10 @@ export class CoveragePluginCore {
     async init() {
         if (!this.options.enabled) return;
         console.log('[CoveragePlugin] 初始化...');
+
+        // 自动探测 Git 根目录 (支持 Monorepo)
+        await this.gitService.findGitRoot();
+
         if (this.options.enableImpactAnalysis) {
             this.analysisService.initDependencyGraph().catch(console.error);
         }
@@ -92,7 +96,7 @@ export class CoveragePluginCore {
      * 代码转换 (Transform)
      * 使用 Babel 和 istanbul 插件对代码进行插桩
      */
-    transform(code: string, id: string): string | null {
+    transform(code: string, id: string): { code: string, map: any } | null {
         if (!this.shouldInstrument(id)) return null;
 
         try {
@@ -100,14 +104,21 @@ export class CoveragePluginCore {
                 filename: id,
                 plugins: [
                     [require.resolve('babel-plugin-istanbul'), {
-                        // 由于 shouldInstrument 已经做了过滤
-                        // 这里不需要再传递 exclude，避免 RegExp 导致 babel-plugin-istanbul 崩溃
+                        // 启用 inputSourceMap 传递，确保链式调用支持
+                        useInlineSourceMaps: false
                     }]
                 ],
+                sourceMaps: true, // 明确开启 sourcemap 生成
                 configFile: false,
                 babelrc: false
             });
-            return result?.code || null;
+
+            if (!result) return null;
+
+            return {
+                code: result.code || '',
+                map: result.map
+            };
         } catch (e) {
             console.warn(`[CoveragePlugin] Transform error for ${id}:`, e);
             return null;

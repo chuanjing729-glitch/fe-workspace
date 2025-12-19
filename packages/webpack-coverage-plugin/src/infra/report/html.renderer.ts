@@ -27,7 +27,7 @@ export class HtmlRenderer {
     template = template.replace('{{SCRIPT}}', script);
 
     // 2. 注入 JSON 数据 (用于 JS 逻辑)
-    template = template.replace('{{ REPORT_DATA_JSON }}', JSON.stringify(data));
+    template = template.replace('__REPORT_DATA_JSON__', JSON.stringify(data));
 
     // 3. 注入基础信息
     template = template.replace('{{TIMESTAMP}}', data.timestamp);

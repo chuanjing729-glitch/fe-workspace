@@ -199,6 +199,9 @@ importers:
       vue:
         specifier: ^2.7.16
         version: 2.7.16
+      vue-router:
+        specifier: ^3.6.5
+        version: 3.6.5(vue@2.7.16)
     devDependencies:
       '@51jbs/webpack-coverage-plugin':
         specifier: ../../
@@ -5738,6 +5741,11 @@ packages:
         optional: true
       vue-template-compiler:
         optional: true
+
+  vue-router@3.6.5:
+    resolution: {integrity: sha512-VYXZQLtjuvKxxcshuRAwjHnciqZVoXAjTjcqBTz4rKc8qih9g9pI3hbDjmqXaHdgL3v8pV6P8Z335XvHzESxLQ==}
+    peerDependencies:
+      vue: ^2
 
   vue-style-loader@4.1.3:
     resolution: {integrity: sha512-sFuh0xfbtpRlKfm39ss/ikqs9AbKCoXZBpHeVZ8Tx650o0k0q/YCM7FRvigtxpACezfq6af+a7JeqVTWvncqDg==}
@@ -12614,6 +12622,10 @@ snapshots:
       - velocityjs
       - walrus
       - whiskers
+
+  vue-router@3.6.5(vue@2.7.16):
+    dependencies:
+      vue: 2.7.16
 
   vue-style-loader@4.1.3:
     dependencies:

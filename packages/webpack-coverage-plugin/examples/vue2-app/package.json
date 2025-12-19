@@ -7,7 +7,8 @@
         "build": "webpack build --mode production"
     },
     "dependencies": {
-        "vue": "^2.7.16"
+        "vue": "^2.7.16",
+        "vue-router": "^3.6.5"
     },
     "devDependencies": {
         "@51jbs/webpack-coverage-plugin": "../../",

@@ -7,9 +7,56 @@ import { CoverageMap, CoverageData, IncrementalCoverageResult } from '../core/ty
  */
 export class CoverageService implements ICoverageService {
     private gitService: IGitService;
+    private mergedMap: CoverageMap = {}; // v3.0: 持久化合并后的覆盖率数据
+    private baselines: Record<string, any> = {}; // v3.0: 存储文件的静态元数据 (statementMap, fnMap, branchMap)
 
     constructor(gitService: IGitService) {
         this.gitService = gitService;
+    }
+
+    /**
+     * 注册文件基准元数据 (Build-time or first-seen)
+     */
+    public registerBaseline(filename: string, metadata: any) {
+        this.baselines[filename] = metadata;
+        if (!this.mergedMap[filename]) {
+            this.mergedMap[filename] = {
+                path: filename,
+                ...metadata,
+                s: {},
+                f: {},
+                b: {}
+            };
+        }
+    }
+
+    /**
+     * 合并覆盖率数据 (Merge Logic)
+     */
+    private mergeCoverage(target: CoverageMap, source: CoverageMap) {
+        for (const file in source) {
+            if (!target[file]) {
+                target[file] = JSON.parse(JSON.stringify(source[file]));
+                continue;
+            }
+
+            // 归并语句计数
+            const targetS = target[file].s;
+            const sourceS = source[file].s;
+            for (const id in sourceS) {
+                if (targetS[id] !== undefined) {
+                    targetS[id] = Math.max(targetS[id], sourceS[id]);
+                } else {
+                    targetS[id] = sourceS[id];
+                }
+            }
+            // 归并函数与分支计数 (同理)
+            if (source[file].f) {
+                for (const id in source[file].f) {
+                    target[file].f[id] = Math.max(target[file].f[id] || 0, source[file].f[id]);
+                }
+            }
+        }
     }
 
     /**
@@ -17,6 +64,35 @@ export class CoverageService implements ICoverageService {
      * @param coverageMap 运行时收集到的覆盖率数据
      */
     async calculate(coverageMap: CoverageMap): Promise<IncrementalCoverageResult> {
+        // v3.0: 合并新上报的数据到主 Map 中
+        // 支持 "Thin" 协议：如果上报的数据缺失 Map，则从 baselines 中拼装
+        const normalizedMap: CoverageMap = {};
+        for (const file in coverageMap) {
+            const data = coverageMap[file];
+            if (!data.statementMap && this.baselines[file]) {
+                // 是 Thin Data, 进行拼装
+                normalizedMap[file] = {
+                    ...this.baselines[file],
+                    s: data.s,
+                    f: data.f,
+                    b: data.b,
+                    path: data.path || file
+                };
+            } else {
+                normalizedMap[file] = data;
+                // 如果之前没见过 baseline，现在存一下
+                if (data.statementMap && !this.baselines[file]) {
+                    this.baselines[file] = {
+                        statementMap: data.statementMap,
+                        fnMap: data.fnMap,
+                        branchMap: data.branchMap
+                    };
+                }
+            }
+        }
+
+        this.mergeCoverage(this.mergedMap, normalizedMap);
+
         const changedFiles = await this.gitService.getChangedFiles();
         const result: IncrementalCoverageResult = {
             overall: {
@@ -27,11 +103,11 @@ export class CoverageService implements ICoverageService {
             files: []
         };
 
-        console.log(`[CoverageService] 开始计算 ${changedFiles.length} 个变更文件的覆盖率`);
+        console.log(`[CoverageService] 开始计算 ${changedFiles.length} 个变更文件的覆盖率 (使用合并数据)`);
 
         for (const file of changedFiles) {
-            // 查找覆盖率数据 (处理路径匹配)
-            const coverage = this.findCoverageForFile(coverageMap, file);
+            // 从合并后的数据中查找
+            const coverage = this.findCoverageForFile(this.mergedMap, file);
 
             if (!coverage) {
                 // 如果是源文件但没有覆盖率数据，视为全未覆盖

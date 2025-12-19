@@ -106,7 +106,12 @@ export const unplugin = createUnplugin<WebpackCoveragePluginOptions>((options) =
 
         // 3. 代码转换 (插桩)
         transform(code, id) {
-            return core.transform(code, id);
+            const result = core.transform(code, id);
+            if (!result) return null;
+            return {
+                code: result.code,
+                map: result.map
+            };
         },
 
         // ------------------

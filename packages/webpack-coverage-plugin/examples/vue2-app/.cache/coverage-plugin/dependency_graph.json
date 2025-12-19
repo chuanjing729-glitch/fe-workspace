@@ -6,25 +6,137 @@
       "ExportDefaultDeclaration"
     ],
     "dependencies": [],
-    "hash": "bb159cc1eb6386dc960b950f0117d804b3ee55908cc19f032dc5be11bfd8ae2a"
+    "hash": "26bcbce96caa3b2526a75450ea57719d28beab7163f629fd9a608ee071a88c83"
   },
   "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/main.js": {
     "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/main.js",
     "imports": [
       "vue",
-      "./App.vue"
+      "./App.vue",
+      "./router"
     ],
     "exports": [],
     "dependencies": [
-      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/App.vue"
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/App.vue",
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/router/index.js"
     ],
-    "hash": "71901c2081085d1064b128e1c198b0ff08243859129ec46d48680dc2f16a23a4"
+    "hash": "2a07f5230cad16c171a3a3de85675797eff51c5e8f3cec32c0a7682bbc02be91"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/router/index.js": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/router/index.js",
+    "imports": [
+      "vue",
+      "vue-router",
+      "../views/Layout.vue",
+      "../views/MenuList.vue"
+    ],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/Layout.vue",
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/MenuList.vue"
+    ],
+    "hash": "606bd6b305ba8c9dea05d77dedd03a148c39ddda26b9c03c30dc67052ae43bb7"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/services/mock.js": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/services/mock.js",
+    "imports": [],
+    "exports": [
+      "ExportNamedDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "53bd84faa29b12eef6f01b0f5e35108d7701421a97057a8e70c915af23304039"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/AdvancedScenarios.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/AdvancedScenarios.vue",
+    "imports": [
+      "./scenarios/ScenarioReactivity.vue",
+      "./scenarios/ScenarioDirectives.vue",
+      "./scenarios/ScenarioStore.vue"
+    ],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioReactivity.vue",
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioDirectives.vue",
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioStore.vue"
+    ],
+    "hash": "486148b814e940bb7c20f931d92dccd87c3fd433d101eb9a22346d34c6836bda"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/Layout.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/Layout.vue",
+    "imports": [],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "5b17c3424fb6f06a8f887e3972e0b2d95d7fa31083b1cdc2f1e062761d2ae29a"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/MenuList.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/MenuList.vue",
+    "imports": [
+      "../services/mock"
+    ],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/services/mock.js"
+    ],
+    "hash": "b692cb400e83a869960b3c13078fd7476ad1fe608cb34f62793eaa6cbcc3818e"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/SystemSettings.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/SystemSettings.vue",
+    "imports": [],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "2c4cd8aeb047a187b46513bed4e9f63b1ed24cf97d3557bbfe175be018ec455d"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/UserList.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/UserList.vue",
+    "imports": [],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "e624ba3320cccdb82ea784ebd0a09cf68207014c246ec53d7cb583df4edbab81"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioDirectives.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioDirectives.vue",
+    "imports": [],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "0eecfd8d457e2a9c85c6d2f4b19c5497978d2ec8d6c078cf12a631ae70ca1992"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioReactivity.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioReactivity.vue",
+    "imports": [],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "8d11573ea1048d5dc58c84a9f5d80ab9c66d17e43c93fcddd3da539ca59f781f"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioStore.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/views/scenarios/ScenarioStore.vue",
+    "imports": [],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "810c77dec35cb2a568085694dfa90199debe8a3a2fff553efcc665dbf11c9d54"
   },
   "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/webpack.config.js": {
     "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/webpack.config.js",
     "imports": [],
     "exports": [],
     "dependencies": [],
-    "hash": "46a02da1e9145e471a405125bdb057c6b8fa4cd8bf125bc63240002641f7c26e"
+    "hash": "052975c47a1452f65fa280c75820e8c41f8d7e2c9fdfba9ba7b1f24c18e8accf"
   }
 }

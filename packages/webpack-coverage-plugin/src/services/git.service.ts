@@ -16,6 +16,21 @@ export class GitService implements IGitService {
     }
 
     /**
+     * 自动探测 Git 根目录 (支持 Monorepo)
+     */
+    async findGitRoot(): Promise<string> {
+        try {
+            const root = await this.git.revparse(['--show-toplevel']);
+            this.rootDir = root.trim();
+            this.git = simpleGit(this.rootDir);
+            return this.rootDir;
+        } catch (error) {
+            console.warn('[GitService] 探测 Git 根目录失败, 使用当前目录:', error);
+            return this.rootDir;
+        }
+    }
+
+    /**
      * 获取变更文件列表
      * @param targetBranch 目标分支，默认为 main
      */

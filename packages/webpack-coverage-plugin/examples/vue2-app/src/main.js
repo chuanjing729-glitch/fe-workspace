@@ -1,6 +1,9 @@
 import Vue from 'vue';
 import App from './App.vue';
+import router from './router';
 
 new Vue({
-    render: h => h(App),
-}).$mount('#app');
+    el: '#app',
+    router, // 注入路由
+    render: h => h(App)
+});
