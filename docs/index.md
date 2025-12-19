@@ -5,6 +5,9 @@ hero:
   name: "前端工程效率平台"
   text: "一站式提升前端开发质量、效率和性能"
   tagline: 规范检查工具 · 完整规范体系 · AI编码助手 · 全栈工具库
+  image:
+    src: /logo.jpg
+    alt: Efficiency Logo
   actions:
     - theme: brand
       text: 开始使用

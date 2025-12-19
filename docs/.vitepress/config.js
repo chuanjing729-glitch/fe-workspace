@@ -7,11 +7,11 @@ export default defineConfig({
   title: "前端工程效率空间",
   description: "前端工程效率平台提升开发质量、效率和性能",
   head: [
-    ['link', { rel: 'icon', href: '/fe-workspace/favicon.ico' }],
-    ['link', { rel: 'icon', type: 'image/x-icon', href: '/fe-workspace/favicon.ico' }],
-    ['link', { rel: 'shortcut icon', href: '/fe-workspace/favicon.ico' }]
+    ['link', { rel: 'icon', href: '/fe-workspace/logo.jpg' }],
+    ['link', { rel: 'shortcut icon', href: '/fe-workspace/logo.jpg' }]
   ],
   themeConfig: {
+    logo: '/logo.jpg',
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: '介绍', link: '/' },
