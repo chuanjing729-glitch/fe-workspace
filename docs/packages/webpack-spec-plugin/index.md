@@ -233,6 +233,8 @@ export default {
 }
 ```
 
+[查看更多示例](/packages/webpack-spec-plugin/validation-report)
+
 ### Vue2 规范 - 组件命名
 
 **问题代码**：
@@ -348,7 +350,7 @@ MIT © 2025
 
 ## 🔗 相关链接
 
-- [📚 文档中心](/packages/webpack-spec-plugin/)
+- [📚 文档中心](/packages/plugins)
 - [🚀 快速开始](/packages/webpack-spec-plugin/quick-start)
 - [✅ 真实验证](/packages/webpack-spec-plugin/production-evaluation)
 - [📊 HTML 报告](/packages/webpack-spec-plugin/validation-report)

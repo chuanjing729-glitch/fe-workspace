@@ -4,16 +4,16 @@
 
 ## 功能模块
 
-- [数组操作 (Array)](./core-utils/array.html)
-- [DOM 操作 (DOM)](./core-utils/dom.html)
-- [事件管理 (Event)](./core-utils/event.html)
-- [格式化工具 (Format)](./core-utils/format.html)
-- [HTTP 请求 (HTTP)](./core-utils/http.html)
-- [数据校验 (Validation)](./core-utils/validation.html)
+- [数组操作 (Array)](/packages/core-utils/array)
+- [DOM 操作 (DOM)](/packages/core-utils/dom)
+- [事件管理 (Event)](/packages/core-utils/event)
+- [格式化工具 (Format)](/packages/core-utils/format)
+- [HTTP 请求 (HTTP)](/packages/core-utils/http)
+- [数据校验 (Validation)](/packages/core-utils/validation)
 
 ## 更新日志
 
-详细的更新日志请查看 [CHANGELOG](./core-utils/changelog.html)
+详细的更新日志请查看 [CHANGELOG](/packages/core-utils/changelog)
 
 ---
 

@@ -4,5 +4,5 @@
 
 ## 功能模块
 
-- [Mixins](./vue2-toolkit/mixins.html)
-- [更新日志](./vue2-toolkit/changelog.html)
+- [Mixins](/packages/vue2-toolkit/mixins)
+- [更新日志](/packages/vue2-toolkit/changelog)
