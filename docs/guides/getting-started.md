@@ -1,93 +1,49 @@
-# 快速开始指南
+# 前端工程效率平台
 
-本文档将指导您如何在这个工作空间中开始开发。
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## 环境准备.   
+前端工程效率平台是一套完整的前端开发工具集，包含多个高质量的工具库和插件，旨在提升开发效率和代码质量。
 
-确保您的开发环境满足以下要求：
+## 工具列表
 
-- Node.js >= 18
-- pnpm >= 8
+### Core Utils 核心工具库
+通用的前端工具函数集合，包含数组操作、DOM 操作、数据校验、格式化工具等。
 
-## 安装依赖
+### Vue2 Toolkit
+专为 Vue2 应用设计的工具库，提供了常用的指令和 Mixins 来提升开发效率。
 
-在工作空间根目录运行以下命令安装所有依赖：
+### Webpack 规范检查插件
+集成在 Webpack 构建流程中的代码质量检查工具。
+
+### Webpack 覆盖率插件
+用于在开发阶段收集代码覆盖率并生成增量自测报告的 Webpack 插件。
+
+### Webpack API 跟踪插件
+用于跟踪 API 契约变化并在开发阶段提供实时通知的 Webpack 插件。该插件作为接口契约的"看门人"，负责数据的同步、清洗、脱敏与变动分析，并与 `webpack-coverage-plugin` 协同工作，提供完整的质量保障解决方案。
+
+## 安装
 
 ```bash
+# 克隆仓库
+git clone <repository-url>
+
+# 安装依赖
 pnpm install
 ```
 
-这将安装所有包的依赖，包括根工作空间和各个子包。
-
-## 开发流程
-
-### 启动开发服务器
-
-要启动特定包的开发服务器，可以使用以下命令：
+## 使用
 
 ```bash
-pnpm --filter @fe-efficiency/fe-quantity-report dev
-```
+# 启动文档站点
+pnpm docs:dev
 
-或者在包目录下直接运行：
-
-```bash
-cd packages/fe-quantity-report
-pnpm dev
-```
-
-### 构建所有包
-
-要构建所有包，可以在根目录运行：
-
-```bash
+# 构建所有包
 pnpm build
-```
 
-### 构建特定包
-
-要构建特定包，可以使用：
-
-```bash
-pnpm --filter @fe-efficiency/fe-quantity-report build
-```
-
-## 创建新包
-
-使用我们提供的脚本创建新包：
-
-```bash
-node scripts/create-package.js my-new-package
-```
-
-这将创建一个新的包，包含推荐的目录结构和配置文件。
-
-## 文档编写
-
-所有文档都应放在 `docs/` 目录下：
-
-- 使用指南放在 `docs/guides/`
-- API文档放在 `docs/api/`
-- 技术规范放在 `docs/specs/`
-
-## 代码规范
-
-我们使用 ESLint 和 Prettier 来保证代码风格的一致性。在提交代码前，请确保通过了代码检查：
-
-```bash
-pnpm lint
-```
-
-## 测试
-
-我们使用 Vitest 进行单元测试。运行测试的命令是：
-
-```bash
+# 运行所有测试
 pnpm test
 ```
 
-或者针对特定包：
+## 许可证
 
-```bash
-pnpm --filter @fe-efficiency/fe-quantity-report test
-```
+MIT @chuanjign.li

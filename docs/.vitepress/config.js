@@ -16,12 +16,16 @@ export default defineConfig({
     nav: [
       { text: '介绍', link: '/' },
       { text: '规范', link: '/specs/' },
-      { text: '插件', link: '/packages/' },
-      { text: '工具库', link: '/packages/' },
+      { text: '插件', link: '/packages/plugins' },
+      { text: '工具库', link: '/packages/tools' },
       { text: 'AI 指南', link: '/ai-guidelines/' }
     ],
 
     sidebar,
+
+    search: {
+      provider: 'local'
+    },
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/chuanjing729-glitch/fe-workspace' }

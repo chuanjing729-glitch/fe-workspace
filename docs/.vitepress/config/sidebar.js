@@ -1,22 +1,10 @@
 export const sidebar = {
-  // 工具库总览
-  '/packages/': [
-    {
-      text: '工具库总览',
-      items: [
-        { text: '总览', link: '/packages/' }
-      ]
-    },
-    {
-      text: '前端工具库',
-      items: [
-        { text: 'Core Utils 核心工具库', link: '/packages/core-utils/' },
-        { text: 'Vue2 Toolkit Vue2工具库', link: '/packages/vue2-toolkit/' }
-      ]
-    },
+  // 插件总览
+  '/packages/plugins': [
     {
       text: 'Webpack 插件',
       items: [
+        { text: '总览', link: '/packages/plugins' },
         { text: 'Webpack 规范检查插件', link: '/packages/webpack-spec-plugin/' },
         { text: 'Webpack 覆盖率插件', link: '/packages/webpack-coverage-plugin/' },
         { text: 'Webpack API 跟踪插件', link: '/packages/webpack-api-tracker-plugin/' }
@@ -24,10 +12,22 @@ export const sidebar = {
     }
   ],
 
-  // 前端工具库
-  '/packages/core-utils/': [
+  // 工具库总览
+  '/packages/tools': [
     {
       text: '前端工具库',
+      items: [
+        { text: '总览', link: '/packages/tools' },
+        { text: 'Core Utils 核心工具库', link: '/packages/core-utils/' },
+        { text: 'Vue2 Toolkit Vue2工具库', link: '/packages/vue2-toolkit/' }
+      ]
+    }
+  ],
+
+  // Core Utils 工具库
+  '/packages/core-utils/': [
+    {
+      text: 'Core Utils',
       items: [
         { text: '总览', link: '/packages/core-utils/' },
         { text: 'DOM 操作', link: '/packages/core-utils/dom' },
@@ -46,16 +46,59 @@ export const sidebar = {
   // Vue2 工具库
   '/packages/vue2-toolkit/': [
     {
-      text: 'Vue2 工具库',
+      text: 'Vue2 Toolkit',
       items: [
         { text: '总览', link: '/packages/vue2-toolkit/' },
         { text: 'Mixins 资源管理', link: '/packages/vue2-toolkit/mixins' },
         { text: '更新日志', link: '/packages/vue2-toolkit/changelog' }
       ]
+    },
+  ],
+
+  // Webpack 插件详情页
+  '/packages/webpack-spec-plugin/': [
+    {
+      text: 'Webpack 规范检查插件',
+      items: [
+        { text: '总览', link: '/packages/webpack-spec-plugin/' },
+        { text: '快速开始', link: '/packages/webpack-spec-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/webpack-spec-plugin/features' },
+        { text: '真实项目验证', link: '/packages/webpack-spec-plugin/validation-report' },
+        { text: '生产环境评估', link: '/packages/webpack-spec-plugin/production-evaluation' },
+        { text: '更新日志', link: '/packages/webpack-spec-plugin/changelog' }
+      ]
     }
   ],
 
-  // 技术规范
+  '/packages/webpack-coverage-plugin/': [
+    {
+      text: 'Webpack 覆盖率插件',
+      items: [
+        { text: '总览', link: '/packages/webpack-coverage-plugin/' },
+        { text: '快速开始', link: '/packages/webpack-coverage-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/webpack-coverage-plugin/features' },
+        { text: '真实项目验证', link: '/packages/webpack-coverage-plugin/validation-report' },
+        { text: '生产环境评估', link: '/packages/webpack-coverage-plugin/production-evaluation' },
+        { text: '更新日志', link: '/packages/webpack-coverage-plugin/changelog' }
+      ]
+    }
+  ],
+
+  '/packages/webpack-api-tracker-plugin/': [
+    {
+      text: 'Webpack API 跟踪插件',
+      items: [
+        { text: '总览', link: '/packages/webpack-api-tracker-plugin/' },
+        { text: '快速开始', link: '/packages/webpack-api-tracker-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/webpack-api-tracker-plugin/features' },
+        { text: '真实项目验证', link: '/packages/webpack-api-tracker-plugin/validation-report' },
+        { text: '生产环境评估', link: '/packages/webpack-api-tracker-plugin/production-evaluation' },
+        { text: '更新日志', link: '/packages/webpack-api-tracker-plugin/changelog' }
+      ]
+    }
+  ],
+
+  // 技术规范 (保持不变)
   '/specs/': [
     {
       text: '编码规范',
@@ -107,7 +150,7 @@ export const sidebar = {
     }
   ],
 
-    // AI 使用规范
+  // AI 使用规范
   '/ai-guidelines/': [
     {
       text: 'AI 使用规范',
@@ -130,43 +173,6 @@ export const sidebar = {
       text: '使用指南',
       items: [
         { text: '入门指南', link: '/guides/getting-started' }
-      ]
-    }
-  ],
-
-  // Webpack 规范检查插件
-  '/packages/webpack-spec-plugin/': [
-    {
-      text: 'Webpack 规范检查插件',
-      items: [
-        { text: '总览', link: '/packages/webpack-spec-plugin/' },
-        { text: '快速开始', link: '/packages/webpack-spec-plugin/quick-start' },
-        { text: '功能特性', link: '/packages/webpack-spec-plugin/features' },
-        { text: '真实项目验证', link: '/packages/webpack-spec-plugin/validation-report' },
-        { text: '生产环境评估', link: '/packages/webpack-spec-plugin/production-evaluation' },
-        { text: '更新日志', link: '/packages/webpack-spec-plugin/changelog' }
-      ]
-    }
-  ],
-
-  // Webpack 覆盖率插件
-  '/packages/webpack-coverage-plugin/': [
-    {
-      text: 'Webpack 覆盖率插件',
-      items: [
-        { text: '总览', link: '/packages/webpack-coverage-plugin/' },
-        { text: '更新日志', link: '/packages/webpack-coverage-plugin/changelog' }
-      ]
-    }
-  ],
-
-  // Webpack API 跟踪插件
-  '/packages/webpack-api-tracker-plugin/': [
-    {
-      text: 'Webpack API 跟踪插件',
-      items: [
-        { text: '总览', link: '/packages/webpack-api-tracker-plugin/' },
-        { text: '更新日志', link: '/packages/webpack-api-tracker-plugin/changelog' }
       ]
     }
   ]
