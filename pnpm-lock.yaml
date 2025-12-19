@@ -116,6 +116,10 @@ importers:
         version: 4.15.2(webpack-cli@4.10.0)(webpack@5.104.0)
 
   packages/webpack-coverage-plugin:
+    dependencies:
+      simple-git:
+        specifier: ^3.30.0
+        version: 3.30.0
     devDependencies:
       '@babel/parser':
         specifier: ^7.28.5
@@ -3871,6 +3875,9 @@ packages:
 
   simple-git@3.15.1:
     resolution: {integrity: sha512-73MVa5984t/JP4JcQt0oZlKGr42ROYWC3BcUZfuHtT3IHKPspIvL0cZBnvPXF7LL3S/qVeVHVdYYmJ3LOTw4Rg==}
+
+  simple-git@3.30.0:
+    resolution: {integrity: sha512-q6lxyDsCmEal/MEGhP1aVyQ3oxnagGlBDOVSIB4XUVLl1iZh0Pah6ebC9V4xBap/RfgP2WlI8EKs0WS0rMEJHg==}
 
   simple-swizzle@0.2.4:
     resolution: {integrity: sha512-nAu1WFPQSMNr2Zn9PGSZK9AGn4t/y97lEm+MXTtUDwfP0ksAIX4nO+6ruD9Jwut4C49SB1Ws+fbXsm/yScWOHw==}
@@ -9170,6 +9177,14 @@ snapshots:
   signal-exit@4.1.0: {}
 
   simple-git@3.15.1:
+    dependencies:
+      '@kwsites/file-exists': 1.1.1
+      '@kwsites/promise-deferred': 1.1.1
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  simple-git@3.30.0:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
