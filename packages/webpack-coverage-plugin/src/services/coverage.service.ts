@@ -1,0 +1,136 @@
+import { ICoverageService, IGitService } from '../core/interfaces';
+import { CoverageMap, CoverageData, IncrementalCoverageResult } from '../core/types';
+
+/**
+ * 覆盖率服务实现类
+ * 负责计算增量覆盖率
+ */
+export class CoverageService implements ICoverageService {
+    private gitService: IGitService;
+
+    constructor(gitService: IGitService) {
+        this.gitService = gitService;
+    }
+
+    /**
+     * 计算增量覆盖率
+     * @param coverageMap 运行时收集到的覆盖率数据
+     */
+    async calculate(coverageMap: CoverageMap): Promise<IncrementalCoverageResult> {
+        const changedFiles = await this.gitService.getChangedFiles();
+        const result: IncrementalCoverageResult = {
+            overall: {
+                totalChangedLines: 0,
+                coveredChangedLines: 0,
+                coverageRate: 100 // 默认 100%
+            },
+            files: []
+        };
+
+        console.log(`[CoverageService] 开始计算 ${changedFiles.length} 个变更文件的覆盖率`);
+
+        for (const file of changedFiles) {
+            // 查找覆盖率数据 (处理路径匹配)
+            const coverage = this.findCoverageForFile(coverageMap, file);
+
+            if (!coverage) {
+                // 如果是源文件但没有覆盖率数据，视为全未覆盖
+                if (this.isSourceFile(file)) {
+                    const changedLines = await this.gitService.getFileDiff(file);
+                    if (changedLines.length > 0) {
+                        result.files.push({
+                            file,
+                            changedLines,
+                            uncoveredLines: [...changedLines],
+                            coverageRate: 0
+                        });
+                        result.overall.totalChangedLines += changedLines.length;
+                    }
+                }
+                continue;
+            }
+
+            // 获取变更行号
+            const changedLines = await this.gitService.getFileDiff(file);
+
+            if (changedLines.length === 0) continue;
+
+            // 计算未覆盖行
+            const uncoveredLines = this.getUncoveredLines(coverage, changedLines);
+            const coveredCount = changedLines.length - uncoveredLines.length;
+            const coverageRate = changedLines.length > 0
+                ? Math.round((coveredCount / changedLines.length) * 100)
+                : 100;
+
+            result.files.push({
+                file,
+                changedLines,
+                uncoveredLines,
+                coverageRate
+            });
+
+            result.overall.totalChangedLines += changedLines.length;
+            result.overall.coveredChangedLines += coveredCount;
+        }
+
+        // 计算整体覆盖率
+        if (result.overall.totalChangedLines > 0) {
+            result.overall.coverageRate = Math.round(
+                (result.overall.coveredChangedLines / result.overall.totalChangedLines) * 100
+            );
+        }
+
+        return result;
+    }
+
+    /**
+     * 查找文件对应的覆盖率数据
+     */
+    private findCoverageForFile(coverageMap: CoverageMap, gitFile: string): CoverageData | undefined {
+        if (coverageMap[gitFile]) return coverageMap[gitFile];
+
+        // 模糊匹配: 检查 coverageMap 中的路径是否以此 gitFile 结尾
+        // 注意: Windows 下路径分隔符可能不同，需归一化
+        const normalizedGitFile = gitFile.replace(/\\/g, '/');
+
+        return Object.values(coverageMap).find(cov => {
+            const normalizedCovPath = cov.path.replace(/\\/g, '/');
+            return normalizedCovPath.endsWith(normalizedGitFile);
+        });
+    }
+
+    /**
+     * 识别变更行中哪些未覆盖
+     */
+    private getUncoveredLines(coverage: CoverageData, changedLines: number[]): number[] {
+        const uncoveredLines: number[] = [];
+
+        for (const line of changedLines) {
+            let isLineCovered = false;
+            let hasStatement = false;
+
+            // Istanbul statementMap: ID -> Range
+            // Istanbul s: ID -> Count
+            for (const [id, range] of Object.entries(coverage.statementMap)) {
+                if (line >= range.start.line && line <= range.end.line) {
+                    hasStatement = true;
+                    if (coverage.s[id] > 0) {
+                        isLineCovered = true;
+                        break;
+                    }
+                }
+            }
+
+            // 如果该行有可执行语句但执行次数为0，则视为未覆盖
+            if (hasStatement && !isLineCovered) {
+                uncoveredLines.push(line);
+            }
+        }
+
+        return uncoveredLines;
+    }
+
+    private isSourceFile(file: string): boolean {
+        return /\.(js|ts|jsx|tsx|vue)$/.test(file) && !file.includes('node_modules');
+    }
+}

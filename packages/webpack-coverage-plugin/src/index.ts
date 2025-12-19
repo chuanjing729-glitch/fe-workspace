@@ -1,34 +1,30 @@
 import { Compiler } from 'webpack';
-import { Application, Request, Response } from 'express';
-import ReportGenerator from './reporter';
-import ImpactAnalyzer from './impact-analyzer';
+import * as path from 'path';
+import { WebpackCoveragePluginOptions } from './core/types';
+import { GitService } from './services/git.service';
+import { CoverageService } from './services/coverage.service';
+import { AnalysisService } from './services/analysis.service';
+import { ApiService } from './services/api.service';
+import { HttpServer } from './infra/http.server';
+import { FileStorage } from './infra/storage';
+import { ReportService } from './services/report.service';
 
-interface WebpackCoveragePluginOptions {
-  // 是否启用插件
-  enabled?: boolean;
-  // 插桩的文件模式
-  include?: RegExp | string[];
-  // 排除的文件模式
-  exclude?: RegExp | string[];
-  // 输出目录
-  outputDir?: string;
-  // 是否启用影响范围分析
-  enableImpactAnalysis?: boolean;
-  // 是否启用运行时小气泡
-  enableOverlay?: boolean;
-  // 质量门禁配置
-  qualityGate?: {
-    // 行覆盖率阈值 (默认: 80)
-    lineCoverageThreshold?: number;
-    // 分支覆盖率阈值 (默认: 80)
-    branchCoverageThreshold?: number;
-    // 受影响接口数阈值 (默认: 10)
-    affectedInterfacesThreshold?: number;
-  };
-}
-
+/**
+ * WebpackCoveragePlugin (V2.0 Core Refactor)
+ * 采用 Clean Architecture 架构
+ * 作为 Composition Root 负责组装各个服务
+ */
 export class WebpackCoveragePlugin {
   private options: WebpackCoveragePluginOptions;
+
+  // Services
+  private gitService: GitService;
+  private coverageService: CoverageService;
+  private analysisService: AnalysisService;
+  private apiService: ApiService;
+  private httpServer: HttpServer;
+  private storage: FileStorage;
+  private incrementalResult: any; // Added to satisfy the new generateReport method's usage
 
   constructor(options: WebpackCoveragePluginOptions = {}) {
     this.options = {
@@ -36,321 +32,142 @@ export class WebpackCoveragePlugin {
       include: options.include || [],
       exclude: options.exclude,
       outputDir: options.outputDir || '.coverage',
-      enableImpactAnalysis: options.enableImpactAnalysis !== false, // 默认启用
-      enableOverlay: options.enableOverlay !== false, // 默认启用
+      enableImpactAnalysis: options.enableImpactAnalysis !== false,
+      enableOverlay: options.enableOverlay !== false,
       qualityGate: {
         lineCoverageThreshold: 80,
-        branchCoverageThreshold: 80,
-        affectedInterfacesThreshold: 10,
         ...options.qualityGate
       },
       ...options
     };
-    
-    // 如果没有提供 exclude 选项，则设置默认值
+
+    // 1. 初始化基础设施
+    this.storage = new FileStorage(path.resolve(process.cwd(), '.cache'), 'coverage-plugin');
+
+    // 2. 初始化核心服务 (Dependency Injection)
+    this.gitService = new GitService(process.cwd());
+    this.coverageService = new CoverageService(this.gitService);
+    this.analysisService = new AnalysisService(process.cwd(), this.storage);
+    // TODO: 后续可从 options 获取真实 token
+    this.apiService = new ApiService('', '', '');
+
+    // 3. 初始化 HTTP 服务
+    this.httpServer = new HttpServer(this.coverageService);
+
+    // 默认排除
     if (!this.options.exclude) {
       this.options.exclude = [/node_modules/, /\.test\./, /\.spec\./] as unknown as RegExp | string[];
     }
   }
 
   apply(compiler: Compiler) {
-    // 检查是否启用插件
-    if (!this.options.enabled) {
-      return;
-    }
+    if (!this.options.enabled) return;
 
-    // 在编译前阶段注册钩子
+    // Hook: 编译开始
     compiler.hooks.compile.tap('WebpackCoveragePlugin', () => {
-      console.log('[WebpackCoveragePlugin] 开始编译，启用覆盖率插桩');
+      console.log('[WebpackCoveragePlugin] 开始编译...');
+      if (this.options.enableImpactAnalysis) {
+        // 异步初始化依赖图谱 (不阻塞主线程)
+        this.analysisService.initDependencyGraph().catch(console.error);
+      }
     });
 
-    // 在编译完成阶段注册钩子
-    compiler.hooks.done.tap('WebpackCoveragePlugin', (stats) => {
-      console.log('[WebpackCoveragePlugin] 编译完成');
-      
-      // 生成自测报告
-      this.generateSelfTestReport();
-    });
-
-    // 注入 babel-plugin-istanbul 到编译流程
+    // Hook: 模块工厂 (插桩逻辑)
     compiler.hooks.normalModuleFactory.tap('WebpackCoveragePlugin', (nmf) => {
-      nmf.hooks.beforeResolve.tap('WebpackCoveragePlugin', (resolveData: any) => {
-        // 在这里可以修改解析逻辑
-        // 注意：不要返回 resolveData 对象，而是修改它
-        // 返回 undefined 表示继续处理
+      nmf.hooks.createModule.tap('WebpackCoveragePlugin', (createData: any) => {
+        if (!createData.resource) return;
+        if (this.shouldInstrument(createData.resource)) {
+          this.injectBabelLoader(createData);
+        }
       });
     });
 
-    // 集成到 devServer 中
+    // Hook: DevServer 集成
     if (compiler.options.devServer) {
       const originalBefore = compiler.options.devServer.before;
-      
-      compiler.options.devServer.before = (app: Application, server: any, compilerInstance: any) => {
-        // 调用原始的 before 函数
-        if (originalBefore) {
-          originalBefore(app, server, compilerInstance);
-        }
-        
-        // 添加覆盖率数据上传接口
-        app.post('/__coverage_upload', (req: Request, res: Response) => {
-          console.log('[WebpackCoveragePlugin] 接收到覆盖率数据');
-          // 这里处理覆盖率数据
-          res.json({ success: true });
-        });
-        
-        // 如果启用了运行时小气泡，注入相关资源
-        if (this.options.enableOverlay) {
-          // 注入小气泡CSS和JS
-          app.get('/__coverage_overlay.css', (req: Request, res: Response) => {
-            res.setHeader('Content-Type', 'text/css');
-            res.send(`
-              /* 运行时小气泡样式 */
-              #webpack-coverage-overlay {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-                background: #42b983;
-                border-radius: 50%;
-                cursor: pointer;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                z-index: 9999;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-weight: bold;
-                transition: transform 0.2s;
-              }
-              
-              #webpack-coverage-overlay:hover {
-                transform: scale(1.1);
-              }
-              
-              #webpack-coverage-overlay-panel {
-                position: fixed;
-                bottom: 70px;
-                right: 20px;
-                width: 300px;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                z-index: 9999;
-                padding: 15px;
-                display: none;
-              }
-              
-              #webpack-coverage-overlay-panel.visible {
-                display: block;
-              }
-              
-              .coverage-progress {
-                height: 8px;
-                background: #eee;
-                border-radius: 4px;
-                overflow: hidden;
-                margin: 10px 0;
-              }
-              
-              .coverage-progress-bar {
-                height: 100%;
-                background: #42b983;
-                transition: width 0.3s;
-              }
-            `);
-          });
-          
-          app.get('/__coverage_overlay.js', (req: Request, res: Response) => {
-            res.setHeader('Content-Type', 'application/javascript');
-            res.send(`
-              // 运行时小气泡脚本
-              (function() {
-                // 创建小气泡元素
-                const overlay = document.createElement('div');
-                overlay.id = 'webpack-coverage-overlay';
-                overlay.textContent = '95%';
-                
-                // 创建详情面板
-                const panel = document.createElement('div');
-                panel.id = 'webpack-coverage-overlay-panel';
-                panel.innerHTML = '
-                  <h3>覆盖率信息</h3>
-                  <p>当前页面覆盖率: <strong>95%</strong></p>
-                  <div class="coverage-progress">
-                    <div class="coverage-progress-bar" style="width: 95%"></div>
-                  </div>
-                  <p>未覆盖代码块: 2</p>
-                  <button onclick="window.location.reload()">刷新数据</button>
-                ';
-                
-                // 添加到页面
-                document.body.appendChild(overlay);
-                document.body.appendChild(panel);
-                
-                // 点击小气泡切换面板显示
-                overlay.addEventListener('click', function(e) {
-                  e.stopPropagation();
-                  panel.classList.toggle('visible');
-                });
-                
-                // 点击页面其他地方隐藏面板
-                document.addEventListener('click', function() {
-                  panel.classList.remove('visible');
-                });
-                
-                // 防止点击面板时隐藏面板
-                panel.addEventListener('click', function(e) {
-                  e.stopPropagation();
-                });
-              })();
-            `);
-          });
-        }
+      compiler.options.devServer.before = (app: any, server: any, compilerInstance: any) => {
+        if (originalBefore) originalBefore(app, server, compilerInstance);
+        this.httpServer.attach(app);
       };
+    } else {
+      // Webpack 5+ DevServer configuration might use `onBeforeSetupMiddleware` or `setupMiddlewares`
+      // 兼容新版 Webpack Dev Server
+      const devServer = compiler.options.devServer || {};
+      const originalOnBeforeSetupMiddleware = (devServer as any).onBeforeSetupMiddleware;
+      (devServer as any).onBeforeSetupMiddleware = (devServerObj: any) => {
+        if (originalOnBeforeSetupMiddleware) originalOnBeforeSetupMiddleware(devServerObj);
+        if (devServerObj.app) this.httpServer.attach(devServerObj.app);
+      };
+    }
+
+    // Hook: 编译完成
+    compiler.hooks.done.tapPromise('WebpackCoveragePlugin', async (stats) => {
+      console.log('[WebpackCoveragePlugin] 编译完成，正在生成自测报告...');
+      await this.generateReport();
+    });
+  }
+
+  /**
+   * 生成最终报告
+   */
+  private async generateReport() {
+    try {
+      // 1. 获取 Git 信息
+      // const gitInfo = await this.gitService.getGitInfo();
+      const changedFiles = await this.gitService.getChangedFiles();
+
+      // 2. 分析影响面
+      const impact = await this.analysisService.analyzeImpact(changedFiles);
+      console.log(`[Report] 受影响页面: ${impact.affectedPages.length} 个`);
+
+      // 3. 生成报告
+      const reportService = new ReportService(this.options.outputDir || '.coverage', this.options);
+      
+      await reportService.generate({
+        gitService: this.gitService,
+        incrementalResult: this.incrementalResult, // 注意：这里如果在 done 钩子前没有触发 upload，可能是 null
+        impactResult: impact
+      });
+
+    } catch (error) {
+      console.error('[WebpackCoveragePlugin] 生成报告失败:', error);
     }
   }
 
-  private generateSelfTestReport(): void {
-    // 创建报告生成器
-    const reportGenerator = new ReportGenerator(this.options.outputDir);
-    
-    // 创建影响范围分析器
-    const impactAnalyzer = new ImpactAnalyzer(process.cwd());
-    
-    // 分析项目依赖关系
-    impactAnalyzer.analyzeDependencies();
-    
-    // 模拟变更的文件（在实际应用中，这将来自Git diff）
-    const changedFiles = [
-      'src/components/Button.jsx',
-      'src/pages/HomePage.jsx',
-      'src/utils/helper.js'
-    ];
-    
-    // 分析影响范围
-    const impactAnalysis = impactAnalyzer.analyzeImpact(changedFiles);
-    
-    // 获取Git信息
-    const gitInfo = this.getGitInfo();
-    
-    // 获取硬件信息
-    const hardwareInfo = this.getHardwareInfo();
-    
-    // 模拟测试结果
-    const testReport = {
-      timestamp: new Date(),
-      environment: {
-        nodeVersion: process.version,
-        os: process.platform,
-        gitName: gitInfo.name,
-        gitHash: gitInfo.hash,
-        gitBranch: gitInfo.branch,
-        hardwareInfo: hardwareInfo
-      },
-      // 插件测试摘要
-      pluginTestSummary: {
-        total: 5,
-        passed: 5,
-        failed: 0,
-        passRate: '100.00'
-      },
-      // 代码覆盖率摘要
-      coverageSummary: {
-        lineCoverage: 85,
-        branchCoverage: 70,
-        lineCoverageStatus: 'pass' as const,
-        branchCoverageStatus: 'fail' as const
-      },
-      // 质量门禁配置
-      qualityGateConfig: {
-        lineCoverageThreshold: this.options.qualityGate?.lineCoverageThreshold || 80,
-        branchCoverageThreshold: this.options.qualityGate?.branchCoverageThreshold || 80,
-        affectedInterfacesThreshold: this.options.qualityGate?.affectedInterfacesThreshold || 10
-      },
-      pluginTestResults: [
-        {
-          testName: '插件实例化测试',
-          status: 'pass' as const,
-          duration: 2
-        },
-        {
-          testName: '配置选项测试',
-          status: 'pass' as const,
-          duration: 1
-        },
-        {
-          testName: 'Webpack 钩子注册测试',
-          status: 'pass' as const,
-          duration: 3
-        },
-        {
-          testName: 'DevServer 集成测试',
-          status: 'pass' as const,
-          duration: 5
-        },
-        {
-          testName: '覆盖率数据收集测试',
-          status: 'pass' as const,
-          duration: 4
-        }
-      ],
-      impactAnalysis,
-      codeInfo: {
-        commitCodeLines: 150,
-        codeComplexity: 2.5,
-        importantCodeLevel: '中',
-        complexityExplanation: '代码复杂度基于圈复杂度算法计算，数值越高表示代码越复杂，维护成本越高。',
-        importanceExplanation: '重要代码重要程度根据代码位置、调用频率、业务关键性等因素综合评估。'
-      },
-      businessInfo: [
-        {
-          pageName: 'HomePage',
-          componentName: 'Button',
-          codeLines: 45,
-          selfTestTotal: 10,
-          selfTestPassed: 9,
-          selfTestFailed: 1,
-          severityLevel: 'medium' as const,
-          apiStatus: 'unknown' as const
-        },
-        {
-          pageName: 'UserProfile',
-          componentName: 'Form',
-          codeLines: 78,
-          selfTestTotal: 15,
-          selfTestPassed: 15,
-          selfTestFailed: 0,
-          severityLevel: 'low' as const,
-          apiStatus: 'unknown' as const
-        }
-      ]
-    };
-    
-    // 生成报告
-    reportGenerator.generateReports(testReport);
-  }
-  
   /**
-   * 获取Git信息
+   * 注入 Babel Socket
    */
-  private getGitInfo(): { name: string; hash: string; branch: string } {
-    // 在实际实现中，这里会调用Git命令获取真实信息
-    // 暂时返回模拟数据
-    return {
-      name: '张三',
-      hash: 'a1b2c3d4e5f67890',
-      branch: 'feature/new-feature'
-    };
+  private injectBabelLoader(createData: any) {
+    const loaders = createData.loaders || [];
+    const hasBabelLoader = loaders.some((l: any) => l.loader && l.loader.includes('babel-loader'));
+
+    // 简易插桩逻辑
+    if (!hasBabelLoader || true) { // 强制注入
+      loaders.unshift({
+        loader: require.resolve('babel-loader'),
+        options: {
+          plugins: [[require.resolve('babel-plugin-istanbul'), {
+            exclude: this.options.exclude
+          }]]
+        }
+      });
+      createData.loaders = loaders;
+    }
   }
-  
-  /**
-   * 获取硬件信息
-   */
-  private getHardwareInfo(): string {
-    // 在实际实现中，这里会获取真实的硬件信息
-    // 暂时返回模拟数据
-    return 'macOS 14.7.7, 8核CPU, 16GB内存';
+
+  private shouldInstrument(file: string): boolean {
+    if (file.includes('node_modules')) return false;
+
+    // Exclude check
+    if (this.options.exclude) {
+      const excludes = Array.isArray(this.options.exclude) ? this.options.exclude : [this.options.exclude];
+      for (const p of excludes) {
+        if (p instanceof RegExp && p.test(file)) return false;
+        if (typeof p === 'string' && file.includes(p)) return false;
+      }
+    }
+
+    return /\.(js|ts|jsx|tsx|vue)$/.test(file);
   }
 }
 

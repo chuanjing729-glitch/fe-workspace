@@ -1,5 +1,5 @@
 const path = require('path');
-const WebpackCoveragePlugin = require('../../dist/index').default;
+const { WebpackCoveragePlugin } = require('../../dist/cjs/index');
 
 module.exports = {
   entry: './index.js',

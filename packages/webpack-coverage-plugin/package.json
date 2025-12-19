@@ -10,7 +10,7 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "build": "tsc && tsc -p tsconfig.cjs.json && mkdir -p dist/infra/report/templates && cp -r src/infra/report/templates/* dist/infra/report/templates/ && mkdir -p dist/cjs/infra/report/templates && cp -r src/infra/report/templates/* dist/cjs/infra/report/templates/",
     "test": "jest",
     "dev": "tsc --watch"
   },
@@ -40,5 +40,8 @@
   },
   "peerDependencies": {
     "webpack": "^5.0.0"
+  },
+  "dependencies": {
+    "simple-git": "^3.30.0"
   }
 }
