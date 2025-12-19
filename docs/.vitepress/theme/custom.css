@@ -1,140 +1,150 @@
-/* --- Efficiency 3.0：工业设计、极简科技、极致克制 --- */
+/* --- Efficiency 4.0：极简奢华、极致呼吸感、现代 SaaS 风格 --- */
 
 :root {
-  /* 调色盘：钛金灰 + 极客红 */
-  --efficiency-primary: #dc2626;
-  /* 核心极客红 */
-  --efficiency-bg-soft: #f8fafc;
-  --efficiency-border: #e2e8f0;
+  /* 调色盘：深沉的冷色底蕴 + 精致的品牌点缀 */
+  --vp-c-brand-1: #ff3e8d;
+  --vp-c-brand-2: #ff8a00;
 
-  --vp-c-brand-1: var(--efficiency-primary);
-  --vp-c-brand-2: #b91c1c;
-  --vp-c-brand-3: #991b1b;
+  /* 页面底色优化 */
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f9f9fb;
+  --vp-c-bg-mute: #f1f1f4;
 
-  --vp-c-brand-soft: rgba(220, 38, 38, 0.05);
+  /* 文字：更高级的深空灰 */
+  --vp-c-text-1: #1c1c1e;
+  --vp-c-text-2: #636366;
 
-  /* 文字排版：强调几何感 */
-  --vp-font-family-base: "Inter Variable", -apple-system, system-ui, sans-serif;
+  /* 排版：极致现代 */
+  --vp-font-family-base: "Inter", "Readex Pro", system-ui, -apple-system, sans-serif;
 }
 
-/* 1. 导航栏：极薄视觉 */
+.dark {
+  --vp-c-bg: #0a0a0c;
+  --vp-c-bg-soft: #141417;
+  --vp-c-text-1: #f5f5f7;
+  --vp-c-text-2: #8e8e93;
+}
+
+/* 1. 首页网格背景：增加空间维度感 */
+.home {
+  background-image:
+    radial-gradient(circle at 50% -20%, rgba(255, 62, 141, 0.05) 0%, transparent 50%),
+    linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.dark .home {
+  background-image:
+    radial-gradient(circle at 50% -20%, rgba(255, 62, 141, 0.1) 0%, transparent 60%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* 2. 导航栏：极简通透 */
 .VPNavBar {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border-bottom: 1px solid var(--efficiency-border) !important;
+  background-color: rgba(var(--vp-c-bg-rgb), 0.7) !important;
+  backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-.dark .VPNavBar {
-  background-color: rgba(15, 17, 26, 0.8) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-/* 2. Hero 区域：空间感重塑 */
+/* 3. Hero 区域：克制的力量 */
 .VPHero {
-  padding: 140px 24px !important;
-  text-align: center;
+  padding: 160px 32px 100px !important;
 }
 
 .VPHero .name {
   font-weight: 900;
-  font-size: 64px !important;
-  line-height: 1;
+  font-size: 72px !important;
   letter-spacing: -3px !important;
-  color: #0f172a !important;
-  margin-bottom: 24px;
+  color: var(--vp-c-text-1) !important;
   background: none !important;
   -webkit-text-fill-color: initial !important;
 }
 
-.dark .VPHero .name {
-  color: #f1f5f9 !important;
+.VPHero .text {
+  font-size: 26px !important;
+  font-weight: 500;
+  color: var(--vp-c-text-2) !important;
+  margin-top: 12px;
 }
 
 .VPHero .tagline {
-  font-size: 20px !important;
-  color: #64748b !important;
-  max-width: 800px;
-  margin: 0 auto;
+  margin-top: 24px;
+  font-weight: 400;
+  opacity: 0.8;
 }
 
-/* 3. 图片容器：精致悬浮感 */
+/* 4. 图片：科技感微发光 */
 .VPHero .image-src {
-  border-radius: 32px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 20px 50px rgba(0, 0, 0, 0.1);
-  filter: none !important;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 48px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
+  transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .VPHero .image-container:hover .image-src {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.1),
-    0 30px 60px rgba(0, 0, 0, 0.12);
+  transform: scale(1.05) rotate(1deg);
+  box-shadow: 0 60px 120px rgba(255, 62, 141, 0.15);
 }
 
-/* 4. 卡片设计：现代几何主义 */
+/* 5. 功能卡片：精致瓷片感 */
 .VPFeature {
-  background-color: #ffffff !important;
-  border: 1px solid var(--efficiency-border) !important;
-  border-radius: 12px;
-  padding: 32px !important;
-  transition: all 0.3s ease;
+  background-color: var(--vp-c-bg-soft) !important;
+  border: 1px solid rgba(0, 0, 0, 0.03) !important;
+  border-radius: 24px;
+  padding: 40px !important;
+  transition: all 0.4s ease;
 }
 
 .dark .VPFeature {
-  background-color: #1e293b !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.03) !important;
 }
 
 .VPFeature:hover {
-  border-color: var(--efficiency-primary) !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  transform: translateY(-4px);
+  background-color: #ffffff !important;
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+  border-color: var(--vp-c-brand-1) !important;
 }
 
-/* 5. 按钮：硬朗风格 */
+.dark .VPFeature:hover {
+  background-color: #1a1a1c !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* 6. 按钮：流畅的苹果风格 */
 .VPButton.brand {
-  background-color: #0f172a !important;
-  border: none !important;
-  border-radius: 8px !important;
+  border-radius: 14px !important;
+  background: var(--vp-c-text-1) !important;
+  color: var(--vp-c-bg) !important;
   font-weight: 600;
+  letter-spacing: 0.5px;
   padding: 0 32px;
-  height: 48px;
-  line-height: 48px;
-  color: white !important;
-}
-
-.dark .VPButton.brand {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
+  transition: all 0.3s ease;
 }
 
 .VPButton.brand:hover {
-  background-color: var(--efficiency-primary) !important;
+  transform: scale(1.05);
+  background: var(--vp-c-brand-1) !important;
   color: white !important;
 }
 
-/* 6. 文档排版优化 */
-.vp-doc a {
-  color: var(--efficiency-primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: all 0.2s;
-}
-
-.vp-doc a:hover {
-  color: #b91c1c;
-}
-
+/* 7. 文档细节微调 */
 .vp-doc h1,
-.vp-doc h2,
-.vp-doc h3 {
-  color: #0f172a;
+.vp-doc h2 {
+  font-weight: 800;
+  letter-spacing: -1px;
 }
 
-.dark .vp-doc h1,
-.dark .vp-doc h2,
-.dark .vp-doc h3 {
-  color: #f1f5f9;
+.vp-doc a {
+  color: var(--vp-c-brand-1);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.vp-doc blockquote {
+  border-left-width: 3px;
+  border-left-color: var(--vp-c-brand-1);
+  font-style: italic;
+  font-weight: 500;
 }
