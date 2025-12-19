@@ -49,37 +49,37 @@ classDiagram
         class HttpServer
     }
 
-    WebpackCoveragePlugin ..> UnpluginFactory : Wraps
-    ViteCoveragePlugin ..> UnpluginFactory : Uses
-    UnpluginFactory --> CoveragePluginCore : Delegates
+    WebpackCoveragePlugin ..> UnpluginFactory : Wraps (封装)
+    ViteCoveragePlugin ..> UnpluginFactory : Uses (使用)
+    UnpluginFactory --> CoveragePluginCore : Delegates (委托核心逻辑)
     
-    CoveragePluginCore --> GitService : Injects
-    CoveragePluginCore --> CoverageService : Injects
-    CoveragePluginCore --> AnalysisService : Injects
-    CoveragePluginCore --> ReportService : Creates
-    CoveragePluginCore --> HttpServer : Manages
+    CoveragePluginCore --> GitService : Injects (Git操作)
+    CoveragePluginCore --> CoverageService : Injects (覆盖率计算)
+    CoveragePluginCore --> AnalysisService : Injects (依赖分析)
+    CoveragePluginCore --> ReportService : Creates (报告生成)
+    CoveragePluginCore --> HttpServer : Manages (HTTP服务)
 ```
 
 ## 2. 目录结构说明
 
 ```
 src/
-├── core/                 # 核心定义
-│   ├── plugin-core.ts    # 核心业务逻辑 (平台无关)
-│   ├── interfaces.ts     # 服务接口
-│   └── types.ts          # 类型定义
-├── services/             # 业务逻辑服务
+├── core/                 # 核心定义 (Core Definitions)
+│   ├── plugin-core.ts    # 核心业务逻辑 (Platform-agnostic Logic)
+│   ├── interfaces.ts     # 服务接口 (Interfaces)
+│   └── types.ts          # 类型定义 (Types)
+├── services/             # 业务逻辑服务 (Business Services)
 │   ├── git.service.ts
 │   ├── coverage.service.ts
 │   ├── analysis.service.ts
 │   └── report.service.ts
-├── infra/                # 基础设施
-│   ├── http.server.ts    # 通用 HTTP/中间件服务
-│   ├── storage.ts        # 文件缓存
-│   └── report/           # 报告生成器
-├── unplugin.ts           # Unplugin 工厂 (通用钩子实现)
-├── vite.ts               # Vite 导出适配
-└── index.ts              # Webpack 导出适配 (兼容层)
+├── infra/                # 基础设施 (Infrastructure)
+│   ├── http.server.ts    # 通用 HTTP/中间件服务 (Universal HTTP Server)
+│   ├── storage.ts        # 文件缓存 (File Storage)
+│   └── report/           # 报告生成器 (Report Generator)
+├── unplugin.ts           # Unplugin 工厂 (Universal Hooks Factory)
+├── vite.ts               # Vite 导出适配 (Vite Adapter)
+└── index.ts              # Webpack 导出适配 (Webpack Adapter)
 ```
 
 ## 3. 核心流程 (Core Flows)
@@ -88,19 +88,19 @@ src/
 
 ```mermaid
 sequenceDiagram
-    participant Bundler as Webpack/Vite
-    participant Adapter as Unplugin Adapter
-    participant Core as CoveragePluginCore
-    participant Babel as Babel(Istanbul)
+    participant Bundler as Webpack/Vite (构建工具)
+    participant Adapter as Unplugin Adapter (适配层)
+    participant Core as CoveragePluginCore (核心层)
+    participant Babel as Babel(Istanbul) (插桩工具)
 
     Bundler->>Adapter: transform(code, id)
     Adapter->>Core: transform(code, id)
-    Core->>Core: shouldInstrument(id)?
-    alt Yes
+    Core->>Core: shouldInstrument(id)? (是否需要插桩)
+    alt Yes (需要)
         Core->>Babel: transformSync(code, plugins=[istanbul])
-        Babel-->>Core: Instrumented Code
+        Babel-->>Core: Instrumented Code (插桩后代码)
         Core-->>Adapter: code
-    else No
+    else No (不需要)
         Core-->>Adapter: null (skip)
     end
     Adapter-->>Bundler: result
@@ -110,22 +110,22 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant Browser as Browser UI/Overlay
-    participant Server as HttpServer (Connect/Express)
-    participant Core as CoverageService
-    participant Git as GitService
+    participant Browser as Browser UI/Overlay (前端)
+    participant Server as HttpServer (服务层)
+    participant Core as CoverageService (核心计算)
+    participant Git as GitService (Git服务)
     
     Browser->>Server: POST /__coverage_upload
     Server->>Core: calculate(runtimeMap)
     
     rect rgb(240, 248, 255)
-    note right of Core: Calculation Logic
-    Core->>Git: getChangedFiles() -> getFileDiff()
-    Git-->>Core: Diff Lines
-    Core->>Core: Intersect(Diff, Runtime)
+    note right of Core: Calculation Logic (计算逻辑)
+    Core->>Git: getChangedFiles() -> getFileDiff() (获取变更)
+    Git-->>Core: Diff Lines (差异行)
+    Core->>Core: Intersect(Diff, Runtime) (计算交集)
     end
     
-    Core-->>Server: IncrementalResult
+    Core-->>Server: IncrementalResult (增量结果)
     Server-->>Browser: 200 OK
 ```
 

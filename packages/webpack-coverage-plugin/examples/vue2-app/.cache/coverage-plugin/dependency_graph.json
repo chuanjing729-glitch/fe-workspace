@@ -1,0 +1,30 @@
+{
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/App.vue": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/App.vue",
+    "imports": [],
+    "exports": [
+      "ExportDefaultDeclaration"
+    ],
+    "dependencies": [],
+    "hash": "bb159cc1eb6386dc960b950f0117d804b3ee55908cc19f032dc5be11bfd8ae2a"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/main.js": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/main.js",
+    "imports": [
+      "vue",
+      "./App.vue"
+    ],
+    "exports": [],
+    "dependencies": [
+      "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/src/App.vue"
+    ],
+    "hash": "71901c2081085d1064b128e1c198b0ff08243859129ec46d48680dc2f16a23a4"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/webpack.config.js": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/webpack-coverage-plugin/examples/vue2-app/webpack.config.js",
+    "imports": [],
+    "exports": [],
+    "dependencies": [],
+    "hash": "46a02da1e9145e471a405125bdb057c6b8fa4cd8bf125bc63240002641f7c26e"
+  }
+}

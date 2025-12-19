@@ -3,11 +3,11 @@
  * 负责生成运行时小气泡的 HTML/CSS/JS 代码
  */
 export class UiGenerator {
-    /**
-     * 生成小气泡 CSS
-     */
-    static generateOverlayCss(): string {
-        return `
+  /**
+   * 生成小气泡 CSS
+   */
+  static generateOverlayCss(): string {
+    return `
       /* 运行时小气泡样式 */
       #webpack-coverage-overlay {
         position: fixed;
@@ -136,13 +136,13 @@ export class UiGenerator {
         color: #333;
       }
     `;
-    }
+  }
 
-    /**
-     * 生成小气泡 JS 逻辑
-     */
-    static generateOverlayJs(): string {
-        return `
+  /**
+   * 生成小气泡 JS 逻辑
+   */
+  static generateOverlayJs(): string {
+    return `
       (function() {
         if (document.getElementById('webpack-coverage-overlay')) return;
 
@@ -159,9 +159,6 @@ export class UiGenerator {
         
         const panel = el('div', '', '');
         panel.id = 'webpack-coverage-overlay-panel';
-        
-        document.body.appendChild(overlay);
-        document.body.appendChild(panel);
         
         // 事件绑定
         overlay.addEventListener('click', (e) => {
@@ -232,10 +229,27 @@ export class UiGenerator {
             '</div>' +
             '<div class="uncovered-list">' + listHtml + '</div>';
         }
+        
+        function init() {
+            if (document.body) {
+                document.body.appendChild(overlay);
+                document.body.appendChild(panel);
+            } else {
+                document.addEventListener('DOMContentLoaded', () => {
+                   document.body.appendChild(overlay);
+                   document.body.appendChild(panel); 
+                });
+            }
+            fetchData();
+            setInterval(fetchData, 3000);
+        }
 
-        fetchData();
-        setInterval(fetchData, 3000);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
       })();
     `;
-    }
+  }
 }

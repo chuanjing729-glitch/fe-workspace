@@ -20,28 +20,67 @@ function applyWebpackLike(compiler: Compiler, core: CoveragePluginCore) {
         const devServer = compiler.options.devServer as any;
 
         // Webpack 4: before
-        const originalBefore = devServer.before;
-        if (originalBefore) {
+        if (devServer.before) {
+            const originalBefore = devServer.before;
             devServer.before = (app: any, server: any, compiler: any) => {
                 originalBefore(app, server, compiler);
                 core.httpServer.install(app);
             };
-        } else if (devServer.onBeforeSetupMiddleware) {
-            // Webpack 5 (Deprecated)
+        }
+        // Webpack 5 (Deprecated): onBeforeSetupMiddleware
+        else if (devServer.onBeforeSetupMiddleware) {
             const originalMiddleware = devServer.onBeforeSetupMiddleware;
             devServer.onBeforeSetupMiddleware = (devServerObj: any) => {
                 if (originalMiddleware) originalMiddleware(devServerObj);
                 if (devServerObj.app) core.httpServer.install(devServerObj.app);
             };
-        } else if (devServer.setupMiddlewares) {
-            // Webpack 5 Latest / Rspack
+        }
+        // Webpack 5 Latest / Rspack: setupMiddlewares
+        // 优先使用 setupMiddlewares，即使或者用户没有配置，也要赋值
+        else {
             const originalSetup = devServer.setupMiddlewares;
             devServer.setupMiddlewares = (middlewares: any[], devServerObj: any) => {
                 if (originalSetup) middlewares = originalSetup(middlewares, devServerObj);
-                if (devServerObj.app) core.httpServer.install(devServerObj.app);
+
+                // 确保安装了中间件
+                if (devServerObj.app) {
+                    core.httpServer.install(devServerObj.app);
+                }
+
                 return middlewares;
             };
         }
+    }
+
+    // HTML 注入 (Overlay)
+    if (core.options.enableOverlay) {
+        compiler.hooks.compilation.tap('UnpluginCoverage', (compilation) => {
+            let HtmlWebpackPlugin;
+            try {
+                // 尝试获取 HtmlWebpackPlugin
+                HtmlWebpackPlugin = require('html-webpack-plugin');
+            } catch (e) {
+                // 忽略错误
+            }
+
+            if (HtmlWebpackPlugin && HtmlWebpackPlugin.getHooks) {
+                HtmlWebpackPlugin.getHooks(compilation).alterAssetTags.tapAsync('UnpluginCoverage', (data: any, cb: any) => {
+                    data.assetTags.scripts.push({
+                        tagName: 'script',
+                        voidTag: false,
+                        meta: { plugin: 'unplugin-coverage' },
+                        attributes: { src: '/__coverage_overlay.js' }
+                    });
+                    data.assetTags.styles.push({
+                        tagName: 'link',
+                        voidTag: true,
+                        meta: { plugin: 'unplugin-coverage' },
+                        attributes: { rel: 'stylesheet', href: '/__coverage_overlay.css' }
+                    });
+                    cb(null, data);
+                });
+            }
+        });
     }
 }
 
