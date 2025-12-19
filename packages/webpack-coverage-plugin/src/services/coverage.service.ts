@@ -1,5 +1,5 @@
 import { ICoverageService, IGitService } from '../core/interfaces';
-import { CoverageMap, CoverageData, IncrementalCoverageResult } from '../core/types';
+import { WebpackCoveragePluginOptions, CoverageMap, CoverageData, IncrementalCoverageResult } from '../core/types';
 
 /**
  * 覆盖率服务实现类
@@ -7,11 +7,13 @@ import { CoverageMap, CoverageData, IncrementalCoverageResult } from '../core/ty
  */
 export class CoverageService implements ICoverageService {
     private gitService: IGitService;
+    private options: WebpackCoveragePluginOptions | undefined;
     private mergedMap: CoverageMap = {}; // v3.0: 持久化合并后的覆盖率数据
     private baselines: Record<string, any> = {}; // v3.0: 存储文件的静态元数据 (statementMap, fnMap, branchMap)
 
-    constructor(gitService: IGitService) {
+    constructor(gitService: IGitService, options?: WebpackCoveragePluginOptions) {
         this.gitService = gitService;
+        this.options = options;
     }
 
     /**
@@ -79,7 +81,10 @@ export class CoverageService implements ICoverageService {
                     path: data.path || file
                 };
             } else {
-                normalizedMap[file] = data;
+                normalizedMap[file] = {
+                    ...data,
+                    path: data.path || file
+                };
                 // 如果之前没见过 baseline，现在存一下
                 if (data.statementMap && !this.baselines[file]) {
                     this.baselines[file] = {
@@ -170,6 +175,7 @@ export class CoverageService implements ICoverageService {
         const normalizedGitFile = gitFile.replace(/\\/g, '/');
 
         return Object.values(coverageMap).find(cov => {
+            if (!cov || !cov.path) return false;
             const normalizedCovPath = cov.path.replace(/\\/g, '/');
             return normalizedCovPath.endsWith(normalizedGitFile);
         });
@@ -207,6 +213,44 @@ export class CoverageService implements ICoverageService {
     }
 
     private isSourceFile(file: string): boolean {
-        return /\.(js|ts|jsx|tsx|vue)$/.test(file) && !file.includes('node_modules');
+        // Normalize path
+        const normalizedFile = file.replace(/\\/g, '/');
+
+        // Basic extension check
+        if (!/\.(js|ts|jsx|tsx|vue)$/.test(normalizedFile)) return false;
+        if (normalizedFile.includes('node_modules')) return false;
+
+        // Apply Plugin include/exclude filters (v3.0 fix)
+        if (this.options?.include) {
+            const includes = Array.isArray(this.options.include) ? this.options.include : [this.options.include];
+            let matched = false;
+            for (const p of includes) {
+                if (p instanceof RegExp && p.test(normalizedFile)) {
+                    matched = true;
+                    break;
+                }
+                if (typeof p === 'string') {
+                    const normalizedP = p.replace(/\\/g, '/');
+                    if (normalizedFile.startsWith(normalizedP) || normalizedFile.includes(normalizedP)) {
+                        matched = true;
+                        break;
+                    }
+                }
+            }
+            if (!matched) return false;
+        }
+
+        if (this.options?.exclude) {
+            const excludes = Array.isArray(this.options.exclude) ? this.options.exclude : [this.options.exclude];
+            for (const p of excludes) {
+                if (p instanceof RegExp && p.test(normalizedFile)) return false;
+                if (typeof p === 'string') {
+                    const normalizedP = p.replace(/\\/g, '/');
+                    if (normalizedFile.includes(normalizedP)) return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

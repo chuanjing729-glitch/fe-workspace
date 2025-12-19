@@ -39,6 +39,7 @@ module.exports = {
         }),
         new WebpackCoveragePlugin({
             enabled: true,
+            include: [path.resolve(__dirname, 'src')],
             enableOverlay: true, // Enable the overlay for instant feedback
             reportTimer: 5000 // Generate report every 5s during dev
         })

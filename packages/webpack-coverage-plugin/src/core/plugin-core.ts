@@ -50,7 +50,7 @@ export class CoveragePluginCore {
         // FileStorage: 用于缓存 AST 分析结果和文件内容
         this.storage = new FileStorage(path.resolve(process.cwd(), '.cache'), 'coverage-plugin');
         this.gitService = new GitService(process.cwd()); // Git 操作
-        this.coverageService = new CoverageService(this.gitService); // 覆盖率核心计算
+        this.coverageService = new CoverageService(this.gitService, this.options); // 覆盖率核心计算 (注入 options 用于过滤)
         this.analysisService = new AnalysisService(process.cwd(), this.storage); // 依赖分析
         this.apiService = new ApiService('', '', ''); // API 服务 (预留)
         this.httpServer = new HttpServer(this.coverageService); // HTTP 服务 (接收覆盖率上报)
@@ -78,18 +78,48 @@ export class CoveragePluginCore {
      */
     shouldInstrument(file: string): boolean {
         if (!this.options.enabled) return false;
-        if (file.includes('node_modules')) return false;
+
+        // Normalize path for consistent matching
+        const normalizedFile = file.replace(/\\/g, '/');
+
+        if (normalizedFile.includes('node_modules')) return false;
+
+        // Include check (v3.0 fix: use startsWith for absolute path prefix matching)
+        if (this.options.include) {
+            const includes = Array.isArray(this.options.include) ? this.options.include : [this.options.include];
+            let matched = false;
+            for (const p of includes) {
+                if (p instanceof RegExp && p.test(normalizedFile)) {
+                    matched = true;
+                    break;
+                }
+                if (typeof p === 'string') {
+                    const normalizedP = p.replace(/\\/g, '/');
+                    if (normalizedFile.startsWith(normalizedP) || normalizedFile.includes(normalizedP)) {
+                        // NOTE: For absolute paths, startsWith is safer. 
+                        // But we'll keep includes if the user provided a partial path.
+                        // However, if we want to be strict with the ResolveDir/src, startsWith is better.
+                        matched = true;
+                        break;
+                    }
+                }
+            }
+            if (!matched) return false;
+        }
 
         // Exclude check
         if (this.options.exclude) {
             const excludes = Array.isArray(this.options.exclude) ? this.options.exclude : [this.options.exclude];
             for (const p of excludes) {
-                if (p instanceof RegExp && p.test(file)) return false;
-                if (typeof p === 'string' && file.includes(p)) return false;
+                if (p instanceof RegExp && p.test(normalizedFile)) return false;
+                if (typeof p === 'string') {
+                    const normalizedP = p.replace(/\\/g, '/');
+                    if (normalizedFile.includes(normalizedP)) return false;
+                }
             }
         }
 
-        return /\.(js|ts|jsx|tsx|vue)$/.test(file);
+        return /\.(js|ts|jsx|tsx|vue)$/.test(normalizedFile);
     }
 
     /**
