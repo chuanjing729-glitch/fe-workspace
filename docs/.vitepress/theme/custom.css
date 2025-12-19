@@ -1,150 +1,133 @@
-/* --- Efficiency 4.0：极简奢华、极致呼吸感、现代 SaaS 风格 --- */
+/* --- Monochrome 视觉方案：极致简约、纯粹黑白、极速反馈 --- */
 
 :root {
-  /* 调色盘：深沉的冷色底蕴 + 精致的品牌点缀 */
-  --vp-c-brand-1: #ff3e8d;
-  --vp-c-brand-2: #ff8a00;
+  /* 极致黑白灰阶 */
+  --vp-c-brand-1: #000000;
+  --vp-c-brand-2: #333333;
+  --vp-c-brand-3: #666666;
 
-  /* 页面底色优化 */
-  --vp-c-bg: #ffffff;
-  --vp-c-bg-soft: #f9f9fb;
-  --vp-c-bg-mute: #f1f1f4;
+  --vp-c-brand-soft: rgba(0, 0, 0, 0.05);
 
-  /* 文字：更高级的深空灰 */
-  --vp-c-text-1: #1c1c1e;
-  --vp-c-text-2: #636366;
+  /* 基础字效调整 */
+  --vp-home-hero-name-color: #000000;
+  --vp-home-hero-name-background: none;
 
-  /* 排版：极致现代 */
-  --vp-font-family-base: "Inter", "Readex Pro", system-ui, -apple-system, sans-serif;
+  /* 统一字体：苹果/谷歌现代无衬线 */
+  --vp-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .dark {
-  --vp-c-bg: #0a0a0c;
-  --vp-c-bg-soft: #141417;
-  --vp-c-text-1: #f5f5f7;
-  --vp-c-text-2: #8e8e93;
+  --vp-c-brand-1: #ffffff;
+  --vp-c-brand-2: #cccccc;
+  --vp-c-brand-3: #999999;
+
+  --vp-c-brand-soft: rgba(255, 255, 255, 0.1);
+  --vp-home-hero-name-color: #ffffff;
 }
 
-/* 1. 首页网格背景：增加空间维度感 */
-.home {
-  background-image:
-    radial-gradient(circle at 50% -20%, rgba(255, 62, 141, 0.05) 0%, transparent 50%),
-    linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px);
-  background-size: 100% 100%, 40px 40px, 40px 40px;
-}
-
-.dark .home {
-  background-image:
-    radial-gradient(circle at 50% -20%, rgba(255, 62, 141, 0.1) 0%, transparent 60%),
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-}
-
-/* 2. 导航栏：极简通透 */
-.VPNavBar {
-  background-color: rgba(var(--vp-c-bg-rgb), 0.7) !important;
-  backdrop-filter: blur(24px) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-}
-
-/* 3. Hero 区域：克制的力量 */
+/* 1. 首页 Hero：纯粹文字的视觉冲击 */
 .VPHero {
-  padding: 160px 32px 100px !important;
+  padding: 120px 32px 80px !important;
+  text-align: center;
 }
 
 .VPHero .name {
-  font-weight: 900;
+  font-weight: 850;
   font-size: 72px !important;
-  letter-spacing: -3px !important;
-  color: var(--vp-c-text-1) !important;
+  letter-spacing: -2.5px !important;
   background: none !important;
-  -webkit-text-fill-color: initial !important;
+  -webkit-text-fill-color: var(--vp-home-hero-name-color) !important;
+  line-height: 1.1;
+  margin-bottom: 20px;
 }
 
 .VPHero .text {
-  font-size: 26px !important;
-  font-weight: 500;
+  font-size: 24px !important;
   color: var(--vp-c-text-2) !important;
-  margin-top: 12px;
+  font-weight: 500;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.VPHero .tagline {
-  margin-top: 24px;
-  font-weight: 400;
-  opacity: 0.8;
+/* 2. 导航栏：无痕融入 */
+.VPNavBar {
+  background-color: var(--vp-c-bg) !important;
+  border-bottom: 1px solid var(--vp-c-divider) !important;
+  backdrop-filter: none !important;
 }
 
-/* 4. 图片：科技感微发光 */
-.VPHero .image-src {
-  border-radius: 48px;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
-  transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
-}
-
-.VPHero .image-container:hover .image-src {
-  transform: scale(1.05) rotate(1deg);
-  box-shadow: 0 60px 120px rgba(255, 62, 141, 0.15);
-}
-
-/* 5. 功能卡片：精致瓷片感 */
+/* 3. 功能卡片：极简边框与纯白背景 */
 .VPFeature {
-  background-color: var(--vp-c-bg-soft) !important;
-  border: 1px solid rgba(0, 0, 0, 0.03) !important;
-  border-radius: 24px;
-  padding: 40px !important;
-  transition: all 0.4s ease;
-}
-
-.dark .VPFeature {
-  border-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  border-radius: 0 !important;
+  /* 方正边角，体现严谨 */
+  transition: all 0.2s ease;
+  padding: 32px !important;
 }
 
 .VPFeature:hover {
-  background-color: #ffffff !important;
-  transform: translateY(-8px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+  background-color: var(--vp-c-bg-soft) !important;
   border-color: var(--vp-c-brand-1) !important;
+  transform: none !important;
+  /* 移除浮夸的位移 */
 }
 
-.dark .VPFeature:hover {
-  background-color: #1a1a1c !important;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-}
-
-/* 6. 按钮：流畅的苹果风格 */
+/* 4. 按钮：高对比度设计 */
 .VPButton.brand {
-  border-radius: 14px !important;
-  background: var(--vp-c-text-1) !important;
-  color: var(--vp-c-bg) !important;
+  border-radius: 0 !important;
+  background-color: #000000 !important;
+  border: 1px solid #000000 !important;
+  color: #ffffff !important;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  padding: 0 32px;
-  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dark .VPButton.brand {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #000000 !important;
 }
 
 .VPButton.brand:hover {
-  transform: scale(1.05);
-  background: var(--vp-c-brand-1) !important;
-  color: white !important;
+  opacity: 0.85;
 }
 
-/* 7. 文档细节微调 */
+.VPButton.alt {
+  border-radius: 0 !important;
+  border: 1px solid var(--vp-c-divider) !important;
+}
+
+/* 5. 文档排版：回归阅读本质 */
 .vp-doc h1,
-.vp-doc h2 {
-  font-weight: 800;
-  letter-spacing: -1px;
+.vp-doc h2,
+.vp-doc h3 {
+  color: var(--vp-c-text-1);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .vp-doc a {
-  color: var(--vp-c-brand-1);
-  text-decoration-thickness: 1px;
+  color: var(--vp-c-text-1);
+  text-decoration: underline;
   text-underline-offset: 4px;
+  font-weight: 500;
+}
+
+.vp-doc a:hover {
+  color: var(--vp-c-brand-1);
+  text-decoration-thickness: 2px;
 }
 
 .vp-doc blockquote {
-  border-left-width: 3px;
   border-left-color: var(--vp-c-brand-1);
-  font-style: italic;
-  font-weight: 500;
+  background-color: var(--vp-c-bg-soft);
+}
+
+/* 6. 侧边栏活动项 */
+.VPSidebarItem.level-0.active>.item>.link {
+  color: var(--vp-c-brand-1) !important;
+  font-weight: 700;
+  border-left: 2px solid var(--vp-c-brand-1);
 }
