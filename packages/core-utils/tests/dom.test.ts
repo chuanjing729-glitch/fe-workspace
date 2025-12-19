@@ -13,6 +13,8 @@ describe('DOM 模块测试', () => {
   let mockElement: HTMLElement
 
   beforeEach(() => {
+    // Mock window.scrollTo
+    window.scrollTo = jest.fn()
     // 创建测试元素
     mockElement = document.createElement('div')
     document.body.appendChild(mockElement)
