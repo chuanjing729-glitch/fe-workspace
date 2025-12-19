@@ -69,17 +69,34 @@ function getAllPackages() {
  */
 function getPackageInfo(packageName) {
   const packages = getAllPackages();
-  const pkg = packages.find(p => p.name === packageName);
-  
-  if (!pkg) {
-    throw new Error(`包 "${packageName}" 不存在`);
+
+  // 1. 尝试通过目录名匹配
+  let pkg = packages.find(p => p.name === packageName);
+
+  if (pkg) {
+    const packageJson = JSON.parse(fs.readFileSync(pkg.packageJsonPath, 'utf-8'));
+    return {
+      ...pkg,
+      packageJson
+    };
   }
-  
-  const packageJson = JSON.parse(fs.readFileSync(pkg.packageJsonPath, 'utf-8'));
-  return {
-    ...pkg,
-    packageJson
-  };
+
+  // 2. 尝试通过 package.json 中的 name 匹配
+  for (const p of packages) {
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(p.packageJsonPath, 'utf-8'));
+      if (packageJson.name === packageName) {
+        return {
+          ...p,
+          packageJson
+        };
+      }
+    } catch (e) {
+      // 忽略读取错误
+    }
+  }
+
+  throw new Error(`包 "${packageName}" 不存在 (既不是目录名也不是包名)`);
 }
 
 /**
@@ -104,10 +121,10 @@ function getPackages() {
 function updateVersion(packageInfo, versionType) {
   const { name, packageJsonPath, packageJson } = packageInfo;
   const currentVersion = packageJson.version;
-  
+
   // 解析当前版本
   const [major, minor, patch] = currentVersion.split('.').map(Number);
-  
+
   // 计算新版本
   let newVersion;
   switch (versionType) {
@@ -122,11 +139,11 @@ function updateVersion(packageInfo, versionType) {
       newVersion = `${major}.${minor}.${patch + 1}`;
       break;
   }
-  
+
   // 更新 package.json
   packageJson.version = newVersion;
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-  
+
   success(`[${name}] 版本已从 ${currentVersion} 更新为 ${newVersion}`);
   return { oldVersion: currentVersion, newVersion };
 }
@@ -136,7 +153,7 @@ function updateVersion(packageInfo, versionType) {
  */
 function buildPackage(packageInfo) {
   const { name, path: packagePath } = packageInfo;
-  
+
   try {
     info(`[${name}] 开始构建...`);
     execSync('pnpm run build', { cwd: packagePath, stdio: 'inherit' });
@@ -152,7 +169,7 @@ function buildPackage(packageInfo) {
  */
 function publishPackage(packageInfo) {
   const { name, path: packagePath } = packageInfo;
-  
+
   try {
     info(`[${name}] 开始发布...`);
     // 检查是否提供了 OTP
@@ -161,11 +178,11 @@ function publishPackage(packageInfo) {
     if (otp) {
       cmd += ` --otp=${otp}`;
     }
-    
+
     info(`[${name}] 执行命令: ${cmd}`);
-    
-    const output = execSync(cmd, { 
-      cwd: packagePath, 
+
+    const output = execSync(cmd, {
+      cwd: packagePath,
       stdio: ['inherit', 'pipe', 'pipe'],
       encoding: 'utf-8'
     });
@@ -190,30 +207,30 @@ function publishPackage(packageInfo) {
 function updateDocsChangelog(packageInfo, versionInfo) {
   const { name, packageJson } = packageInfo;
   const { newVersion } = versionInfo;
-  
+
   // 查找对应的文档文件
   const docsDir = path.join(process.cwd(), 'docs', 'packages');
   const docFileName = `${name}.md`;
   const docPath = path.join(docsDir, docFileName);
-  
+
   if (!fs.existsSync(docPath)) {
     warning(`[${name}] 未找到对应的文档文件: ${docPath}`);
     return;
   }
-  
+
   try {
     // 使用 changelog-helper 更新文档
     const changelogHelperPath = path.join(process.cwd(), 'scripts', 'changelog-helper.cjs');
-    const changeType = versionType === 'major' ? 'UPDATE' : 
-                      versionType === 'minor' ? 'ADD' : 'OPTIMIZE';
-    const changeContent = versionType === 'major' ? '重大更新' : 
-                         versionType === 'minor' ? '新增功能' : '性能优化和bug修复';
-    
+    const changeType = versionType === 'major' ? 'UPDATE' :
+      versionType === 'minor' ? 'ADD' : 'OPTIMIZE';
+    const changeContent = versionType === 'major' ? '重大更新' :
+      versionType === 'minor' ? '新增功能' : '性能优化和bug修复';
+
     execSync(
       `node "${changelogHelperPath}" add "${docPath}" "${newVersion}" "${changeType}" "${changeContent}"`,
       { stdio: 'inherit' }
     );
-    
+
     success(`[${name}] 文档 Changelog 已更新`);
   } catch (err) {
     error(`[${name}] 更新文档 Changelog 失败: ${err.message}`);
@@ -252,48 +269,48 @@ function checkNpmToken() {
 async function main() {
   try {
     info(`开始执行发布流程 (${versionType} 版本)...`);
-    
+
     // 检查 NPM token
     checkNpmToken();
-    
+
     // 获取要处理的包
     const packages = getPackages();
-    
+
     if (packages.length === 0) {
       error('未找到任何包');
       process.exit(1);
     }
-    
+
     info(`找到 ${packages.length} 个包: ${packages.map(p => p.name).join(', ')}`);
-    
+
     // 处理每个包
     let publishedCount = 0;
     for (const pkg of packages) {
       console.log('\n---');
       info(`处理包: ${pkg.name}`);
-      
+
       // 1. 更新版本号
-      const versionInfo =  updateVersion(pkg, versionType);
-      
+      const versionInfo = updateVersion(pkg, versionType);
+
       // 2. 构建包
       buildPackage(pkg);
-      
+
       // 3. 更新文档 Changelog
       updateDocsChangelog(pkg, versionInfo);
-      
+
       // 4. 发布包
       const isPublished = publishPackage(pkg);
       if (isPublished) {
         publishedCount++;
       }
     }
-    
+
     // 5. 重建文档
     // rebuildDocs();
-    
+
     console.log('\n---');
     success(`所有包发布完成! 成功发布 ${publishedCount}/${packages.length} 个包`);
-    
+
   } catch (err) {
     error(`发布流程失败: ${err.message}`);
     process.exit(1);
