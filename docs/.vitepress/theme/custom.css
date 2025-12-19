@@ -1,127 +1,114 @@
-/* --- 高级感重构：Efficiency 视觉方案 --- */
+/* --- Efficiency 2.0：极简、纯净、极致专业 --- */
 
 :root {
-  /* 核心色彩系统 - 从 Icon 提取并优化为更具质感的色阶 */
-  --vp-c-brand-1: #ff3e8d;
-  --vp-c-brand-2: #ff5d5d;
-  --vp-c-brand-3: #ff8a00;
+  /* 调色盘：更深邃、更有质感的品牌色 */
+  --vp-c-brand-1: #e91e63;
+  /* 优雅的玫瑰粉 */
+  --vp-c-brand-2: #f06292;
+  --vp-c-brand-3: #ff8a65;
+  /* 柔和的橘色 */
 
-  /* 功能色调 */
-  --vp-c-brand-soft: rgba(255, 62, 141, 0.12);
-  --vp-c-brand-dimm: rgba(255, 62, 141, 0.05);
+  --vp-c-brand-soft: rgba(233, 30, 99, 0.08);
 
-  /* 首页 Hero 渐变背景光效 */
-  --vp-home-hero-image-filter: blur(80px);
-  --vp-home-hero-image-background-image: linear-gradient(135deg, rgba(255, 138, 0, 0.2) 0%, rgba(255, 62, 141, 0.2) 100%);
-
-  /* 导航栏玻璃拟态 */
-  --vp-nav-bg-color: rgba(255, 255, 255, 0.8);
+  /* 现代排版：增加衬线美感或极简无衬线 */
+  --vp-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.dark {
-  --vp-nav-bg-color: rgba(27, 27, 31, 0.8);
-  --vp-c-brand-soft: rgba(255, 62, 141, 0.2);
-}
-
-/* 1. 导航栏毛玻璃特效 */
+/* 1. 导航栏：极致通透 */
 .VPNavBar {
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(20px) saturate(50%);
+  -webkit-backdrop-filter: blur(20px) saturate(50%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* 2. 首页 Hero 名字艺术化（渐变+发光） */
+.dark .VPNavBar {
+  background-color: rgba(24, 24, 27, 0.6) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 2. Hero 标题：克制的优雅 */
 .VPHero .name {
-  background: linear-gradient(135deg, #ff8a00 0%, #ff3e8d 50%, #d300c5 100%);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #e91e63 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(255, 62, 141, 0.2));
-  letter-spacing: -0.02em;
 }
 
-/* 3. Hero 图片容器（增加氛围灯） */
-.VPHero .image-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
+.dark .VPHero .name {
+  background: linear-gradient(135deg, #ffffff 0%, #f06292 100%);
+  background-clip: text;
 }
 
-.VPHero .image-container::before {
-  content: "";
-  position: absolute;
-  width: 250px;
-  height: 250px;
-  background: radial-gradient(circle, rgba(255, 62, 141, 0.4) 0%, transparent 70%);
-  filter: blur(40px);
-  z-index: -1;
-  animation: pulse 4s ease-in-out infinite alternate;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-
-  100% {
-    transform: scale(1.2);
-    opacity: 0.8;
-  }
-}
-
+/* 3. 图片容器：去除闪烁，增加悬浮深度 */
 .VPHero .image-src {
-  border-radius: 24%;
-  /* 配合 Apple 风格 Icon 的圆角 */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  border-radius: 40px;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.08);
+  filter: grayscale(0.1);
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.VPHero .image-src:hover {
-  transform: translateY(-5px) scale(1.02);
+.VPHero .image-container:hover .image-src {
+  transform: scale(1.02) translateY(-10px);
+  filter: grayscale(0);
+  box-shadow: 0 60px 100px rgba(233, 30, 99, 0.1);
 }
 
-/* 4. 按钮高级感调整 */
-.VPButton.brand {
-  border: none;
-  background: linear-gradient(135deg, #ff8a00 0%, #ff3e8d 100%);
-  box-shadow: 0 4px 15px rgba(255, 62, 141, 0.3);
-  transition: all 0.3s ease;
-}
-
-.VPButton.brand:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 62, 141, 0.4);
-}
-
-/* 5. 侧边栏与卡片微调 */
+/* 4. 卡片设计：极简无边框感 */
 .VPFeature {
-  border-radius: 16px;
-  border: 1px solid rgba(255, 62, 141, 0.05) !important;
-  background-color: var(--vp-c-bg-soft);
+  background-color: transparent !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 20px;
   transition: all 0.3s ease;
+}
+
+.dark .VPFeature {
+  border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 .VPFeature:hover {
+  background-color: var(--vp-c-bg-soft) !important;
   border-color: var(--vp-c-brand-1) !important;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transform: translateY(-5px);
 }
 
-/* 6. 文档排版优化 */
+/* 5. 按钮：纯色质感 */
+.VPButton.brand {
+  background-color: #1a1a1a;
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 0 24px;
+  transition: all 0.2s ease;
+}
+
+.dark .VPButton.brand {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.VPButton.brand:hover {
+  background-color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-2px);
+}
+
+/* 6. 文档细节 */
 .vp-doc h1,
 .vp-doc h2 {
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
 }
 
 .vp-doc a {
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
+  color: var(--vp-c-brand-1);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(233, 30, 99, 0.2);
 }
 
-.vp-doc li::marker {
-  color: var(--vp-c-brand-1);
+.vp-doc a:hover {
+  text-decoration-color: var(--vp-c-brand-1);
 }
