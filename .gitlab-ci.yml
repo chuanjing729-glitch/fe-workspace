@@ -1,0 +1,32 @@
+stages:
+  - build
+  - deploy
+
+docs_build:
+  stage: build
+  image: node:20
+  script:
+    - npm install -g pnpm
+    - pnpm install
+    - node scripts/sync-package-docs.cjs  # 同步文档
+    - pnpm docs:build
+  artifacts:
+    paths:
+      - docs/.vitepress/dist
+  only:
+    changes:
+      - "packages/*/README.md"
+      - "docs/**/*"
+      - "scripts/sync-package-docs.cjs"
+
+pages:
+  stage: deploy
+  dependencies:
+    - docs_build
+  script:
+    - mv docs/.vitepress/dist public
+  artifacts:
+    paths:
+      - public
+  only:
+    - main

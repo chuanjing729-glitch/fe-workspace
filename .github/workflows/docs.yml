@@ -7,10 +7,8 @@ on:
       - main # Deploys on pushes to main
     paths:
       - 'docs/**'
-      - 'docs/packages/plugins.md'
-      - 'docs/packages/tools.md'
       - 'packages/*/README.md'
-      - 'scripts/**'
+      - 'scripts/sync-package-docs.cjs'
       - '.github/workflows/docs.yml'
       - 'package.json'
       - 'pnpm-lock.yaml'

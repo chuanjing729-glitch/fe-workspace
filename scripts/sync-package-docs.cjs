@@ -74,11 +74,11 @@ function getAllPackages() {
 function getPackageInfo(packageName) {
   const packages = getAllPackages();
   const pkg = packages.find(p => p.name === packageName);
-  
+
   if (!pkg) {
     throw new Error(`包 "${packageName}" 不存在`);
   }
-  
+
   return pkg;
 }
 
@@ -93,13 +93,13 @@ function isFileUpdated(srcPath, destPath) {
     debug(`目标文件不存在，需要更新: ${destPath}`);
     return true;
   }
-  
+
   const srcStat = fs.statSync(srcPath);
   const destStat = fs.statSync(destPath);
-  
+
   const needUpdate = srcStat.mtime > destStat.mtime;
   debug(`文件比较 - 源: ${srcPath} (${srcStat.mtime}), 目标: ${destPath} (${destStat.mtime}), 需要更新: ${needUpdate}`);
-  
+
   return needUpdate;
 }
 
@@ -114,26 +114,162 @@ function checkConflict(srcPath, destPath) {
   if (!fs.existsSync(destPath)) {
     return { hasConflict: false };
   }
-  
+
   // 检查源文件是否存在
   if (!fs.existsSync(srcPath)) {
     return { hasConflict: false };
   }
-  
+
   // 获取文件内容的哈希值进行比较
   const srcContent = fs.readFileSync(srcPath, 'utf-8');
   const destContent = fs.readFileSync(destPath, 'utf-8');
-  
+
   // 简单的哈希比较
   const crypto = require('crypto');
   const srcHash = crypto.createHash('md5').update(srcContent).digest('hex');
   const destHash = crypto.createHash('md5').update(destContent).digest('hex');
-  
+
   return {
     hasConflict: srcHash !== destHash,
     srcHash,
     destHash
   };
+}
+
+/**
+ * 生成 Frontmatter
+ * @param {Object} pkg 包信息
+ * @param {string} type 文件类型 'readme' | 'changelog'
+ * @returns {string} Frontmatter 字符串
+ */
+function getFrontmatter(pkg, type) {
+  const title = type === 'readme' ? pkg.name : `${pkg.name} Changelog`;
+  const order = type === 'readme' ? 1 : 2;
+
+  return `---
+title: ${title}
+order: ${order}
+editLink: true
+---
+
+`;
+}
+
+/**
+ * 复制资源文件（如图片）并重写引用
+ * @param {string} content 文件内容
+ * @param {Object} pkg 包信息
+ * @returns {string} 处理后的内容
+ */
+function processAssets(content, pkg) {
+  const imgRegex = /!\[([^\]]*)\]\((?!http)([^)]+)\)/g;
+  const assetsDir = path.join(pkg.docsPath, 'assets');
+  let hasAssets = false;
+
+  const newContent = content.replace(imgRegex, (match, alt, imgPath) => {
+    try {
+      const srcImgPath = path.resolve(pkg.path, imgPath);
+      if (fs.existsSync(srcImgPath)) {
+        if (!hasAssets) {
+          if (!fs.existsSync(assetsDir)) {
+            fs.mkdirSync(assetsDir, { recursive: true });
+          }
+          hasAssets = true;
+        }
+
+        const imgFileName = path.basename(srcImgPath);
+        const destImgPath = path.join(assetsDir, imgFileName);
+
+        // 复制图片
+        fs.copyFileSync(srcImgPath, destImgPath);
+
+        // 返回新的相对路径引用
+        return `![${alt}](./assets/${imgFileName})`;
+      } else {
+        warning(`[${pkg.name}] 图片未找到: ${srcImgPath}`);
+        return match;
+      }
+    } catch (e) {
+      error(`[${pkg.name}] 处理图片失败: ${e.message}`);
+      return match;
+    }
+  });
+
+  return newContent;
+}
+
+/**
+ * 处理链接：
+ * 1. 如果是 .md 文件，则复制该文件到目标目录，并保持相对引用
+ * 2. 如果是其他文件（源码），则转换为 GitHub 绝对链接
+ * @param {string} content 文件内容
+ * @param {Object} pkg 包信息
+ * @returns {string} 处理后的内容
+ */
+function processLinks(content, pkg) {
+  const linkRegex = /\[([^\]]+)\]\((?!http)([^)]+)\)/g;
+  const repoBase = 'https://github.com/chuanjing729-glitch/fe-workspace/blob/main';
+  const packagePath = `packages/${pkg.name}`;
+
+  return content.replace(linkRegex, (match, text, link) => {
+    // 忽略锚点链接
+    if (link.startsWith('#')) return match;
+
+    // 如果是图片，不在此处重写
+    if (text.match(/!\[.*\]/)) return match;
+
+    // 移除 hash 用于文件检查
+    const linkPath = link.split('#')[0];
+    const anchor = link.split('#')[1] ? '#' + link.split('#')[1] : '';
+
+    try {
+      const srcPath = path.resolve(pkg.path, linkPath);
+
+      // 情况1: 是 Markdown 引用
+      if (linkPath.endsWith('.md') && fs.existsSync(srcPath)) {
+        const fileName = path.basename(linkPath);
+        const destPath = path.join(pkg.docsPath, fileName);
+
+        // 避免处理自身
+        if (path.resolve(pkg.path, 'README.md') === srcPath) return match;
+
+        // 特殊处理 CHANGELOG: 映射到 changelog.md
+        if (fileName.toUpperCase() === 'CHANGELOG.MD') {
+          return `[${text}](./changelog.md${anchor})`;
+        }
+
+        // 递归复制并处理引用的 MD 文件
+        if (!fs.existsSync(destPath) || fs.statSync(srcPath).mtime > fs.statSync(destPath).mtime) {
+          let nestedContent = fs.readFileSync(srcPath, 'utf-8');
+
+          // 递归处理资源和链接
+          nestedContent = processAssets(nestedContent, pkg);
+          nestedContent = processLinks(nestedContent, pkg);
+
+          // 简单的 Frontmatter (Title only)
+          const nestedFrontmatter = `---
+title: ${fileName.replace('.md', '')}
+editLink: true
+---
+
+`;
+          fs.writeFileSync(destPath, nestedFrontmatter + nestedContent, 'utf-8');
+          success(`[${pkg.name}] 递归同步文档: ${fileName}`);
+        }
+
+        // 返回相对链接
+        return `[${text}](./${fileName}${anchor})`;
+      }
+
+      // 情况2: 源码或其他文件 -> GitHub Blob
+      const absPath = path.posix.join(packagePath, linkPath);
+      return `[${text}](${repoBase}/${absPath})`;
+
+    } catch (e) {
+      warning(`[${pkg.name}] 处理链接失败: ${link} - ${e.message}`);
+      return match;
+    }
+  });
 }
 
 /**
@@ -145,42 +281,33 @@ function checkConflict(srcPath, destPath) {
 function syncReadme(pkg, options = {}) {
   const srcReadme = path.join(pkg.path, 'README.md');
   const destReadme = path.join(pkg.docsPath, 'index.md');
-  
+
   if (!fs.existsSync(srcReadme)) {
     warning(`[${pkg.name}] 源 README.md 文件不存在`);
     return false;
   }
-  
-  // 检查是否存在冲突
-  if (options.checkConflict) {
-    const conflictInfo = checkConflict(srcReadme, destReadme);
-    if (conflictInfo.hasConflict) {
-      warning(`[${pkg.name}] README.md 存在冲突，源文件和目标文件内容不同`);
-      if (!options.force) {
-        error(`[${pkg.name}] 同步已中止，使用 --force 选项强制同步`);
-        return false;
-      } else {
-        warning(`[${pkg.name}] 使用 --force 选项强制同步`);
-      }
-    }
-  }
-  
-  // 检查是否需要更新
-  if (!options.force && !isFileUpdated(srcReadme, destReadme)) {
-    info(`[${pkg.name}] README.md 无需更新`);
-    return true;
-  }
-  
+
   try {
     // 确保目标目录存在
     if (!fs.existsSync(pkg.docsPath)) {
       fs.mkdirSync(pkg.docsPath, { recursive: true });
     }
-    
-    // 复制文件
-    const content = fs.readFileSync(srcReadme, 'utf-8');
-    fs.writeFileSync(destReadme, content, 'utf-8');
-    
+
+    let content = fs.readFileSync(srcReadme, 'utf-8');
+
+    // 1. 注入 Frontmatter
+    const frontmatter = getFrontmatter(pkg, 'readme');
+
+    // 2. 处理资源图片
+    content = processAssets(content, pkg);
+
+    // 3. 处理链接 (支持递归 Markdown 同步)
+    content = processLinks(content, pkg);
+
+    const finalContent = frontmatter + content;
+
+    fs.writeFileSync(destReadme, finalContent, 'utf-8');
+
     success(`[${pkg.name}] README.md 同步完成`);
     return true;
   } catch (err) {
@@ -198,42 +325,22 @@ function syncReadme(pkg, options = {}) {
 function syncChangelog(pkg, options = {}) {
   const srcChangelog = path.join(pkg.path, 'CHANGELOG.md');
   const destChangelog = path.join(pkg.docsPath, 'changelog.md');
-  
+
   if (!fs.existsSync(srcChangelog)) {
-    warning(`[${pkg.name}] 源 CHANGELOG.md 文件不存在`);
-    return false;
-  }
-  
-  // 检查是否存在冲突
-  if (options.checkConflict) {
-    const conflictInfo = checkConflict(srcChangelog, destChangelog);
-    if (conflictInfo.hasConflict) {
-      warning(`[${pkg.name}] CHANGELOG.md 存在冲突，源文件和目标文件内容不同`);
-      if (!options.force) {
-        error(`[${pkg.name}] 同步已中止，使用 --force 选项强制同步`);
-        return false;
-      } else {
-        warning(`[${pkg.name}] 使用 --force 选项强制同步`);
-      }
-    }
-  }
-  
-  // 检查是否需要更新
-  if (!options.force && !isFileUpdated(srcChangelog, destChangelog)) {
-    info(`[${pkg.name}] CHANGELOG.md 无需更新`);
+    // Changelog 是可选的，不报错
     return true;
   }
-  
+
   try {
-    // 确保目标目录存在
     if (!fs.existsSync(pkg.docsPath)) {
       fs.mkdirSync(pkg.docsPath, { recursive: true });
     }
-    
-    // 复制文件
-    const content = fs.readFileSync(srcChangelog, 'utf-8');
-    fs.writeFileSync(destChangelog, content, 'utf-8');
-    
+
+    let content = fs.readFileSync(srcChangelog, 'utf-8');
+    const frontmatter = getFrontmatter(pkg, 'changelog');
+
+    fs.writeFileSync(destChangelog, frontmatter + content, 'utf-8');
+
     success(`[${pkg.name}] CHANGELOG.md 同步完成`);
     return true;
   } catch (err) {
@@ -250,17 +357,17 @@ function syncChangelog(pkg, options = {}) {
  */
 function syncPackage(pkg, options = {}) {
   info(`[${pkg.name}] 开始同步文档...`);
-  
+
   let successCount = 0;
   let failCount = 0;
-  
+
   // 同步 README.md
   if (syncReadme(pkg, options)) {
     successCount++;
   } else {
     failCount++;
   }
-  
+
   // 同步 CHANGELOG.md（如果存在）
   if (fs.existsSync(path.join(pkg.path, 'CHANGELOG.md'))) {
     if (syncChangelog(pkg, options)) {
@@ -269,7 +376,7 @@ function syncPackage(pkg, options = {}) {
       failCount++;
     }
   }
-  
+
   if (failCount === 0) {
     success(`[${pkg.name}] 文档同步完成 (${successCount} 个文件成功)`);
     return true;
@@ -287,10 +394,10 @@ function syncAllPackages(options = {}) {
   try {
     const packages = getAllPackages();
     info(`找到 ${packages.length} 个包`);
-    
+
     let successCount = 0;
     let failCount = 0;
-    
+
     for (const pkg of packages) {
       console.log('');
       if (syncPackage(pkg, options)) {
@@ -299,7 +406,7 @@ function syncAllPackages(options = {}) {
         failCount++;
       }
     }
-    
+
     console.log('\n---');
     if (failCount === 0) {
       success(`所有包文档同步完成! (${successCount}/${packages.length} 个包成功)`);
@@ -350,34 +457,43 @@ function showHelp() {
 // 主函数
 function main() {
   const args = process.argv.slice(2);
-  
+
   // 显示帮助
   if (args.includes('--help') || args.includes('-h')) {
     showHelp();
     process.exit(0);
   }
-  
+
   // 解析选项
   const options = {
     force: args.includes('--force') || args.includes('-f'),
     checkConflict: args.includes('--check-conflict'),
     dryRun: args.includes('--dry-run')
   };
-  
+
   // 设置调试模式
   if (args.includes('--debug')) {
     process.env.DEBUG = 'true';
   }
-  
+
   // 过滤掉选项参数，获取包名
   const packageArgs = args.filter(arg => !arg.startsWith('--') && !arg.startsWith('-'));
-  const packageName = packageArgs[0];
-  
+  let packageName = packageArgs[0];
+
+  // 处理 lint-staged 传入的路径情况 (例如: packages/foo/README.md)
+  if (packageName && packageName.includes('packages')) {
+    const parts = packageName.split(path.sep);
+    const packagesIndex = parts.indexOf('packages');
+    if (packagesIndex !== -1 && packagesIndex + 1 < parts.length) {
+      packageName = parts[packagesIndex + 1];
+    }
+  }
+
   // 预演模式
   if (options.dryRun) {
     info('预演模式：不会实际执行同步操作');
   }
-  
+
   if (packageName) {
     // 同步指定包
     try {
