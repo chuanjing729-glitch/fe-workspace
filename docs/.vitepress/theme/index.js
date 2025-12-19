@@ -6,7 +6,7 @@ export default {
     ...DefaultTheme,
     Layout() {
         return h(DefaultTheme.Layout, null, {
-            'doc-before': () => h('div', { class: 'vp-doc-author' }, '作者：Chuanjing Li')
+            'doc-after': () => h('div', { class: 'vp-doc-author' }, '作者：Chuanjing Li')
         })
     }
 }
