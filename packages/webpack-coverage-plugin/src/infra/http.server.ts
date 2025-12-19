@@ -1,14 +1,13 @@
-import express, { Application, Request, Response } from 'express';
+import express from 'express';
 import { ICoverageService } from '../core/interfaces';
 import { IncrementalCoverageResult, CoverageMap } from '../core/types';
 import { UiGenerator } from './ui.generator';
 
 /**
- * 嵌入式 HTTP 服务器
- * 负责接收浏览器端的覆盖率数据，并提供查询接口
+ * 嵌入式 HTTP 服务器 (Universal Version)
+ * 支持 Express (Webpack) 和 Connect (Vite)
  */
 export class HttpServer {
-    private app: Application | null = null;
     private coverageService: ICoverageService;
     private latestResult: IncrementalCoverageResult | null = null;
 
@@ -17,69 +16,124 @@ export class HttpServer {
     }
 
     /**
-     * 将中间件挂载到 Webpack Dev Server 的 App 实例上
+     * 安装中间件到服务器 (支持 Webpack DevServer 和 Vite DevServer)
      */
-    public attach(app: Application): void {
-        console.log('[HttpServer] 挂载中间件到 DevServer');
-        this.app = app;
-        this.registerRoutes();
+    public install(server: any): void {
+        console.log('[HttpServer] Installing middleware...');
+
+        // 解析 Body (Vite 的 connect 不自带 body parser)
+        // Express.json() 返回兼容 connect 的中间件
+        server.use('/__coverage_upload', express.json({ limit: '50mb' }));
+
+        const isExpress = typeof server.get === 'function';
+
+        if (isExpress) {
+            this.registerExpressRoutes(server);
+        } else {
+            this.registerConnectRoutes(server);
+        }
     }
 
-    /**
-     * 注册路由
-     */
-    private registerRoutes(): void {
-        if (!this.app) return;
+    private registerExpressRoutes(app: any) {
+        app.post('/__coverage_upload', this.handleUpload.bind(this));
+        app.get('/__coverage_info', this.handleInfo.bind(this));
+        app.get('/__coverage_overlay.css', this.handleCss.bind(this));
+        app.get('/__coverage_overlay.js', this.handleJs.bind(this));
+    }
 
-        // 1. 覆盖率上报接口
-        this.app.post('/__coverage_upload', express.json({ limit: '50mb' }), async (req: Request, res: Response) => {
-            const coverageData = req.body as CoverageMap;
-            if (coverageData) {
-                // 触发异步计算，不阻塞请求
-                this.coverageService.calculate(coverageData)
-                    .then(result => {
-                        this.latestResult = result;
-                        console.log(`[HttpServer] 增量覆盖率更新: ${result.overall.coverageRate}%`);
-                    })
-                    .catch(err => {
-                        console.error('[HttpServer] 计算失败:', err);
-                    });
-            }
-            res.json({ success: true });
-        });
+    private registerConnectRoutes(server: any) {
+        // Connect 只支持 .use(route, handler)
 
-        // 2. 覆盖率查询接口
-        this.app.get('/__coverage_info', (req: Request, res: Response) => {
-            if (this.latestResult) {
-                res.json({
-                    success: true,
-                    data: {
-                        coverageRate: this.latestResult.overall.coverageRate,
-                        coveredLines: this.latestResult.overall.coveredChangedLines,
-                        totalLines: this.latestResult.overall.totalChangedLines,
-                        uncoveredFiles: this.latestResult.files
-                            .filter(f => f.coverageRate < 100)
-                            .map(f => ({
-                                file: f.file,
-                                rate: f.coverageRate,
-                                uncoveredLines: f.uncoveredLines
-                            }))
-                    }
-                });
+        server.use('/__coverage_upload', (req: any, res: any, next: any) => {
+            if (req.method === 'POST') {
+                this.handleUpload(req, res);
             } else {
-                res.json({ success: false, message: 'Wait for data...' });
+                next();
             }
         });
 
-        // 3. 静态资源接口
-        this.app.get('/__coverage_overlay.css', (req: Request, res: Response) => {
-            res.setHeader('Content-Type', 'text/css');
-            res.send(UiGenerator.generateOverlayCss());
+        server.use('/__coverage_info', (req: any, res: any, next: any) => {
+            if (req.method === 'GET') {
+                this.handleInfo(req, res);
+            } else {
+                next();
+            }
         });
 
-        this.app.get('/__coverage_overlay.js', (req: Request, res: Response) => {
-            res.setHeader('Content-Type', 'application/javascript');
-            res.send(UiGenerator.generateOverlayJs());
+        server.use('/__coverage_overlay.css', (req: any, res: any, next: any) => {
+            if (req.method === 'GET') {
+                this.handleCss(req, res);
+            } else { next(); }
         });
+
+        server.use('/__coverage_overlay.js', (req: any, res: any, next: any) => {
+            if (req.method === 'GET') {
+                this.handleJs(req, res);
+            } else { next(); }
+        });
+    }
+
+    // --- Handlers ---
+
+    private async handleUpload(req: any, res: any) {
+        const sendJson = (data: any) => {
+            if (res.json) res.json(data);
+            else {
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(data));
+            }
+        };
+
+        const coverageData = req.body;
+        if (coverageData) {
+            this.coverageService.calculate(coverageData).then(r => {
+                this.latestResult = r;
+                console.log(`[HttpServer] 增量覆盖率更新: ${r.overall.coverageRate}%`);
+            }).catch(e => console.error('[HttpServer] 计算失败:', e));
+        }
+        sendJson({ success: true });
+    }
+
+    private handleInfo(req: any, res: any) {
+        const sendJson = (data: any) => {
+            if (res.json) res.json(data);
+            else {
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(data));
+            }
+        };
+
+        if (this.latestResult) {
+            sendJson({
+                success: true,
+                data: {
+                    coverageRate: this.latestResult.overall.coverageRate,
+                    coveredLines: this.latestResult.overall.coveredChangedLines,
+                    totalLines: this.latestResult.overall.totalChangedLines,
+                    uncoveredFiles: this.latestResult.files.filter(f => f.coverageRate < 100).map(f => ({
+                        file: f.file,
+                        rate: f.coverageRate,
+                        uncoveredLines: f.uncoveredLines
+                    }))
+                }
+            });
+        } else {
+            sendJson({ success: false, message: 'Wait for data...' });
+        }
+    }
+
+    private handleCss(req: any, res: any) {
+        res.setHeader('Content-Type', 'text/css');
+        res.end(UiGenerator.generateOverlayCss());
+    }
+
+    private handleJs(req: any, res: any) {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.end(UiGenerator.generateOverlayJs());
+    }
+
+    // Deprecated alias for backward compatibility (in case used elsewhere)
+    public attach(app: any): void {
+        this.install(app);
     }
 }

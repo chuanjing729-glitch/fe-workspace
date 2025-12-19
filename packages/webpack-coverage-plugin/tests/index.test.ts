@@ -1,8 +1,9 @@
 import { WebpackCoveragePlugin } from '../src/index';
+import { CoveragePluginCore } from '../src/core/plugin-core';
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('WebpackCoveragePlugin', () => {
+describe('WebpackCoveragePlugin & Core', () => {
   it('should create plugin instance', () => {
     const plugin = new WebpackCoveragePlugin();
     expect(plugin).toBeInstanceOf(WebpackCoveragePlugin);
@@ -13,27 +14,19 @@ describe('WebpackCoveragePlugin', () => {
     expect(plugin).toBeInstanceOf(WebpackCoveragePlugin);
   });
 
-  it('should have default options', () => {
-    const plugin = new WebpackCoveragePlugin();
-    // We can't easily test private properties, but we can test that it instantiates
-    expect(plugin).toBeInstanceOf(WebpackCoveragePlugin);
-  });
-
-  it('should generate test reports', async () => {
+  it('should generate test reports (via Core)', async () => {
     // 创建一个临时目录用于测试报告生成
     const tempDir = path.join(__dirname, 'temp-reports');
 
-    // 创建插件实例并生成报告
-    const plugin = new WebpackCoveragePlugin({
+    // 创建 Core 实例并生成报告
+    // 直接测试核心逻辑，绕过 Unplugin 封装
+    const core = new CoveragePluginCore({
       enabled: true,
       outputDir: tempDir,
-      enableImpactAnalysis: false // 禁用影响面分析以简化测试依赖
+      enableImpactAnalysis: false
     });
 
-    // 调用私有方法生成报告（通过反射）
-    // generateReport 是异步的
-    const generateMethod = (plugin as any).generateReport.bind(plugin);
-    await generateMethod();
+    await core.generateReport();
 
     // 检查报告文件是否生成 (ReportService 2.0 生成 smart-test-report.html)
     const htmlReportPath = path.join(tempDir, 'smart-test-report.html');

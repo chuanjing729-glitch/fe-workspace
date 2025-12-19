@@ -1,11 +1,12 @@
-# Webpack Coverage Plugin (Smart Testing Edition)
+# 通用前端覆盖率插件 (Universal Coverage Plugin)
 
-> 🚀 **V2.0 Architecture Refactor**: Clean Architecture, Caching, and Enterprise-Grade Reporting.
+> 🚀 **3.0 架构升级**: 基于 Unplugin 的通用架构，同时支持 Webpack, Vite 和 Rspack。
 
-Webpack 插件用于在开发阶段收集代码覆盖率，并生成增量自测报告。即时反馈变更影响，提升前端研发质量。
+本插件用于在开发阶段收集代码覆盖率，并生成增量自测报告。即时反馈变更影响，提升前端研发质量。
 
 ## ✨ 核心特性
 
+- **🌍 多构建工具支持**: 一套代码，同时支持 Webpack 4/5, Vite, Rspack。
 - **🔍 增量覆盖率**: 基于 Git Diff 和运行时数据，精准计算变更代码的覆盖率。
 - **📊 分层报告 (Reporter 2.0)**: 
     - 全新 Dashboard 视图
@@ -17,7 +18,6 @@ Webpack 插件用于在开发阶段收集代码覆盖率，并生成增量自测
 - **🛠 开发者友好**: 
     - 运行时悬浮气泡 (Overlay)
     - 快捷键操作 (Ctrl+Shift+C)
-- **🏗 整洁架构**: 分离 Core, Service, Infrastructure 层，易于扩展及维护。
 
 ## 📚 文档
 
@@ -32,37 +32,66 @@ npm install @51jbs/webpack-coverage-plugin --save-dev
 
 ## 🚀 快速开始
 
-### 1. Webpack 配置
+### 1. 接入配置
 
+#### Webpack
 ```javascript
+// webpack.config.js
 const { WebpackCoveragePlugin } = require('@51jbs/webpack-coverage-plugin');
 
 module.exports = {
-  // ...
   plugins: [
     new WebpackCoveragePlugin({
-      // 仅在开发模式或特定环境变量下启用
       enabled: process.env.ENABLE_SELF_TEST === 'true',
-      
-      // 包含的文件模式
       include: ['src/**/*.{js,ts,jsx,tsx,vue}'],
-      
-      // 排除的文件
-      exclude: [/node_modules/, /\.test\./],
-      
-      // 报告输出目录
-      outputDir: '.coverage',
-      
-      // 质量门禁配置
-      qualityGate: {
-        lineCoverageThreshold: 80 // 增量行覆盖率阈值
-      }
     })
   ]
 };
 ```
 
-### 2. 开发流程
+#### Vite
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import coverage from '@51jbs/webpack-coverage-plugin/vite';
+
+export default defineConfig({
+  plugins: [
+    coverage({
+      enabled: process.env.ENABLE_SELF_TEST === 'true',
+      include: ['src/**/*.{js,ts,jsx,tsx,vue}'],
+    })
+  ]
+});
+```
+
+#### Rspack
+```javascript
+// rspack.config.js
+const { rspackCoveragePlugin } = require('@51jbs/webpack-coverage-plugin/rspack');
+
+module.exports = {
+  plugins: [
+    rspackCoveragePlugin({
+      enabled: process.env.ENABLE_SELF_TEST === 'true',
+      include: ['src/**/*.{js,ts,jsx,tsx,vue}'],
+    })
+  ]
+};
+```
+
+### 2. 配置选项 (Options)
+
+| 选项 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `enabled` | `boolean` | `false` | 是否启用插件。建议仅在开发环境开启。 |
+| `include` | `string[]` | `[]` | 需要插桩的文件 glob 模式。 |
+| `exclude` | `(string\|RegExp)[]` | `[/node_modules/, /\.test\./]` | 排除的文件模式。 |
+| `outputDir` | `string` | `.coverage` | 报告输出目录。 |
+| `enableImpactAnalysis` | `boolean` | `true` | 是否启用影响面分析（依赖分析）。 |
+| `enableOverlay` | `boolean` | `true` | 是否启用浏览器端悬浮气泡 UI。 |
+
+### 3. 开发流程
 
 1. **启动开发服务**:
    ```bash
@@ -80,10 +109,10 @@ module.exports = {
 
 ## ⚙️ 架构设计
 
-本插件采用 **Clean Architecture**：
+本插件采用 **Universal Plugin Architecture**：
 
-- **Core**: 定义核心接口 (`IGitService`, `ICoverageService`).
-- **Services**: 业务逻辑实现 (Git操作, 覆盖率计算, 影响面分析).
+- **Core**: 平台无关的核心逻辑 (`CoveragePluginCore`)。
+- **Adapters**: 适配不同构建工具 (`Unplugin`, `ViteCoveragePlugin`, `WebpackCoveragePlugin`)。
 - **Infrastructure**: HTTP服务, 文件存储, 报告渲染.
 
 详情请参阅 [TECHNICAL_DOC.md](./TECHNICAL_DOC.md)。

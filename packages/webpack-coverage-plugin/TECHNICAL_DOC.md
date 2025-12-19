@@ -2,12 +2,17 @@
 
 ## 1. 架构概览 (Architecture Overview)
 
-本插件采用 **Clean Architecture (整洁架构)** 设计，旨在实现关注点分离、提高可测试性和系统的可维护性。
+本插件采用 **Universal Plugin Architecture (通用插件架构)** 结合 **Clean Architecture (整洁架构)** 设计。旨在通过一套核心逻辑同时支持 Webpack, Vite, Rollup, Rspack 等多种构建工具。
 
 ### 核心分层
-- **Core Layer (`src/core`)**: 定义核心业务实体 (Types) 和抽象接口 (Interfaces)。不依赖其他层。
-- **Service Layer (`src/services`)**: 实现具体的业务逻辑 (`GitService`, `CoverageService`)。只依赖 Core 层的接口。
-- **Infrastructure Layer (`src/infra`)**: 处理外部依赖和具体实现细节 (UI生成, 文件存储, HTTP服务)。
+- **Core Layer (`src/core`)**: 
+    - **Entity (Types/Interfaces)**: 定义核心业务实体和接口。
+    - **Use Cases (`PluginCore`)**: 封装平台无关的业务流程 (`init`, `transform`, `generateReport`)。
+- **Service Layer (`src/services`)**: 实现具体的业务逻辑 (`GitService`, `CoverageService`)。依赖 Core 接口。
+- **Adapter Layer (`src/unplugin.ts`, `src/vite.ts`, `src/rspack.ts`, `src/index.ts`)**: 
+    - 使用 `unplugin` 抹平不同构建工具的钩子差异。
+    - 为 Webpack 和 Vite 提供特定的兼容性适配器。
+- **Infrastructure Layer (`src/infra`)**: 处理外部依赖和具体实现 (UI生成, 文件存储, HTTP服务)。
 
 ### 架构图 (Class Diagram)
 
@@ -16,12 +21,21 @@ classDiagram
     class WebpackCoveragePlugin {
         +apply(compiler)
     }
+    class ViteCoveragePlugin {
+        +configureServer(server)
+    }
+    
+    class UnpluginFactory {
+        <<Function>>
+        +buildStart()
+        +transform()
+        +buildEnd()
+    }
 
-    namespace Core {
-        class IGitService { <<interface>> }
-        class ICoverageService { <<interface>> }
-        class IAnalysisService { <<interface>> }
-        class IReportService { <<interface>> }
+    class CoveragePluginCore {
+        +init()
+        +transform(code, id)
+        +generateReport()
     }
 
     namespace Services {
@@ -33,86 +47,25 @@ classDiagram
 
     namespace Infra {
         class HttpServer
-        class FileStorage
-        class HtmlRenderer
     }
 
-    WebpackCoveragePlugin ..> IGitService
-    WebpackCoveragePlugin ..> ICoverageService
-    WebpackCoveragePlugin ..> IAnalysisService
-
-    GitService ..|> IGitService
-    CoverageService ..|> ICoverageService
-    AnalysisService ..|> IAnalysisService
-    ReportService ..|> IReportService
-
-    WebpackCoveragePlugin --> GitService : Injects
-    WebpackCoveragePlugin --> CoverageService : Injects
-    WebpackCoveragePlugin --> AnalysisService : Injects
-    WebpackCoveragePlugin --> ReportService : Injects
-
-    CoverageService --> IGitService : Depends
-    AnalysisService --> FileStorage : Uses
-    ReportService --> HtmlRenderer : Uses
-    HttpServer --> ICoverageService : Uses
+    WebpackCoveragePlugin ..> UnpluginFactory : Wraps
+    ViteCoveragePlugin ..> UnpluginFactory : Uses
+    UnpluginFactory --> CoveragePluginCore : Delegates
+    
+    CoveragePluginCore --> GitService : Injects
+    CoveragePluginCore --> CoverageService : Injects
+    CoveragePluginCore --> AnalysisService : Injects
+    CoveragePluginCore --> ReportService : Creates
+    CoveragePluginCore --> HttpServer : Manages
 ```
 
-## 2. 核心流程 (Core Flows)
-
-### 2.1 增量覆盖率计算流程
-
-```mermaid
-sequenceDiagram
-    participant Webpack as Webpack Compiler
-    participant Plugin as WebpackCoveragePlugin
-    participant Git as GitService
-    participant Cov as CoverageService
-    participant Browser as Browser UI
-
-    Webpack->>Plugin: hooks.done
-    Plugin->>Git: getChangedFiles()
-    Git-->>Plugin: ['src/a.ts', 'src/b.vue']
-    
-    Browser->>Plugin: POST /__coverage_upload (Runtime Coverage)
-    Plugin->>Cov: calculate(runtimeMap)
-    
-    rect rgb(240, 248, 255)
-    note right of Cov: Calculation Logic
-    Cov->>Git: getFileDiff('src/a.ts')
-    Git-->>Cov: [Lines: 10, 11, 12]
-    Cov->>Cov: Intersect(ChangedLines, RuntimeMap)
-    end
-    
-    Cov-->>Plugin: IncrementalResult
-    Plugin-->>Browser: 200 OK
-```
-
-### 2.2 影响面分析流程 (带缓存)
-
-```mermaid
-flowchart TD
-    Start[Start Compilation] --> Init[Init Dependency Graph]
-    Init --> CheckCache{Match Hash?}
-    
-    CheckCache -- Yes --> LoadCache[Load from FileStorage]
-    CheckCache -- No --> ParseAST[Parse AST (Babel)]
-    ParseAST --> ComputeHash[Compute Content Hash]
-    ComputeHash --> ExtractDeps[Extract Imports/Exports]
-    ExtractDeps --> SaveCache[Save to FileStorage]
-    
-    LoadCache --> BuildGraph[Build Dependency Graph]
-    SaveCache --> BuildGraph
-    
-    BuildGraph --> Analyze[Analyze Impact]
-    Analyze --> IdentifyPages[Identify Affected Pages]
-    IdentifyPages --> End[Return ImpactResult]
-```
-
-## 3. 目录结构说明
+## 2. 目录结构说明
 
 ```
 src/
 ├── core/                 # 核心定义
+│   ├── plugin-core.ts    # 核心业务逻辑 (平台无关)
 │   ├── interfaces.ts     # 服务接口
 │   └── types.ts          # 类型定义
 ├── services/             # 业务逻辑服务
@@ -121,21 +74,69 @@ src/
 │   ├── analysis.service.ts
 │   └── report.service.ts
 ├── infra/                # 基础设施
-│   ├── http.server.ts    # 嵌入式 Express 服务
+│   ├── http.server.ts    # 通用 HTTP/中间件服务
 │   ├── storage.ts        # 文件缓存
 │   └── report/           # 报告生成器
-│       ├── html.renderer.ts
-│       └── templates/    # HTML/CSS 模板
-└── index.ts              # 插件入口 (Composition Root)
+├── unplugin.ts           # Unplugin 工厂 (通用钩子实现)
+├── vite.ts               # Vite 导出适配
+└── index.ts              # Webpack 导出适配 (兼容层)
+```
+
+## 3. 核心流程 (Core Flows)
+
+### 3.1 跨平台插桩流程 (Instrumentation)
+
+```mermaid
+sequenceDiagram
+    participant Bundler as Webpack/Vite
+    participant Adapter as Unplugin Adapter
+    participant Core as CoveragePluginCore
+    participant Babel as Babel(Istanbul)
+
+    Bundler->>Adapter: transform(code, id)
+    Adapter->>Core: transform(code, id)
+    Core->>Core: shouldInstrument(id)?
+    alt Yes
+        Core->>Babel: transformSync(code, plugins=[istanbul])
+        Babel-->>Core: Instrumented Code
+        Core-->>Adapter: code
+    else No
+        Core-->>Adapter: null (skip)
+    end
+    Adapter-->>Bundler: result
+```
+
+### 3.2 增量覆盖率计算流程
+
+```mermaid
+sequenceDiagram
+    participant Browser as Browser UI/Overlay
+    participant Server as HttpServer (Connect/Express)
+    participant Core as CoverageService
+    participant Git as GitService
+    
+    Browser->>Server: POST /__coverage_upload
+    Server->>Core: calculate(runtimeMap)
+    
+    rect rgb(240, 248, 255)
+    note right of Core: Calculation Logic
+    Core->>Git: getChangedFiles() -> getFileDiff()
+    Git-->>Core: Diff Lines
+    Core->>Core: Intersect(Diff, Runtime)
+    end
+    
+    Core-->>Server: IncrementalResult
+    Server-->>Browser: 200 OK
 ```
 
 ## 4. 扩展指南
 
-### 添加新的报告格式
-1. 在 `src/infra/report/` 下新建 Renderer (如 `markdown.renderer.ts`)。
-2. 实现 `render(data: ReportData): string` 方法。
-3. 在 `ReportService` 中调用该 Renderer。
+### 支持新的构建工具 (例如 Rollup)
+由于基于 `unplugin`，支持 Rollup 非常简单：
+1. 在 `src/` 下创建 `rollup.ts`。
+2. 导出 `unplugin.rollup`。
+3. 如果需要 DevServer 支持，需研究 Rollup 配置服务的机制并适配 `src/infra/http.server.ts`。
 
-### 对接新的通知渠道
-1. 新建 Service (如 `DingTalkService`) 实现 `INotificationService`。
-2. 在 `index.ts` 中初始化并注入。
+### 适配新的 DevServer
+目前的 `HttpServer` 支持 `Express` (Webpack) 和 `Connect` (Vite) 风格的中间件。
+如果新的工具使用其他风格 (如 Koa)，需要在 `src/infra/http.server.ts` 的 `install` 方法中添加适配逻辑。

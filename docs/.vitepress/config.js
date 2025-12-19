@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid';
 import { sidebar } from './config/sidebar'
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid(defineConfig({
   base: '/fe-workspace/',
   title: "前端工程效率空间",
   description: "前端工程效率平台提升开发质量、效率和性能",
@@ -27,4 +28,4 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/chuanjing729-glitch/fe-workspace' }
     ]
   }
-});
+}));
