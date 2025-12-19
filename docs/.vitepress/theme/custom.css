@@ -131,3 +131,26 @@
   font-weight: 700;
   border-left: 2px solid var(--vp-c-brand-1);
 }
+
+/* 7. 作者署名样式 (Monochrome Style) */
+.vp-doc-author {
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  margin-top: -12px;
+  margin-bottom: 40px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--vp-c-divider);
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vp-doc-author::before {
+  content: "BY";
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 8px;
+  opacity: 0.6;
+}
