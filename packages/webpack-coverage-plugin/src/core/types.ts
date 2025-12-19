@@ -21,6 +21,10 @@ export interface WebpackCoveragePluginOptions {
     enableOverlay?: boolean;
     /** 质量门禁配置 */
     qualityGate?: QualityGateConfig;
+    /** 报告生成最小间隔（毫秒），默认 30000 */
+    reportTimer?: number;
+    /** 是否使用 istanbul-diff 进行增量覆盖率计算，默认 true（v3.0+） */
+    useIstanbulDiff?: boolean;
 }
 
 /**

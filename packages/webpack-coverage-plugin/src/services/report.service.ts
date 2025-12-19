@@ -38,14 +38,78 @@ export class ReportService {
         // 1. 聚合数据
         const reportData = await this.buildReportData(data);
 
-        // 2. 生成 HTML 报告
+        // 2. 生成带时间戳和序号的报告文件名（使用本地时间）
+        const timestamp = this.getTimestamp();
+        const sequence = this.getNextSequenceNumber();
+        const filename = `coverage-report-${timestamp}-${sequence.toString().padStart(3, '0')}.html`;
+
+        // 3. 生成 HTML 报告
         const htmlContent = this.htmlRenderer.render(reportData);
-        const htmlPath = path.join(this.outputDir, 'smart-test-report.html');
+        const htmlPath = path.join(this.outputDir, filename);
         fs.writeFileSync(htmlPath, htmlContent);
 
-        console.log(`[ReportService] 报告已生成: ${htmlPath}`);
+        // 4. 同时生成一个 latest.html 作为最新报告的快捷访问
+        const latestPath = path.join(this.outputDir, 'latest.html');
+        fs.writeFileSync(latestPath, htmlContent);
+
+        console.log(`[ReportService] 报告已生成: ${filename}`);
+
+        // 5. 清理旧报告（保留最近10个）
+        this.cleanOldReports(10);
 
         // TODO: 生成 Markdown 报告 (后续)
+    }
+
+    /**
+     * 获取本地时间戳字符串
+     */
+    private getTimestamp(): string {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+        const second = String(now.getSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day}-${hour}-${minute}-${second}`;
+    }
+
+    /**
+     * 获取下一个序号（基于当前目录中已有的报告数量）
+     */
+    private getNextSequenceNumber(): number {
+        try {
+            const files = fs.readdirSync(this.outputDir);
+            const reportFiles = files.filter(f => f.startsWith('coverage-report-') && f.endsWith('.html'));
+            return reportFiles.length + 1;
+        } catch {
+            return 1;
+        }
+    }
+
+    /**
+     * 清理旧报告，保留最近的 N 个
+     */
+    private cleanOldReports(keepCount: number = 10) {
+        try {
+            const files = fs.readdirSync(this.outputDir)
+                .filter(f => f.startsWith('coverage-report-') && f.endsWith('.html'))
+                .map(f => ({
+                    name: f,
+                    path: path.join(this.outputDir, f),
+                    time: fs.statSync(path.join(this.outputDir, f)).mtime.getTime()
+                }))
+                .sort((a, b) => b.time - a.time); // 最新的在前
+
+            // 删除超出保留数量的旧报告
+            files.slice(keepCount).forEach(file => {
+                fs.unlinkSync(file.path);
+                console.log(`[ReportService] 清理旧报告: ${file.name}`);
+            });
+        } catch (error) {
+            console.warn('[ReportService] 清理旧报告失败:', error);
+        }
     }
 
     private async buildReportData(data: {

@@ -38,10 +38,22 @@ module.exports = {
             template: './index.html'
         }),
         new WebpackCoveragePlugin({
+            // === 基础配置 ===
             enabled: true,
             include: [path.resolve(__dirname, 'src')],
-            enableOverlay: true, // Enable the overlay for instant feedback
-            reportTimer: 5000 // Generate report every 5s during dev
+            outputDir: '.coverage',
+
+            // === UI 配置 ===
+            enableOverlay: true,  // 启用浏览器覆盖率 UI
+
+            // === v3.0 新特性 ===
+            reportTimer: 5000,        // 报告生成间隔（毫秒），默认 30000
+            useIstanbulDiff: true,    // 使用 istanbul-diff 计算（默认 true）
+
+            // === 质量门禁（可选）===
+            qualityGate: {
+                lineCoverageThreshold: 80  // 行覆盖率阈值
+            }
         })
     ],
     devServer: {

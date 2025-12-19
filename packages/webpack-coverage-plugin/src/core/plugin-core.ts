@@ -25,6 +25,8 @@ export class CoveragePluginCore {
     httpServer: HttpServer;
     storage: FileStorage;
     incrementalResult: any;
+    private lastReportTime = 0;  // 上次报告生成时间
+    private reportInterval: number;  // 报告生成最小间隔
 
     constructor(options: WebpackCoveragePluginOptions = {}) {
         this.options = {
@@ -38,8 +40,12 @@ export class CoveragePluginCore {
                 lineCoverageThreshold: 80,
                 ...options.qualityGate
             },
+            reportTimer: options.reportTimer || 30000,  // 默认30秒
             ...options
         };
+
+        // 初始化报告间隔
+        this.reportInterval = this.options.reportTimer || 30000;
 
         // 默认排除逻辑 (Default exclude logic)
         if (!this.options.exclude) {
@@ -70,6 +76,35 @@ export class CoveragePluginCore {
         if (this.options.enableImpactAnalysis) {
             this.analysisService.initDependencyGraph().catch(console.error);
         }
+
+        // 注册优雅退出钩子 (v3.0: 在进程退出时生成最终报告)
+        this.registerShutdownHooks();
+    }
+
+    /**
+     * 注册进程退出钩子，确保在中断时生成最终报告
+     */
+    private registerShutdownHooks() {
+        const generateFinalReport = async () => {
+            try {
+                console.log('\n[CoveragePlugin] 检测到进程退出，正在生成最终覆盖率报告...');
+                await this.generateReport(true); // 强制生成
+                console.log('[CoveragePlugin] 最终报告已生成，进程即将退出。');
+            } catch (error) {
+                console.error('[CoveragePlugin] 生成最终报告失败:', error);
+            }
+        };
+
+        // ✅ 使用 once 确保只执行一次，避免重复注册
+        process.once('SIGINT', async () => {
+            await generateFinalReport();
+            process.exit(0);
+        });
+
+        process.once('SIGTERM', async () => {
+            await generateFinalReport();
+            process.exit(0);
+        });
     }
 
     /**
@@ -84,7 +119,7 @@ export class CoveragePluginCore {
 
         if (normalizedFile.includes('node_modules')) return false;
 
-        // Include check (v3.0 fix: use startsWith for absolute path prefix matching)
+        // Include check (v3.0 fix: strict path prefix matching)
         if (this.options.include) {
             const includes = Array.isArray(this.options.include) ? this.options.include : [this.options.include];
             let matched = false;
@@ -95,10 +130,10 @@ export class CoveragePluginCore {
                 }
                 if (typeof p === 'string') {
                     const normalizedP = p.replace(/\\/g, '/');
-                    if (normalizedFile.startsWith(normalizedP) || normalizedFile.includes(normalizedP)) {
-                        // NOTE: For absolute paths, startsWith is safer. 
-                        // But we'll keep includes if the user provided a partial path.
-                        // However, if we want to be strict with the ResolveDir/src, startsWith is better.
+                    // Ensure trailing slash for directory matching
+                    const dirPath = normalizedP.endsWith('/') ? normalizedP : normalizedP + '/';
+                    // Strict prefix check: file must start with the directory path
+                    if (normalizedFile.startsWith(dirPath)) {
                         matched = true;
                         break;
                     }
@@ -160,9 +195,22 @@ export class CoveragePluginCore {
      * 1. 获取 Git 变更
      * 2. 分析变更影响面
      * 3. 结合运行时覆盖率生成 HTML 报告
+     * @param force 是否强制生成（忽略防抖）
      */
-    async generateReport() {
+    async generateReport(force = false) {
         if (!this.options.enabled) return;
+
+        const now = Date.now();
+        const timeSinceLastReport = now - this.lastReportTime;
+
+        // 防抖：除非强制生成，否则检查时间间隔
+        if (!force && timeSinceLastReport < this.reportInterval) {
+            console.log(`[CoveragePlugin] 距离上次生成仅 ${Math.round(timeSinceLastReport / 1000)}秒，跳过（最小间隔 ${this.reportInterval / 1000}秒）`);
+            return;
+        }
+
+        this.lastReportTime = now;
+
         try {
             console.log('[CoveragePlugin] 生成报告...');
             const changedFiles = await this.gitService.getChangedFiles();
@@ -173,7 +221,10 @@ export class CoveragePluginCore {
 
             await reportService.generate({
                 gitService: this.gitService,
-                incrementalResult: this.incrementalResult,
+                incrementalResult: this.incrementalResult || {
+                    overall: { totalChangedLines: 0, coveredChangedLines: 0, coverageRate: 0 },
+                    files: []
+                },
                 impactResult: impact
             });
         } catch (error) {

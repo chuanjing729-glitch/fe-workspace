@@ -1,5 +1,8 @@
 import { ICoverageService, IGitService } from '../core/interfaces';
 import { WebpackCoveragePluginOptions, CoverageMap, CoverageData, IncrementalCoverageResult } from '../core/types';
+import * as istanbulDiff from 'istanbul-diff';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * 覆盖率服务实现类
@@ -62,10 +65,28 @@ export class CoverageService implements ICoverageService {
     }
 
     /**
-     * 计算增量覆盖率
+     * 计算增量覆盖率（路由方法）
+     * 根据配置选择使用 istanbul-diff 或传统实现
      * @param coverageMap 运行时收集到的覆盖率数据
      */
     async calculate(coverageMap: CoverageMap): Promise<IncrementalCoverageResult> {
+        // 默认使用 istanbul-diff 实现（v3.0+）
+        const useIstanbul = this.options?.useIstanbulDiff !== false;
+
+        if (useIstanbul) {
+            console.log('[CoverageService] 使用 istanbul-diff 实现');
+            return this.calculateWithIstanbulDiff(coverageMap);
+        } else {
+            console.log('[CoverageService] 使用传统实现');
+            return this.calculateLegacy(coverageMap);
+        }
+    }
+
+    /**
+     * 计算增量覆盖率（传统实现）
+     * @param coverageMap 运行时收集到的覆盖率数据
+     */
+    private async calculateLegacy(coverageMap: CoverageMap): Promise<IncrementalCoverageResult> {
         // v3.0: 合并新上报的数据到主 Map 中
         // 支持 "Thin" 协议：如果上报的数据缺失 Map，则从 baselines 中拼装
         const normalizedMap: CoverageMap = {};
@@ -252,5 +273,241 @@ export class CoverageService implements ICoverageService {
         }
 
         return true;
+    }
+
+    /**
+     * 使用 istanbul-diff 计算增量覆盖率（新实现）
+     */
+    private async calculateWithIstanbulDiff(coverageMap: CoverageMap): Promise<IncrementalCoverageResult> {
+        // 1. 规范化和合并数据（复用 calculateLegacy 的逻辑）
+        const normalizedMap: CoverageMap = {};
+        for (const file in coverageMap) {
+            const data = coverageMap[file];
+            if (!data.statementMap && this.baselines[file]) {
+                normalizedMap[file] = {
+                    ...this.baselines[file],
+                    s: data.s,
+                    f: data.f,
+                    b: data.b,
+                    path: data.path || file
+                };
+            } else {
+                normalizedMap[file] = {
+                    ...data,
+                    path: data.path || file
+                };
+                if (data.statementMap && !this.baselines[file]) {
+                    this.baselines[file] = {
+                        statementMap: data.statementMap,
+                        fnMap: data.fnMap,
+                        branchMap: data.branchMap
+                    };
+                }
+            }
+        }
+        this.mergeCoverage(this.mergedMap, normalizedMap);
+
+        // 2. 转换为 Istanbul 格式
+        const currentCoverage = this.toIstanbulFormat(this.mergedMap);
+
+        // 3. 获取 baseline
+        const baselineCoverage = this.getIstanbulBaseline() || this.createEmptyIstanbulBaseline();
+
+        // 4. 使用 istanbul-diff 计算差异
+        const diff = istanbulDiff.diff(baselineCoverage, currentCoverage, {
+            pick: 'lines'
+        });
+
+        console.log('[CoverageService] Istanbul diff:', JSON.stringify(diff.total, null, 2));
+
+        // 5. 获取 Git 变更并计算（复用传统逻辑）
+        const changedFiles = await this.gitService.getChangedFiles();
+        const result: IncrementalCoverageResult = {
+            overall: { totalChangedLines: 0, coveredChangedLines: 0, coverageRate: 100 },
+            files: []
+        };
+
+        for (const file of changedFiles) {
+            const coverage = this.findCoverageForFile(this.mergedMap, file);
+            if (!coverage) {
+                if (this.isSourceFile(file)) {
+                    const changedLines = await this.gitService.getFileDiff(file);
+                    if (changedLines.length > 0) {
+                        result.files.push({
+                            file,
+                            changedLines,
+                            uncoveredLines: [...changedLines],
+                            coverageRate: 0
+                        });
+                        result.overall.totalChangedLines += changedLines.length;
+                    }
+                }
+                continue;
+            }
+
+            const changedLines = await this.gitService.getFileDiff(file);
+            if (changedLines.length === 0) continue;
+
+            const uncoveredLines = this.getUncoveredLines(coverage, changedLines);
+            const coveredCount = changedLines.length - uncoveredLines.length;
+            const coverageRate = changedLines.length > 0
+                ? Math.round((coveredCount / changedLines.length) * 100)
+                : 100;
+
+            result.files.push({
+                file,
+                changedLines,
+                uncoveredLines,
+                coverageRate
+            });
+
+            result.overall.totalChangedLines += changedLines.length;
+            result.overall.coveredChangedLines += coveredCount;
+        }
+
+        if (result.overall.totalChangedLines > 0) {
+            result.overall.coverageRate = Math.round(
+                (result.overall.coveredChangedLines / result.overall.totalChangedLines) * 100
+            );
+        }
+
+        // 6. 保存当前覆盖率作为新 baseline
+        this.saveIstanbulBaseline(currentCoverage);
+
+        return result;
+    }
+
+    /**
+     * 转换为 Istanbul JSON Summary 格式
+     */
+    private toIstanbulFormat(coverageMap: CoverageMap): any {
+        const result: any = {
+            total: {
+                lines: { total: 0, covered: 0, skipped: 0, pct: 0 },
+                statements: { total: 0, covered: 0, skipped: 0, pct: 0 },
+                functions: { total: 0, covered: 0, skipped: 0, pct: 0 },
+                branches: { total: 0, covered: 0, skipped: 0, pct: 0 }
+            }
+        };
+
+        for (const [filePath, coverage] of Object.entries(coverageMap)) {
+            if (!coverage) continue;
+            const fileMetrics = this.calculateIstanbulFileMetrics(coverage);
+            result[filePath] = fileMetrics;
+
+            result.total.lines.total += fileMetrics.lines.total;
+            result.total.lines.covered += fileMetrics.lines.covered;
+            result.total.statements.total += fileMetrics.statements.total;
+            result.total.statements.covered += fileMetrics.statements.covered;
+            result.total.functions.total += fileMetrics.functions.total;
+            result.total.functions.covered += fileMetrics.functions.covered;
+            result.total.branches.total += fileMetrics.branches.total;
+            result.total.branches.covered += fileMetrics.branches.covered;
+        }
+
+        result.total.lines.pct = result.total.lines.total > 0
+            ? (result.total.lines.covered / result.total.lines.total) * 100 : 0;
+        result.total.statements.pct = result.total.statements.total > 0
+            ? (result.total.statements.covered / result.total.statements.total) * 100 : 0;
+        result.total.functions.pct = result.total.functions.total > 0
+            ? (result.total.functions.covered / result.total.functions.total) * 100 : 0;
+        result.total.branches.pct = result.total.branches.total > 0
+            ? (result.total.branches.covered / result.total.branches.total) * 100 : 0;
+
+        return result;
+    }
+
+    /**
+     * 计算单个文件的 Istanbul 指标
+     */
+    private calculateIstanbulFileMetrics(coverage: CoverageData): any {
+        const lines = {
+            total: Object.keys(coverage.statementMap || {}).length,
+            covered: 0,
+            skipped: 0,
+            pct: 0
+        };
+
+        for (const [, count] of Object.entries(coverage.s || {})) {
+            if (count > 0) lines.covered++;
+        }
+        lines.pct = lines.total > 0 ? (lines.covered / lines.total) * 100 : 0;
+
+        const statements = { ...lines };
+
+        const functions = {
+            total: Object.keys(coverage.fnMap || {}).length,
+            covered: 0,
+            skipped: 0,
+            pct: 0
+        };
+        for (const [, count] of Object.entries(coverage.f || {})) {
+            if (count > 0) functions.covered++;
+        }
+        functions.pct = functions.total > 0 ? (functions.covered / functions.total) * 100 : 0;
+
+        const branches = {
+            total: Object.keys(coverage.branchMap || {}).length * 2,
+            covered: 0,
+            skipped: 0,
+            pct: 0
+        };
+        for (const [, counts] of Object.entries(coverage.b || {})) {
+            if (Array.isArray(counts)) {
+                for (const count of counts) {
+                    if (count > 0) branches.covered++;
+                }
+            }
+        }
+        branches.pct = branches.total > 0 ? (branches.covered / branches.total) * 100 : 0;
+
+        return { lines, statements, functions, branches };
+    }
+
+    /**
+     * 获取 Istanbul baseline
+     */
+    private getIstanbulBaseline(): any | null {
+        try {
+            const outputDir = this.options?.outputDir || '.coverage';
+            const baselinePath = path.join(outputDir, 'istanbul-baseline.json');
+            if (fs.existsSync(baselinePath)) {
+                return JSON.parse(fs.readFileSync(baselinePath, 'utf-8'));
+            }
+        } catch (error) {
+            console.warn('[CoverageService] 无法读取 Istanbul baseline:', error);
+        }
+        return null;
+    }
+
+    /**
+     * 保存 Istanbul baseline
+     */
+    private saveIstanbulBaseline(istanbulCoverage: any): void {
+        try {
+            const outputDir = this.options?.outputDir || '.coverage';
+            if (!fs.existsSync(outputDir)) {
+                fs.mkdirSync(outputDir, { recursive: true });
+            }
+            const baselinePath = path.join(outputDir, 'istanbul-baseline.json');
+            fs.writeFileSync(baselinePath, JSON.stringify(istanbulCoverage, null, 2));
+            console.log('[CoverageService] Istanbul baseline 已保存');
+        } catch (error) {
+            console.error('[CoverageService] 保存 Istanbul baseline 失败:', error);
+        }
+    }
+
+    /**
+     * 创建空的 Istanbul baseline
+     */
+    private createEmptyIstanbulBaseline(): any {
+        return {
+            total: {
+                lines: { total: 0, covered: 0, skipped: 0, pct: 0 },
+                statements: { total: 0, covered: 0, skipped: 0, pct: 0 },
+                functions: { total: 0, covered: 0, skipped: 0, pct: 0 },
+                branches: { total: 0, covered: 0, skipped: 0, pct: 0 }
+            }
+        };
     }
 }
