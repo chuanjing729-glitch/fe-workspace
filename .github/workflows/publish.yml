@@ -4,25 +4,27 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: '要发布的包 (留空则发布所有包)'
+        description: "要发布的包 (留空则发布所有包)"
         required: false
         type: choice
         options:
-          - ''
-          - 'core-utils'
-          - 'vue2-toolkit'
-          - 'webpack-spec-plugin'
-          - 'webpack-coverage-plugin'
-          - 'webpack-api-tracker-plugin'
+          - ""
+          - "core-utils"
+          - "vue2-toolkit"
+          - "webpack-spec-plugin"
+          - "incremental-coverage-plugin"
+          - "webpack-coverage-plugin"
+
+          - "webpack-api-tracker-plugin"
       version-type:
-        description: '版本更新类型'
+        description: "版本更新类型"
         required: true
         type: choice
-        default: 'patch'
+        default: "patch"
         options:
-          - 'patch'
-          - 'minor'
-          - 'major'
+          - "patch"
+          - "minor"
+          - "major"
 
 permissions:
   contents: write
@@ -41,8 +43,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org/'
-          cache: 'pnpm'
+          registry-url: "https://registry.npmjs.org/"
+          cache: "pnpm"
 
       - name: Configure Git
         run: |

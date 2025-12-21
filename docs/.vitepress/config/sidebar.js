@@ -7,6 +7,7 @@ export const sidebar = {
         { text: '总览', link: '/packages/plugins' },
         { text: 'Webpack 规范检查插件', link: '/packages/webpack-spec-plugin/' },
         { text: 'Webpack 覆盖率插件', link: '/packages/webpack-coverage-plugin/' },
+        { text: '增量覆盖率插件', link: '/packages/incremental-coverage-plugin/' },
         { text: 'Webpack API 跟踪插件', link: '/packages/webpack-api-tracker-plugin/' }
       ]
     }
@@ -90,6 +91,15 @@ export const sidebar = {
     }
   ],
 
+  '/packages/incremental-coverage-plugin/': [
+    {
+      text: '增量覆盖率插件',
+      items: [
+        { text: '总览', link: '/packages/incremental-coverage-plugin/' }
+      ]
+    }
+  ],
+
   '/packages/webpack-api-tracker-plugin/': [
     {
       text: 'Webpack API 跟踪插件',
@@ -104,7 +114,7 @@ export const sidebar = {
     }
   ],
 
-  // 技术规范 (保持不变)
+  // 技术规范
   '/specs/': [
     {
       text: '编码规范',
