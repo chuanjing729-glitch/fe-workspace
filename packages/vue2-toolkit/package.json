@@ -1,6 +1,6 @@
 {
   "name": "@51jbs/vue2-toolkit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vue2专用工具库，提供统一的消息提示、指令、mixins等",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
