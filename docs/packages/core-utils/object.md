@@ -28,6 +28,9 @@ import * as objectUtils from '@51jbs/core-utils';
 
 深拷贝对象，解决 `JSON.parse(JSON.stringify())` 的问题。
 
+**源码实现**
+<<< @/packages/core-utils/src/object/index.ts{15-67}
+
 **特点**：
 1. 支持循环引用
 2. 支持函数、Date、RegExp 等特殊对象
@@ -59,7 +62,7 @@ const obj = {
 obj.self = obj;
 
 const cloned = deepClone(obj);
-console.log(cloned); // 深拷贝后的对象，包含所有属性和循环引用
+console.log(cloned); // 深拷贝后的对象，包含所有属性 and 循环引用
 ```
 
 ---
@@ -67,6 +70,9 @@ console.log(cloned); // 深拷贝后的对象，包含所有属性和循环引�
 ### shallowClone
 
 浅拷贝对象或数组。
+
+**源码实现**
+<<< @/packages/core-utils/src/object/index.ts{72-82}
 
 **类型签名**
 ```typescript
@@ -97,6 +103,9 @@ console.log(arr[2].a); // 4（浅拷贝，数组内的对象仍指向同一引�
 ### merge
 
 合并对象（深度合并）。
+
+**源码实现**
+<<< @/packages/core-utils/src/object/index.ts{87-110}
 
 **类型签名**
 ```typescript
@@ -130,6 +139,9 @@ console.log(merged2); // { a: 5, b: { c: 2, d: 3 }, e: 4, f: { g: 6, h: 7 } }
 
 判断对象是否为空。
 
+**源码实现**
+<<< @/packages/core-utils/src/object/index.ts{122-127}
+
 **类型签名**
 ```typescript
 function isEmpty(obj: any): boolean
@@ -152,4 +164,35 @@ isEmpty(undefined); // true
 isEmpty({ a: 1 }); // false
 isEmpty([1]); // false
 isEmpty('test'); // false
+```
+
+---
+
+### safeGet
+
+安全地从对象中获取深层属性（类似 `_.get`）。
+
+**源码实现**
+<<< @/packages/core-utils/src/object/index.ts{135-149}
+
+**类型签名**
+```typescript
+function safeGet<T = any>(obj: any, path: string, defaultValue?: T): T
+```
+
+**参数**
+- `obj` - 目标对象
+- `path` - 路径字符串（如 'a.b.c'）
+- `defaultValue` - 默认值（可选）
+
+**返回值**
+- 对应路径的值，如果路径不存在或为 null/undefined，则返回默认值。
+
+**示例**
+```typescript
+const obj = { a: { b: { c: 1 } } }
+
+safeGet(obj, 'a.b.c') // 1
+safeGet(obj, 'a.b.d', 'fallback') // 'fallback'
+safeGet(obj, 'x.y.z', 0) // 0
 ```

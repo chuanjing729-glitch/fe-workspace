@@ -8,6 +8,7 @@ const recentUpdates = getRecentUpdates(5)
 // https://vitepress.dev/reference/site-config
 export default withMermaid(defineConfig({
   base: '/fe-workspace/',
+  cleanUrls: true,
   title: "前端工程效率空间",
   description: "前端工程效率平台提升开发质量、效率和性能",
   head: [],
@@ -25,7 +26,7 @@ export default withMermaid(defineConfig({
     announcement: {
       show: true,
       text: '✨ 规范体系升级：新增“存量治理（基线机制）”及“自动化同步”规范，建议团队查阅。',
-      link: '/specs/coding/null-safety-specification.html#存量代码治理-baseline-机制'
+      link: '/specs/coding/null-safety-specification#存量代码治理-baseline-机制'
     },
 
     recentUpdates,

@@ -58,6 +58,9 @@ formatCurrency('', 2, '¥', 'N/A') // 'N/A'
 
 格式化日期
 
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{47-71}
+
 **类型签名**
 ```typescript
 function formatDate(
@@ -95,6 +98,9 @@ formatDate(date, 'MM-DD HH:mm') // '01-15 10:30'
 
 格式化文件大小
 
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{80-91}
+
 **类型签名**
 ```typescript
 function formatFileSize(
@@ -125,6 +131,9 @@ formatFileSize(1024 * 1024 * 1024, 0) // '1 GB'
 
 格式化银行卡号（每4位添加空格）
 
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{98-103}
+
 **类型签名**
 ```typescript
 function formatBankCard(cardNumber: string): string
@@ -148,6 +157,9 @@ formatBankCard('6222 0212 3456 7890') // '6222 0212 3456 7890'（已有空格保
 
 格式化身份证号（隐藏中间部分）
 
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{110-122}
+
 **类型签名**
 ```typescript
 function formatIdCard(idCard: string): string
@@ -170,6 +182,9 @@ formatIdCard('110101900101123') // '110101******123'（15位）
 ### formatPercent
 
 格式化百分比
+
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{131-141}
 
 **类型签名**
 ```typescript
@@ -201,6 +216,9 @@ formatPercent(0.12345, 0) // '12%'
 ### formatNumber
 
 格式化数字（千分位）
+
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{149-161}
 
 **类型签名**
 ```typescript

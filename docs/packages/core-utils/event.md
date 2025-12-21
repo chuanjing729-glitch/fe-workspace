@@ -27,22 +27,21 @@ import {
 
 事件总线类，实现发布订阅模式。
 
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{14-89}
+
 **方法**
 
 #### on
 
 订阅事件
 
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{23-31}
+
 ```typescript
 on(event: string, callback: Function): () => void
 ```
-
-**参数**
-- `event` - 事件名
-- `callback` - 回调函数
-
-**返回值**
-- 取消订阅函数
 
 **示例**
 ```typescript
@@ -59,6 +58,9 @@ unsubscribe()
 
 发布事件
 
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{38-42}
+
 ```typescript
 emit(event: string, data?: any): void
 ```
@@ -71,6 +73,9 @@ bus.emit('userLogin', { id: 1, name: '张三' })
 #### off
 
 取消订阅
+
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{49-61}
 
 ```typescript
 off(event: string, callback?: Function): void
@@ -85,6 +90,9 @@ bus.off('userLogin') // 取消该事件的所有回调
 #### once
 
 订阅一次性事件
+
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{68-74}
 
 ```typescript
 once(event: string, callback: Function): void
@@ -101,6 +109,9 @@ bus.once('init', () => {
 
 清空所有事件
 
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{79-81}
+
 ```typescript
 clear(): void
 ```
@@ -108,6 +119,9 @@ clear(): void
 #### listenerCount
 
 获取事件监听器数量
+
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{86-88}
 
 ```typescript
 listenerCount(event: string): number
@@ -118,6 +132,9 @@ listenerCount(event: string): number
 ### createEventBus
 
 创建独立的事件总线实例
+
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{100-102}
 
 **类型签名**
 ```typescript
@@ -138,6 +155,9 @@ moduleBus.emit('moduleEvent', data)
 
 全局事件总线单例
 
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{107-107}
+
 **示例**
 ```typescript
 import { globalEventBus } from '@51jbs/core-utils'
@@ -156,6 +176,9 @@ globalEventBus.emit('notification', '有新消息')
 ### dispatchCustomEvent
 
 触发自定义DOM事件
+
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{115-126}
 
 **类型签名**
 ```typescript
@@ -189,6 +212,9 @@ button.addEventListener('customClick', (e) => {
 ### delegate
 
 事件委托
+
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{136-155}
 
 **类型签名**
 ```typescript
@@ -227,6 +253,9 @@ unlisten()
 ### waitForEvent
 
 等待事件触发（Promise封装）
+
+**源码实现**
+<<< @/packages/core-utils/src/event/index.ts{164-186}
 
 **类型签名**
 ```typescript

@@ -38,6 +38,9 @@ import * as arrayUtils from '@51jbs/core-utils';
 
 数组去重。
 
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{10-13}
+
 **类型签名**
 ```typescript
 function unique<T>(array: T[]): T[]
@@ -60,6 +63,9 @@ unique(['a', 'b', 'a', 'c']); // ['a', 'b', 'c']
 ### uniqueBy
 
 根据指定键去重。
+
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{21-33}
 
 **类型签名**
 ```typescript
@@ -89,6 +95,9 @@ uniqueBy(arr, item => item.id);
 ### groupBy
 
 数组分组。
+
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{41-56}
 
 **类型签名**
 ```typescript
@@ -125,6 +134,9 @@ groupBy(arr, item => item.type);
 
 数组扁平化。
 
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{64-72}
+
 **类型签名**
 ```typescript
 function flatten<T>(array: any[], depth?: number): T[]
@@ -150,6 +162,9 @@ flatten([1, [2, [3, [4]]]], 3); // [1, 2, 3, 4]
 
 数组乱序（洗牌算法）。
 
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{79-88}
+
 **类型签名**
 ```typescript
 function shuffle<T>(array: T[]): T[]
@@ -171,6 +186,9 @@ shuffle([1, 2, 3, 4, 5]); // [3, 1, 4, 5, 2]（随机顺序）
 ### max
 
 获取数组最大值。
+
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{95-98}
 
 **类型签名**
 ```typescript
@@ -195,6 +213,9 @@ max([]); // undefined
 
 获取数组最小值。
 
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{105-108}
+
 **类型签名**
 ```typescript
 function min(array: number[]): number | undefined
@@ -217,6 +238,9 @@ min([]); // undefined
 ### sum
 
 数组求和。
+
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{115-118}
 
 **类型签名**
 ```typescript
@@ -241,6 +265,9 @@ sum([]); // 0
 
 数组平均值。
 
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{125-128}
+
 **类型签名**
 ```typescript
 function average(array: number[]): number
@@ -263,6 +290,9 @@ average([]); // 0
 ### intersection
 
 数组交集。
+
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{135-143}
 
 **类型签名**
 ```typescript
@@ -287,6 +317,9 @@ intersection([1, 2], [3, 4], [5, 6]); // []
 
 数组并集。
 
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{150-153}
+
 **类型签名**
 ```typescript
 function union<T>(...arrays: T[][]): T[]
@@ -309,6 +342,9 @@ union([1, 2], [3, 4], [5, 6]); // [1, 2, 3, 4, 5, 6]
 ### difference
 
 数组差集（在第一个数组中但不在其他数组中的元素）。
+
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{161-166}
 
 **类型签名**
 ```typescript
@@ -334,6 +370,9 @@ difference([1, 2, 3], [2], [3]); // [1]
 
 数组分块。
 
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{174-182}
+
 **类型签名**
 ```typescript
 function chunk<T>(array: T[], size: number): T[][]
@@ -357,6 +396,9 @@ chunk([1, 2, 3, 4, 5], 3); // [[1, 2, 3], [4, 5]]
 ### paginate
 
 数组分页。
+
+**源码实现**
+<<< @/packages/core-utils/src/array/index.ts{191-209}
 
 **类型签名**
 ```typescript

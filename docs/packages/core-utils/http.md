@@ -22,203 +22,119 @@ HTTP 客户端类，提供完整的 HTTP 请求功能。
 
 #### 构造函数
 
-```typescript
-constructor(config?: RequestConfig)
-```
+初始化 HTTP 客户端。
 
-**参数**
-- `config` - 配置对象（可选）
-  - `baseURL` - 基础URL前缀
-  - `timeout` - 超时时间（毫秒），默认10000
-  - `headers` - 默认请求头
-  - `credentials` - 凭证模式，默认'same-origin'
-  - `mode` - 请求模式，默认'cors'
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{24-35}
 
 **示例**
 ```typescript
-// 创建自定义配置的HTTP客户端
 const client = new HttpClient({
   baseURL: 'https://api.example.com',
   timeout: 5000,
   headers: {
-    'Content-Type': 'application/json',
-    'X-Custom-Header': 'value'
+    'Content-Type': 'application/json'
   }
 });
 ```
 
+---
+
 #### get 方法
 
 发起 GET 请求。
+
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{208-214}
 
 **类型签名**
 ```typescript
 get<T = any>(url: string, params?: Record<string, any>, options?: RequestOptions): Promise<T>
 ```
 
-**参数**
-- `url` - 请求URL
-- `params` - 查询参数（可选）
-- `options` - 请求选项（可选）
-
-**返回值**
-- Promise，解析为响应数据
-
 **示例**
 ```typescript
-// 基础GET请求
-const users = await client.get('/users');
-
-// 带参数的GET请求
 const user = await client.get('/users', { id: 123 });
-
-// 带选项的GET请求
-const data = await client.get('/users', { page: 1 }, { 
-  headers: { 'Authorization': 'Bearer token' } 
-});
 ```
+
+---
 
 #### post 方法
 
 发起 POST 请求。
+
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{219-225}
 
 **类型签名**
 ```typescript
 post<T = any>(url: string, data?: any, options?: RequestOptions): Promise<T>
 ```
 
-**参数**
-- `url` - 请求URL
-- `data` - 请求体数据（可选）
-- `options` - 请求选项（可选）
-
-**返回值**
-- Promise，解析为响应数据
-
 **示例**
 ```typescript
-// 基础POST请求
-const newUser = await client.post('/users', { name: 'John', email: 'john@example.com' });
-
-// 带选项的POST请求
-const result = await client.post('/users', { name: 'John' }, { 
-  headers: { 'Authorization': 'Bearer token' } 
-});
+const newUser = await client.post('/users', { name: 'John' });
 ```
+
+---
 
 #### put 方法
 
 发起 PUT 请求。
+
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{230-236}
 
 **类型签名**
 ```typescript
 put<T = any>(url: string, data?: any, options?: RequestOptions): Promise<T>
 ```
 
-**参数**
-- `url` - 请求URL
-- `data` - 请求体数据（可选）
-- `options` - 请求选项（可选）
-
-**返回值**
-- Promise，解析为响应数据
-
-**示例**
-```typescript
-// PUT请求
-const updatedUser = await client.put('/users/123', { name: 'John Doe' });
-```
+---
 
 #### delete 方法
 
 发起 DELETE 请求。
+
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{241-246}
 
 **类型签名**
 ```typescript
 delete<T = any>(url: string, options?: RequestOptions): Promise<T>
 ```
 
-**参数**
-- `url` - 请求URL
-- `options` - 请求选项（可选）
-
-**返回值**
-- Promise，解析为响应数据
-
-**示例**
-```typescript
-// DELETE请求
-await client.delete('/users/123');
-```
+---
 
 #### patch 方法
 
 发起 PATCH 请求。
+
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{251-257}
 
 **类型签名**
 ```typescript
 patch<T = any>(url: string, data?: any, options?: RequestOptions): Promise<T>
 ```
 
-**参数**
-- `url` - 请求URL
-- `data` - 请求体数据（可选）
-- `options` - 请求选项（可选）
-
-**返回值**
-- Promise，解析为响应数据
-
-**示例**
-```typescript
-// PATCH请求
-const patchedUser = await client.patch('/users/123', { name: 'John Smith' });
-```
-
 ---
 
 ### createHttpClient 函数
 
-创建HTTP客户端实例。
+创建 HTTP 客户端工厂函数。
 
-**类型签名**
-```typescript
-function createHttpClient(config?: RequestConfig): HttpClient
-```
-
-**参数**
-- `config` - 配置对象（可选）
-
-**返回值**
-- HttpClient实例
-
-**示例**
-```typescript
-// 创建自定义HTTP客户端
-const apiClient = createHttpClient({
-  baseURL: 'https://api.myapp.com',
-  timeout: 8000
-});
-
-// 使用客户端发起请求
-const data = await apiClient.get('/endpoint');
-```
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{265-267}
 
 ---
 
 ### http 实例
 
-默认HTTP客户端实例（单例）。
+默认 HTTP 客户端（单例）。
 
-**示例**
-```typescript
-import { http } from '@51jbs/core-utils'
-
-// 直接使用默认实例
-const data = await http.get('/api/users')
-
-// 发起POST请求
-const newUser = await http.post('/api/users', { name: 'John' })
-```
+**源码实现**
+<<< @/packages/core-utils/src/http/index.ts{272-272}
 
 ## 功能特性
 

@@ -3,11 +3,11 @@
  */
 
 // 对象操作
-export { deepClone, shallowClone, merge, isEmpty } from './object'
+export { deepClone, shallowClone, merge, isEmpty, safeGet } from './object'
 
 // 数字操作
-export { 
-  add, subtract, multiply, divide, 
+export {
+  add, subtract, multiply, divide,
   toFixed, clamp, randomInt, numberToChinese, formatPercentage
 } from './number'
 
@@ -15,7 +15,7 @@ export {
 export { dateDiff, getRelativeTime, isToday, isWorkday, getDaysInMonth, addDays, addMonths } from './date'
 
 // 字符串操作
-export { 
+export {
   maskPhone, maskIdCard, maskEmail,
   trimAll, capitalize, camelToSnake, snakeToCamel, truncate,
   isValidPhone, isValidEmail, isValidIdCard, randomString,
@@ -27,7 +27,7 @@ export {
 export { local, session, storage, cookie } from './storage'
 
 // 数组操作
-export { 
+export {
   unique, uniqueBy, groupBy, flatten, shuffle,
   max, min, sum, average,
   intersection, union, difference,

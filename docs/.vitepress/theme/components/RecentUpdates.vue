@@ -1,5 +1,5 @@
 <script setup>
-import { useData } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 const { theme } = useData()
 const updates = theme.value.recentUpdates || []
 </script>
@@ -9,7 +9,7 @@ const updates = theme.value.recentUpdates || []
     <div class="container">
       <h2 class="section-title">📅 最近更新</h2>
       <div class="update-list">
-        <a v-for="item in updates" :key="item.path" :href="item.path" class="update-item">
+        <a v-for="item in updates" :key="item.path" :href="withBase(item.path)" class="update-item">
           <div class="update-content">
             <span class="update-title">{{ item.title }}</span>
             <span class="update-date">{{ item.date }}</span>

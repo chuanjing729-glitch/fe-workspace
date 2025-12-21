@@ -24,158 +24,243 @@ import * as domUtils from '@51jbs/core-utils';
 
 ## API 参考
 
-### querySelector(selector: string, container?: Element | Document): Element | null
+### addClass
 
-根据选择器查找单个元素。
+添加类名。
 
-**参数:**
-- `selector`: CSS 选择器字符串
-- `container`: 可选，查询容器，默认为 document
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{10-25}
 
-**返回值:**
-- 找到的元素或 null
-
-**示例:**
+**类型签名**
 ```typescript
-const element = querySelector('.my-class');
-const nestedElement = querySelector('.nested', containerElement);
+function addClass(el: Element, cls: string): void
 ```
 
-### querySelectorAll(selector: string, container?: Element | Document): Element[]
+**参数**
+- `el` - 元素
+- `cls` - 类名（支持空格分隔的多个类名）
 
-根据选择器查找所有匹配的元素。
-
-**参数:**
-- `selector`: CSS 选择器字符串
-- `container`: 可选，查询容器，默认为 document
-
-**返回值:**
-- 匹配元素的数组
-
-**示例:**
+**示例**
 ```typescript
-const elements = querySelectorAll('.item');
-const nestedElements = querySelectorAll('.nested-item', containerElement);
+addClass(el, 'active');
+addClass(el, 'class1 class2');
 ```
 
-### addClass(element: Element, className: string): void
+---
 
-给元素添加 CSS 类名。
+### removeClass
 
-**参数:**
-- `element`: 目标元素
-- `className`: 要添加的类名
+移除类名。
 
-**示例:**
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{32-48}
+
+**类型签名**
 ```typescript
-addClass(element, 'active');
+function removeClass(el: Element, cls: string): void
 ```
 
-### removeClass(element: Element, className: string): void
+**参数**
+- `el` - 元素
+- `cls` - 类名
 
-从元素移除 CSS 类名。
-
-**参数:**
-- `element`: 目标元素
-- `className`: 要移除的类名
-
-**示例:**
+**示例**
 ```typescript
-removeClass(element, 'active');
+removeClass(el, 'active');
 ```
 
-### hasClass(element: Element, className: string): boolean
+---
 
-检查元素是否包含指定的 CSS 类名。
+### hasClass
 
-**参数:**
-- `element`: 目标元素
-- `className`: 要检查的类名
+检查是否有类名。
 
-**返回值:**
-- 如果元素包含该类名则返回 true，否则返回 false
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{56-68}
 
-**示例:**
+**类型签名**
 ```typescript
-if (hasClass(element, 'active')) {
-  console.log('元素处于激活状态');
+function hasClass(el: Element, cls: string): boolean
+```
+
+**示例**
+```typescript
+if (hasClass(el, 'active')) {
+  // ...
 }
 ```
 
-### toggleClass(element: Element, className: string): void
+---
 
-切换元素的 CSS 类名（存在则移除，不存在则添加）。
+### toggleClass
 
-**参数:**
-- `element`: 目标元素
-- `className`: 要切换的类名
+切换类名。
 
-**示例:**
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{75-83}
+
+**类型签名**
 ```typescript
-toggleClass(element, 'expanded');
+function toggleClass(el: Element, cls: string): void
 ```
 
-### on(element: Element | Window, event: string, handler: EventListener, options?: boolean | AddEventListenerOptions): void
-
-添加事件监听器。
-
-**参数:**
-- `element`: 目标元素或 window 对象
-- `event`: 事件名称
-- `handler`: 事件处理函数
-- `options`: 可选，事件监听器选项
-
-**示例:**
+**示例**
 ```typescript
-on(button, 'click', handleClick);
-on(window, 'resize', handleResize, { passive: true });
+toggleClass(el, 'active');
 ```
 
-### off(element: Element | Window, event: string, handler: EventListener, options?: boolean | AddEventListenerOptions): void
+---
 
-移除事件监听器。
+### getScrollTop
 
-**参数:**
-- `element`: 目标元素或 window 对象
-- `event`: 事件名称
-- `handler`: 事件处理函数
-- `options`: 可选，事件监听器选项
+获取滚动顶部距离（兼容不同浏览器）。
 
-**示例:**
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{89-94}
+
+**类型签名**
 ```typescript
-off(button, 'click', handleClick);
+function getScrollTop(): number
 ```
 
-### closest(element: Element, selector: string): Element | null
+---
 
-查找匹配选择器的最近祖先元素。
+### getScrollLeft
 
-**参数:**
-- `element`: 起始元素
-- `selector`: CSS 选择器字符串
+获取滚动左侧距离。
 
-**返回值:**
-- 匹配的最近祖先元素或 null
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{100-105}
 
-**示例:**
+**类型签名**
 ```typescript
-const listItem = closest(targetElement, 'li');
+function getScrollLeft(): number
 ```
 
-### matches(element: Element, selector: string): boolean
+---
 
-检查元素是否匹配指定的选择器。
+### getElementTop
 
-**参数:**
-- `element`: 目标元素
-- `selector`: CSS 选择器字符串
+获取元素到页面顶部的绝对距离。
 
-**返回值:**
-- 如果元素匹配选择器则返回 true，否则返回 false
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{112-122}
 
-**示例:**
+**类型签名**
 ```typescript
-if (matches(element, '.button.primary')) {
-  console.log('这是一个主按钮');
+function getElementTop(el: HTMLElement): number
+```
+
+---
+
+### getElementLeft
+
+获取元素到页面左侧的绝对距离。
+
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{129-139}
+
+**类型签名**
+```typescript
+function getElementLeft(el: HTMLElement): number
+```
+
+---
+
+### isInViewport
+
+检查元素是否在视口中。
+
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{147-155}
+
+**类型签名**
+```typescript
+function isInViewport(el: Element, offset?: number): boolean
+```
+
+**参数**
+- `el` - 元素
+- `offset` - 偏移量（默认 0）
+
+**示例**
+```typescript
+if (isInViewport(el, 100)) {
+  console.log('元素进入视口（预加载范围）');
 }
+```
+
+---
+
+### scrollToElement
+
+平滑滚动到指定元素。
+
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{162-191}
+
+**类型签名**
+```typescript
+function scrollToElement(
+  el: Element | string, 
+  options?: {
+    behavior?: ScrollBehavior
+    offset?: number
+  }
+): void
+```
+
+**参数**
+- `el` - 元素或选择器字符串
+- `options`
+  - `behavior`: 滚动行为 ('auto' | 'smooth')
+  - `offset`: 顶部偏移量
+
+**示例**
+```typescript
+scrollToElement('#target');
+scrollToElement(element, { offset: 50, behavior: 'smooth' });
+```
+
+---
+
+### createElement
+
+创建 DOM 元素。
+
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{200-224}
+
+**类型签名**
+```typescript
+function createElement(
+  tagName: string, 
+  attributes?: Record<string, any>, 
+  textContent?: string
+): HTMLElement
+```
+
+**示例**
+```typescript
+const div = createElement('div', { class: 'container', id: 'app' }, 'Hello');
+document.body.appendChild(div);
+```
+
+---
+
+### removeElement
+
+移除 DOM 元素。
+
+**源码实现**
+<<< @/packages/core-utils/src/dom/index.ts{230-234}
+
+**类型签名**
+```typescript
+function removeElement(el: Element): void
+```
+
+**示例**
+```typescript
+removeElement(document.getElementById('temp'));
 ```
