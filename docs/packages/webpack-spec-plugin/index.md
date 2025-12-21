@@ -42,12 +42,12 @@
 
 - **[👋 快速开始](/packages/webpack-spec-plugin/quick-start)** - 5 分钟上手
 - **[✨ 功能特性](/packages/webpack-spec-plugin/features)** - 完整功能列表
-- **[📖 Vue2 开发规范](/specs/coding/vue2-guide)** - 1160 行详细指南
-- **[📖 JavaScript 开发规范](/specs/coding/javascript-typescript-guide)** - 1200 行详细指南
+- **[📖 Vue2 开发规范](/specs/coding/vue)** - 1160 行详细指南
+- **[📖 JavaScript 开发规范](/specs/coding/javascript)** - 1200 行详细指南
 - **[🎭 事件规范](/specs/coding/event-specification)** - 9 项事件处理规范
 - **[🛡️ 空指针防护规范](/specs/coding/null-safety-specification)** - 9 项防空检查
 - **[📊 HTML 报告](/packages/webpack-spec-plugin/validation-report)** - 报告功能详解
-- **[✅ 真实项目验证](/packages/webpack-spec-plugin/production-evaluation)** - 生产项目验证报告
+- **[✅ 真实项目验证](/packages/webpack-spec-plugin/validation-report)** - 生产项目验证报告
 - **[🧪 生产环境评估](/packages/webpack-spec-plugin/production-evaluation)** - 综合评分 94.05/100
 - **[📝 更新日志](/packages/webpack-spec-plugin/changelog)** - 版本更新记录
 
@@ -290,7 +290,7 @@ axios.get('/api/user')
   })
 ```
 
-[查看完整规范文档](/specs/coding/vue2-guide)
+[查看完整规范文档](/specs/coding/vue)
 
 ---
 
