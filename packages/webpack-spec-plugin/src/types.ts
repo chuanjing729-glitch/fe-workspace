@@ -57,7 +57,7 @@ export interface PluginOptions {
     /** 依赖检查 */
     dependencyCheck?: boolean
   }
-  
+
   /**
    * 边界处理规则自定义配置
    */
@@ -115,6 +115,24 @@ export interface PluginOptions {
    * 项目根目录
    */
   rootDir?: string
+
+  /**
+   * 基线文件路径，用于忽略已知的存量问题
+   * @default '.spec-baseline.json'
+   */
+  baselineFile?: string
+
+  /**
+   * 是否启用基线机制，启用后将忽略基线中记录的存量错误
+   * @default false
+   */
+  useBaseline?: boolean
+
+  /**
+   * 是否自动生成或更新基线文件
+   * @default false
+   */
+  generateBaseline?: boolean
 }
 
 /**

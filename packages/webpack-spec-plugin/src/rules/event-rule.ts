@@ -1,4 +1,6 @@
+import * as ts from 'typescript'
 import { RuleChecker, CheckResult, PluginOptions } from '../types'
+import { ASTHelper } from '../utils/ast-helper'
 
 /**
  * 事件规范检查模块
@@ -16,15 +18,15 @@ import { RuleChecker, CheckResult, PluginOptions } from '../types'
 export const eventRule: RuleChecker = {
   name: 'event',
   description: '事件规范检查（Vue2 + JavaScript）',
-  
+
   check(filePath: string, content: string, options: PluginOptions): CheckResult[] {
     const results: CheckResult[] = []
-    
+
     // 只检查 Vue 和 JavaScript 文件
     if (!/\.(vue|js|jsx|ts|tsx)$/.test(filePath)) {
       return results
     }
-    
+
     if (filePath.endsWith('.vue')) {
       // Vue2 事件规范检查
       results.push(...checkVueEventNaming(filePath, content))
@@ -33,19 +35,19 @@ export const eventRule: RuleChecker = {
       results.push(...checkVueEventModifiers(filePath, content))
       results.push(...checkVueVagueEventNames(filePath, content))
     }
-    
+
     // JavaScript 事件规范检查（包括 Vue script 部分）
     const scriptContent = filePath.endsWith('.vue')
       ? (content.match(/<script[^>]*>([\s\S]*?)<\/script>/)?.[1] || '')
       : content
-      
+
     if (scriptContent) {
       results.push(...checkJsEventListenerCleanup(filePath, content, scriptContent))
       results.push(...checkJsEventHandlerNaming(filePath, content, scriptContent))
       results.push(...checkEventObjectUsage(filePath, content, scriptContent))
       results.push(...checkEventDelegation(filePath, content, scriptContent))
     }
-    
+
     return results
   }
 }
@@ -56,29 +58,29 @@ export const eventRule: RuleChecker = {
  */
 function checkVueEventNaming(filePath: string, content: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   const templateMatch = content.match(/<template>([\s\S]*?)<\/template>/)
   if (!templateMatch) return results
-  
+
   const template = templateMatch[1]
   const templateStartIndex = content.indexOf(templateMatch[0])
-  
+
   // 匹配 @eventName 或 v-on:eventName
   const eventPattern = /@([a-z][a-zA-Z0-9]*)|v-on:([a-z][a-zA-Z0-9]*)/g
   let match
-  
+
   while ((match = eventPattern.exec(template)) !== null) {
     const eventName = match[1] || match[2]
-    
+
     // 检查是否使用了驼峰命名（排除原生事件）
     const nativeEvents = ['click', 'change', 'input', 'submit', 'focus', 'blur', 'keyup', 'keydown', 'mouseenter', 'mouseleave']
     if (nativeEvents.includes(eventName)) continue
-    
+
     if (/[A-Z]/.test(eventName)) {
       const position = templateStartIndex + match.index
       const lines = content.substring(0, position).split('\n')
       const line = lines.length
-      
+
       results.push({
         rule: 'event/vue-event-naming',
         message: `Vue 自定义事件应使用 kebab-case 命名，不应使用驼峰：${eventName}`,
@@ -88,7 +90,7 @@ function checkVueEventNaming(filePath: string, content: string): CheckResult[] {
       })
     }
   }
-  
+
   return results
 }
 
@@ -98,27 +100,27 @@ function checkVueEventNaming(filePath: string, content: string): CheckResult[] {
  */
 function checkVueCustomEventParams(filePath: string, content: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   const scriptMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/)
   if (!scriptMatch) return results
-  
+
   const script = scriptMatch[1]
   const scriptStartIndex = content.indexOf(scriptMatch[0])
-  
+
   // 匹配 this.$emit('event-name')
   const emitPattern = /this\.\$emit\s*\(\s*['"]([^'"]+)['"]\s*\)/g
   let match
-  
+
   while ((match = emitPattern.exec(script)) !== null) {
     const eventName = match[1]
     const fullMatch = match[0]
-    
+
     // 检查是否有参数（简单检测，只检测是否有第二个参数）
     if (!fullMatch.includes(',')) {
       const position = scriptStartIndex + match.index
       const lines = content.substring(0, position).split('\n')
       const line = lines.length
-      
+
       results.push({
         rule: 'event/vue-emit-params',
         message: `自定义事件 "${eventName}" 建议传递明确的数据参数`,
@@ -128,7 +130,7 @@ function checkVueCustomEventParams(filePath: string, content: string): CheckResu
       })
     }
   }
-  
+
   return results
 }
 
@@ -138,34 +140,47 @@ function checkVueCustomEventParams(filePath: string, content: string): CheckResu
  */
 function checkVueEventListenerCleanup(filePath: string, content: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   const scriptMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/)
   if (!scriptMatch) return results
-  
+
   const script = scriptMatch[1]
-  const scriptStartIndex = content.indexOf(scriptMatch[0])
-  
-  // 查找 addEventListener
-  const addEventPattern = /addEventListener\s*\(\s*['"]([^'"]+)['"]/g
-  const hasAddEventListener = addEventPattern.test(script)
-  
-  if (hasAddEventListener) {
-    // 检查是否有 beforeDestroy 或 beforeUnmount
-    const hasCleanup = /beforeDestroy\s*\(/.test(script) || 
-                       /beforeUnmount\s*\(/.test(script) ||
-                       /removeEventListener/.test(script)
-    
-    if (!hasCleanup) {
-      results.push({
-        rule: 'event/vue-listener-cleanup',
-        message: '使用 addEventListener 添加的事件监听器必须在 beforeDestroy/beforeUnmount 中移除，否则会导致内存泄漏',
-        file: filePath,
-        type: 'error',
-        line: 1
-      })
+  const sourceFile = ASTHelper.parse(script, filePath)
+
+  let hasAddEventListener = false
+  let hasBeforeDestroy = false
+  let hasRemoveEventListener = false
+
+  ASTHelper.traverse(sourceFile, node => {
+    // 检查是否有 addEventListener
+    if (ts.isCallExpression(node) && node.expression.getText().endsWith('addEventListener')) {
+      hasAddEventListener = true
     }
+
+    // 检查是否有 removeEventListener
+    if (ts.isCallExpression(node) && node.expression.getText().endsWith('removeEventListener')) {
+      hasRemoveEventListener = true
+    }
+
+    // 检查是否有 beforeDestroy 或 beforeUnmount 生命周期
+    if (ts.isPropertyAssignment(node) || ts.isMethodDeclaration(node)) {
+      const name = node.name.getText()
+      if (['beforeDestroy', 'beforeUnmount', 'onBeforeUnmount'].includes(name)) {
+        hasBeforeDestroy = true
+      }
+    }
+  })
+
+  if (hasAddEventListener && !(hasBeforeDestroy || hasRemoveEventListener)) {
+    results.push({
+      rule: 'event/vue-listener-cleanup',
+      message: '使用 addEventListener 添加的事件监听器必须在 beforeDestroy/beforeUnmount 中移除，否则会导致内存泄漏',
+      file: filePath,
+      type: 'error',
+      line: 1
+    })
   }
-  
+
   return results
 }
 
@@ -175,17 +190,17 @@ function checkVueEventListenerCleanup(filePath: string, content: string): CheckR
  */
 function checkVueEventModifiers(filePath: string, content: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   const scriptMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/)
   if (!scriptMatch) return results
-  
+
   const script = scriptMatch[1]
   const scriptStartIndex = content.indexOf(scriptMatch[0])
-  
+
   // 查找方法中的 event.preventDefault() 或 event.stopPropagation()
   const preventDefaultPattern = /(\w+)\.preventDefault\s*\(\s*\)/g
   const stopPropagationPattern = /(\w+)\.stopPropagation\s*\(\s*\)/g
-  
+
   let match
   while ((match = preventDefaultPattern.exec(script)) !== null) {
     const eventVar = match[1]
@@ -193,7 +208,7 @@ function checkVueEventModifiers(filePath: string, content: string): CheckResult[
       const position = scriptStartIndex + match.index
       const lines = content.substring(0, position).split('\n')
       const line = lines.length
-      
+
       results.push({
         rule: 'event/vue-prefer-modifiers',
         message: '建议在模板中使用 .prevent 修饰符，而不是在方法中调用 preventDefault()',
@@ -203,14 +218,14 @@ function checkVueEventModifiers(filePath: string, content: string): CheckResult[
       })
     }
   }
-  
+
   while ((match = stopPropagationPattern.exec(script)) !== null) {
     const eventVar = match[1]
     if (eventVar === 'event' || eventVar === 'e' || eventVar === 'evt') {
       const position = scriptStartIndex + match.index
       const lines = content.substring(0, position).split('\n')
       const line = lines.length
-      
+
       results.push({
         rule: 'event/vue-prefer-modifiers',
         message: '建议在模板中使用 .stop 修饰符，而不是在方法中调用 stopPropagation()',
@@ -220,7 +235,7 @@ function checkVueEventModifiers(filePath: string, content: string): CheckResult[
       })
     }
   }
-  
+
   return results
 }
 
@@ -230,29 +245,29 @@ function checkVueEventModifiers(filePath: string, content: string): CheckResult[
  */
 function checkVueVagueEventNames(filePath: string, content: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   const scriptMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/)
   if (!scriptMatch) return results
-  
+
   const script = scriptMatch[1]
   const scriptStartIndex = content.indexOf(scriptMatch[0])
-  
+
   // 模糊的事件名称
   const vagueEvents = ['click', 'change', 'input', 'action', 'event', 'handle']
-  
+
   // 匹配自定义事件 $emit
   const emitPattern = /this\.\$emit\s*\(\s*['"]([^'"]+)['"]/g
   let match
-  
+
   while ((match = emitPattern.exec(script)) !== null) {
     const eventName = match[1]
-    
+
     // 检查事件名是否过于模糊
     if (vagueEvents.some(vague => eventName === vague || eventName === `on-${vague}`)) {
       const position = scriptStartIndex + match.index
       const lines = content.substring(0, position).split('\n')
       const line = lines.length
-      
+
       results.push({
         rule: 'event/vue-specific-event-name',
         message: `事件名 "${eventName}" 过于模糊，建议使用更具体的名称（如 "submit-form"、"update-user" 等）`,
@@ -262,7 +277,7 @@ function checkVueVagueEventNames(filePath: string, content: string): CheckResult
       })
     }
   }
-  
+
   return results
 }
 
@@ -272,49 +287,44 @@ function checkVueVagueEventNames(filePath: string, content: string): CheckResult
  */
 function checkJsEventListenerCleanup(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
   const results: CheckResult[] = []
-  
-  // 查找所有 addEventListener
-  const addPattern = /(\w+)\.addEventListener\s*\(\s*['"]([^'"]+)['"]\s*,\s*([^)]+)\)/g
-  const addedListeners: Array<{ element: string, event: string, handler: string, index: number }> = []
-  
-  let match
-  while ((match = addPattern.exec(scriptContent)) !== null) {
-    addedListeners.push({
-      element: match[1],
-      event: match[2],
-      handler: match[3].trim(),
-      index: match.index
-    })
-  }
-  
-  // 查找所有 removeEventListener
-  const removePattern = /(\w+)\.removeEventListener\s*\(\s*['"]([^'"]+)['"]\s*,\s*([^)]+)\)/g
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
+
+  const addedListeners: Array<{ element: string, event: string, handler: string, node: ts.Node }> = []
   const removedListeners: Array<{ element: string, event: string, handler: string }> = []
-  
-  while ((match = removePattern.exec(scriptContent)) !== null) {
-    removedListeners.push({
-      element: match[1],
-      event: match[2],
-      handler: match[3].trim()
-    })
-  }
-  
+
+  ASTHelper.traverse(sourceFile, node => {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const methodName = node.expression.name.getText()
+      const objectName = node.expression.expression.getText()
+
+      if (methodName === 'addEventListener' && node.arguments.length >= 2) {
+        addedListeners.push({
+          element: objectName,
+          event: node.arguments[0].getText().replace(/['"]/g, ''),
+          handler: node.arguments[1].getText().trim(),
+          node: node
+        })
+      } else if (methodName === 'removeEventListener' && node.arguments.length >= 2) {
+        removedListeners.push({
+          element: objectName,
+          event: node.arguments[0].getText().replace(/['"]/g, ''),
+          handler: node.arguments[1].getText().trim()
+        })
+      }
+    }
+  })
+
   // 检查每个添加的监听器是否有对应的移除
   for (const added of addedListeners) {
-    const hasRemove = removedListeners.some(removed => 
-      removed.element === added.element && 
-      removed.event === added.event && 
+    const hasRemove = removedListeners.some(removed =>
+      removed.element === added.element &&
+      removed.event === added.event &&
       removed.handler === added.handler
     )
-    
+
     if (!hasRemove) {
-      const position = filePath.endsWith('.vue') 
-        ? fullContent.indexOf(scriptContent) + added.index
-        : added.index
-        
-      const lines = fullContent.substring(0, position).split('\n')
-      const line = lines.length
-      
+      const line = ASTHelper.getLine(added.node, sourceFile)
+
       results.push({
         rule: 'event/js-listener-cleanup',
         message: `事件监听器 ${added.element}.addEventListener('${added.event}', ...) 没有对应的 removeEventListener，可能导致内存泄漏`,
@@ -324,7 +334,7 @@ function checkJsEventListenerCleanup(filePath: string, fullContent: string, scri
       })
     }
   }
-  
+
   return results
 }
 
@@ -334,33 +344,47 @@ function checkJsEventListenerCleanup(filePath: string, fullContent: string, scri
  */
 function checkJsEventHandlerNaming(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
   const results: CheckResult[] = []
-  
-  // 匹配事件处理函数定义
-  const handlerPattern = /(?:function\s+(\w+)|const\s+(\w+)\s*=\s*(?:function|\([^)]*\)\s*=>))[^{]*\{[^}]*(?:event|evt|e)\./g
-  let match
-  
-  while ((match = handlerPattern.exec(scriptContent)) !== null) {
-    const funcName = match[1] || match[2]
-    
-    // 检查是否以 handle 或 on 开头
-    if (funcName && !/^(handle|on)[A-Z]/.test(funcName)) {
-      const position = filePath.endsWith('.vue') 
-        ? fullContent.indexOf(scriptContent) + match.index
-        : match.index
-        
-      const lines = fullContent.substring(0, position).split('\n')
-      const line = lines.length
-      
-      results.push({
-        rule: 'event/js-handler-naming',
-        message: `事件处理函数 "${funcName}" 建议使用 handle* 或 on* 前缀命名（如 handleClick、onSubmit）`,
-        file: filePath,
-        type: 'warning',
-        line
-      })
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
+
+  ASTHelper.traverse(sourceFile, node => {
+    let funcName: string | undefined
+    let parameters: ts.NodeArray<ts.ParameterDeclaration> | undefined
+
+    if (ts.isFunctionDeclaration(node) && node.name) {
+      funcName = node.name.getText()
+      parameters = node.parameters
+    } else if (ts.isVariableDeclaration(node) && node.initializer &&
+      (ts.isFunctionExpression(node.initializer) || ts.isArrowFunction(node.initializer))) {
+      funcName = node.name.getText()
+      parameters = node.initializer.parameters
+    } else if (ts.isMethodDeclaration(node)) {
+      funcName = node.name.getText()
+      parameters = node.parameters
     }
-  }
-  
+
+    if (funcName && parameters) {
+      // 判断是否为事件处理函数：依据是参数中包含 event/e/evt
+      const isEventHandler = parameters.some(p => {
+        const pName = p.name.getText()
+        return ['event', 'e', 'evt'].includes(pName)
+      })
+
+      if (isEventHandler && !/^(handle|on)[A-Z]/.test(funcName)) {
+        // 排除 Vue 生命周期等内置方法
+        const builtInMethods = ['beforeCreate', 'created', 'beforeMount', 'mounted', 'beforeUpdate', 'updated', 'beforeDestroy', 'destroyed', 'data', 'setup']
+        if (!builtInMethods.includes(funcName)) {
+          results.push({
+            rule: 'event/js-handler-naming',
+            message: `事件处理函数 "${funcName}" 建议使用 handle* 或 on* 前缀命名（如 handleClick、onSubmit）`,
+            file: filePath,
+            type: 'warning',
+            line: ASTHelper.getLine(node, sourceFile)
+          })
+        }
+      }
+    }
+  })
+
   return results
 }
 
@@ -370,32 +394,23 @@ function checkJsEventHandlerNaming(filePath: string, fullContent: string, script
  */
 function checkEventObjectUsage(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
   const results: CheckResult[] = []
-  
-  // 匹配函数参数中的事件对象（缩写形式）
-  const shortEventPattern = /\((?:.*?,\s*)?(e|evt)\s*(?:,|\))/g
-  let match
-  
-  while ((match = shortEventPattern.exec(scriptContent)) !== null) {
-    const eventParam = match[1]
-    
-    if (eventParam === 'e' || eventParam === 'evt') {
-      const position = filePath.endsWith('.vue') 
-        ? fullContent.indexOf(scriptContent) + match.index
-        : match.index
-        
-      const lines = fullContent.substring(0, position).split('\n')
-      const line = lines.length
-      
-      results.push({
-        rule: 'event/prefer-event-name',
-        message: `事件参数建议使用完整的 "event" 而不是缩写 "${eventParam}"，提高代码可读性`,
-        file: filePath,
-        type: 'warning',
-        line
-      })
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
+
+  ASTHelper.traverse(sourceFile, node => {
+    if (ts.isParameter(node)) {
+      const paramName = node.name.getText()
+      if (paramName === 'e' || paramName === 'evt') {
+        results.push({
+          rule: 'event/prefer-event-name',
+          message: `事件参数建议使用完整的 "event" 而不是缩写 "${paramName}"，提高代码可读性`,
+          file: filePath,
+          type: 'warning',
+          line: ASTHelper.getLine(node, sourceFile)
+        })
+      }
     }
-  }
-  
+  })
+
   return results
 }
 
@@ -405,17 +420,17 @@ function checkEventObjectUsage(filePath: string, fullContent: string, scriptCont
  */
 function checkEventDelegation(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
   const results: CheckResult[] = []
-  
+
   // 统计相同事件的监听器数量
   const eventCounts: Map<string, number> = new Map()
   const addPattern = /\.addEventListener\s*\(\s*['"]([^'"]+)['"]/g
   let match
-  
+
   while ((match = addPattern.exec(scriptContent)) !== null) {
     const eventType = match[1]
     eventCounts.set(eventType, (eventCounts.get(eventType) || 0) + 1)
   }
-  
+
   // 如果同一事件类型监听器超过 3 个，建议使用事件委托
   for (const [eventType, count] of eventCounts.entries()) {
     if (count >= 3) {
@@ -428,6 +443,6 @@ function checkEventDelegation(filePath: string, fullContent: string, scriptConte
       })
     }
   }
-  
+
   return results
 }

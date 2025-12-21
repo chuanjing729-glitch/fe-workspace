@@ -582,6 +582,40 @@ export default {
 
 ---
 
+## 🛠️ 推荐实现方案 (Implementation)
+
+为了方便开发者快速落地上述规范，我们提供了 `@51jbs/core-utils` 工具库，内置了符合规范的工具函数。
+
+### 1. 使用 `safeGet` 进行深层访问
+
+**库地址**：`@51jbs/core-utils/object`
+
+```javascript
+import { safeGet } from '@51jbs/core-utils'
+
+// ✅ 自动处理 null/undefined，支持路径字符串和默认值
+const street = safeGet(user, 'address.street', '未知街道')
+const firstTag = safeGet(data, 'tags[0].name')
+```
+
+### 2. 使用 `safeFormat` 处理空值显示
+
+**库地址**：`@51jbs/core-utils/format`
+
+该系列函数自动将 `null`、`undefined` 或空字符串转换为规范要求的默认占位符 `-`。
+
+```javascript
+import { formatPhone, formatCurrency, safeFormat } from '@51jbs/core-utils'
+
+// ✅ 如果 phone 为空，返回 '-'
+const displayPhone = formatPhone(user?.phone) 
+
+// ✅ 自定义格式化
+const displayValue = safeFormat(value, (v) => `${v}%`, '0%')
+```
+
+---
+
 ## 🔧 配置示例
 
 在 `webpack.config.js` 中启用空指针防护检查：
@@ -668,6 +702,19 @@ if (isValidUser(data)) {
 }
 ```
 
+### 存量代码治理 (Baseline 机制)
+
+针对存量项目，如果一次性修复所有警告风险过高，可使用“基线机制”实现新老划断：
+
+1.  **生成基线**：运行一次全量检查并生成快照。
+    ```javascript
+    new SpecPlugin({ generateBaseline: true })
+    ```
+2.  **开启治理**：后续构建将自动忽略基线中的存量问题，只对新增代码报错。
+    ```javascript
+    new SpecPlugin({ useBaseline: true, baselineFile: '.spec-baseline.json' })
+    ```
+
 ---
 
 ## 📚 参考资料
@@ -678,4 +725,4 @@ if (isValidUser(data)) {
 
 ---
 
-**最后更新**：2025-12-15
+**最后更新**：2025-12-21

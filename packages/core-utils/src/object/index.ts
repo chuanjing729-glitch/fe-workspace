@@ -125,3 +125,25 @@ export function isEmpty(obj: any): boolean {
   if (typeof obj === 'object') return Object.keys(obj).length === 0
   return false
 }
+
+/**
+ * 安全地从对象中获取深层属性 (Safe Get)
+ * @param obj 目标对象
+ * @param path 路径 (如 'a.b.c')
+ * @param defaultValue 默认值
+ */
+export function safeGet<T = any>(obj: any, path: string, defaultValue?: T): T {
+  if (obj === null || obj === undefined || typeof path !== 'string' || !path) {
+    return defaultValue as T
+  }
+
+  const keys = path.split('.')
+  let current = obj
+
+  for (const key of keys) {
+    if (current === null || current === undefined) return defaultValue as T
+    current = current[key]
+  }
+
+  return (current === undefined || current === null) ? defaultValue as T : current
+}

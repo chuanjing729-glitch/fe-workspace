@@ -697,6 +697,48 @@ class BadTodoList {
 
 ---
 
+## 🛠️ 自动化清理实现方案 (Implementation)
+
+手动管理事件清理容易遗漏，推荐使用基建库提供的自动化方案。
+
+### 1. Vue2: 使用 `AutoCleanupMixin`
+
+**库地址**：`@51jbs/vue2-toolkit/mixins`
+
+该 Mixin 会自动接管组件内的事件监听、定时器，并在组件销毁时自动调用清理逻辑。
+
+```vue
+<script>
+import { AutoCleanup } from '@51jbs/vue2-toolkit'
+
+export default {
+  mixins: [AutoCleanup],
+  mounted() {
+    // 使用 Mixin 提供的代理方法（会自动在销毁时回收）
+    // TODO: 完善 Mixin 的 API 文档
+  }
+}
+</script>
+```
+
+### 2. JavaScript: 使用 `LifecycleEventHub`
+
+**库地址**：`@51jbs/core-utils/event`
+
+适用于非 Vue 环境或需要在微前端主子应用间安全解绑事件。
+
+```javascript
+import { LifecycleEventHub } from '@51jbs/core-utils'
+
+const hub = new LifecycleEventHub()
+hub.on(window, 'resize', handleResize)
+
+// 需要清理时一键释放
+hub.dispose()
+```
+
+---
+
 ## 🔧 配置示例
 
 在 `webpack.config.js` 中启用事件规范检查：

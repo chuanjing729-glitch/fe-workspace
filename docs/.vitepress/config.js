@@ -1,6 +1,9 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid';
 import { sidebar } from './config/sidebar'
+import { getRecentUpdates } from '../../scripts/git-helper.cjs'
+
+const recentUpdates = getRecentUpdates(5)
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid(defineConfig({
@@ -17,6 +20,15 @@ export default withMermaid(defineConfig({
       { text: '工具库', link: '/packages/tools' },
       { text: 'AI 指南', link: '/ai-guidelines/' }
     ],
+
+    // 自定义：全站公告内容
+    announcement: {
+      show: true,
+      text: '✨ 规范体系升级：新增“存量治理（基线机制）”及“自动化同步”规范，建议团队查阅。',
+      link: '/specs/coding/null-safety-specification.html#存量代码治理-baseline-机制'
+    },
+
+    recentUpdates,
 
     sidebar,
 

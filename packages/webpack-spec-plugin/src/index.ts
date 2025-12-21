@@ -50,7 +50,10 @@ const DEFAULT_OPTIONS: PluginOptions = {
   htmlReport: true,
   reportPath: '.spec-cache/spec-report.html',
   exclude: ['**/node_modules/**', '**/dist/**', '*.config.js', '**/mock/**'],
-  rootDir: process.cwd()
+  rootDir: process.cwd(),
+  baselineFile: '.spec-baseline.json',
+  useBaseline: false,
+  generateBaseline: false
 }
 
 /**
@@ -78,6 +81,7 @@ class SpecPlugin {
   private rules: RuleChecker[] = []
   private cache: Map<string, FileCache> = new Map()
   private cacheDir: string = '.spec-cache'
+  private baseline: Map<string, number> = new Map()
 
   constructor(options: Partial<PluginOptions> = {}) {
     this.options = { ...DEFAULT_OPTIONS, ...options }
@@ -152,17 +156,20 @@ class SpecPlugin {
   apply(compiler: Compiler) {
     const pluginName = 'SpecPlugin'
 
-    compiler.hooks.beforeCompile.tapAsync(pluginName, async (params, callback) => {
+    compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      // 存储检查结果（如果需要在此注入）
+      (compilation as any)._specPluginResults = []
+    })
+
+    compiler.hooks.emit.tapAsync(pluginName, async (compilation, callback) => {
       try {
         console.log('\n🔍 开始规范检查...\n')
-        
-        const rootDir = this.options.rootDir || compiler.context
-        
-        // 加载缓存
-        this.loadCache(rootDir)
-        
-        const files = await this.getFilesToCheck(rootDir)
 
+        const rootDir = this.options.rootDir || compiler.context
+        this.loadCache(rootDir)
+        this.loadBaseline(rootDir)
+
+        const files = await this.getFilesToCheck(rootDir)
         console.log(`📁 检查文件数: ${files.length}`)
         console.log(`📋 检查模式: ${this.options.mode === 'incremental' ? '增量检查' : '全量检查'}`)
         console.log('')
@@ -173,8 +180,24 @@ class SpecPlugin {
         for (const file of files) {
           const results = await this.checkFile(file)
           reporter.addAll(results)
+
+          // 将结果转换为 Webpack Error/Warning 对象
+          results.forEach(res => {
+            const message = `[SpecPlugin] [${res.rule}] ${res.message}\nFile: ${res.file}${res.line ? `:${res.line}` : ''}`
+
+            // 使用适配 Webpack 的 Error 构造
+            const webpackError = new (compiler as any).webpack.WebpackError(message)
+            // 尝试绑定到具体的文件位置
+            webpackError.file = res.file
+
+            if (res.type === 'error') {
+              compilation.errors.push(webpackError)
+            } else {
+              compilation.warnings.push(webpackError)
+            }
+          })
+
           checkedCount++
-          
           if (checkedCount % 10 === 0) {
             process.stdout.write(`\r检查进度: ${checkedCount}/${files.length}`)
           }
@@ -184,43 +207,37 @@ class SpecPlugin {
           process.stdout.write(`\r检查进度: ${checkedCount}/${files.length}\n`)
         }
 
-        // 输出报告
+        // 输出终端控制台报告
         reporter.print(rootDir)
 
-          // 生成 HTML 报告
+        // 生成 HTML 报告
         if (this.options.htmlReport) {
           const htmlReporter = new HtmlReporter()
           htmlReporter.addAll([...reporter['errors'], ...reporter['warnings']])
-          
-          // 确保报告路径在 .spec-cache 目录中
           let reportPath = this.options.reportPath || '.spec-cache/spec-report.html'
-          if (!reportPath.includes('.spec-cache')) {
-            reportPath = path.join('.spec-cache', path.basename(reportPath))
-          }
-          
-          // 确保 .spec-cache 目录存在
           const reportDir = path.dirname(path.join(rootDir, reportPath))
-          if (!fs.existsSync(reportDir)) {
-            fs.mkdirSync(reportDir, { recursive: true })
-          }
-          
+          if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true })
           htmlReporter.generate(reportPath, rootDir)
         }
-        
-        // 保存缓存
+
+        if (this.options.generateBaseline) {
+          this.saveBaseline(rootDir, [...reporter['errors'], ...reporter['warnings']])
+        }
+
         this.saveCache(rootDir)
 
         // 根据严格程度决定是否中断构建
+        const hasCriticalErrors = compilation.errors.length > 0
+        const hasWarnings = compilation.warnings.length > 0
         const shouldFail = this.options.severity === 'strict'
-          ? reporter.hasErrors() || reporter.hasWarnings()
-          : reporter.hasErrors()
+          ? (hasCriticalErrors || hasWarnings)
+          : hasCriticalErrors
 
         if (shouldFail) {
-          callback(new Error('规范检查失败'))
-        } else {
-          callback()
+          return callback(new Error('[SpecPlugin] 规范检查未通过，构建中断。'))
         }
 
+        callback()
       } catch (error) {
         console.error('规范检查过程中出错:', error)
         callback(error as Error)
@@ -236,7 +253,7 @@ class SpecPlugin {
 
     if (this.options.mode === 'incremental') {
       files = await getChangedFiles(rootDir, this.options.exclude)
-      
+
       // 如果没有检测到变更文件，回退到全量检查
       if (files.length === 0) {
         console.log('⚠️  未检测到 Git 变更文件，切换到全量检查模式')
@@ -257,30 +274,44 @@ class SpecPlugin {
     try {
       // 读取文件内容
       const content = fs.readFileSync(filePath, 'utf-8')
-      
+
       // 计算文件哈希
       const hash = this.calculateHash(content)
-      
+
       // 检查缓存
       const cached = this.cache.get(filePath)
-      if (cached && cached.hash === hash) {
-        return cached.results
-      }
-      
-      const results: CheckResult[] = []
+      let results: CheckResult[] = []
 
-      // 执行所有启用的规则检查
-      for (const rule of this.rules) {
-        const ruleResults = rule.check(filePath, content, this.options)
-        results.push(...ruleResults)
+      if (cached && cached.hash === hash) {
+        results = cached.results
+      } else {
+        // 执行所有启用的规则检查
+        for (const rule of this.rules) {
+          const ruleResults = rule.check(filePath, content, this.options)
+          results.push(...ruleResults)
+        }
+
+        // 缓存结果
+        this.cache.set(filePath, {
+          hash,
+          results: [...results], // 保存一份原始结果的副本到缓存
+          timestamp: Date.now()
+        })
       }
-      
-      // 缓存结果
-      this.cache.set(filePath, {
-        hash,
-        results,
-        timestamp: Date.now()
-      })
+
+      // 如果启用基线，过滤掉基线中已有的问题
+      if (this.options.useBaseline && !this.options.generateBaseline) {
+        const seenInThisFile = new Map<string, number>()
+        return results.filter(res => {
+          const fingerprint = this.getFingerprint(res)
+          const count = seenInThisFile.get(fingerprint) || 0
+          seenInThisFile.set(fingerprint, count + 1)
+
+          const baselineLimit = this.baseline.get(fingerprint) || 0
+          // 只有当出现的次数超过基线中的限制时，才判定为新问题
+          return (count + 1) > baselineLimit
+        })
+      }
 
       return results
     } catch (error) {
@@ -288,14 +319,14 @@ class SpecPlugin {
       return []
     }
   }
-  
+
   /**
    * 计算文件哈希
    */
   private calculateHash(content: string): string {
     return crypto.createHash('md5').update(content).digest('hex')
   }
-  
+
   /**
    * 加载缓存
    */
@@ -310,7 +341,7 @@ class SpecPlugin {
       // 缓存加载失败，忽略
     }
   }
-  
+
   /**
    * 保存缓存
    */
@@ -320,12 +351,67 @@ class SpecPlugin {
       if (!fs.existsSync(cacheDir)) {
         fs.mkdirSync(cacheDir, { recursive: true })
       }
-      
+
       const cacheFile = path.join(cacheDir, 'check-cache.json')
       const cacheData = Object.fromEntries(this.cache)
       fs.writeFileSync(cacheFile, JSON.stringify(cacheData, null, 2))
     } catch (error) {
       // 缓存保存失败，忽略
+    }
+  }
+
+  /**
+   * 获取指纹（用于识别唯一问题）
+   */
+  private getFingerprint(result: CheckResult): string {
+    // 使用相对路径，确保在不同机器上一致
+    const rootDir = this.options.rootDir || process.cwd()
+    const relativeFile = path.relative(rootDir, result.file)
+    return `${relativeFile}|${result.rule}|${result.message}`
+  }
+
+  /**
+   * 加载基线文件
+   */
+  private loadBaseline(rootDir: string) {
+    try {
+      if (!this.options.useBaseline) return
+
+      const baselinePath = path.join(rootDir, this.options.baselineFile || '.spec-baseline.json')
+      if (fs.existsSync(baselinePath)) {
+        const data = JSON.parse(fs.readFileSync(baselinePath, 'utf-8'))
+        const issues = data.issues || []
+
+        // 统计每个指纹出现的次数
+        this.baseline.clear()
+        issues.forEach((f: string) => {
+          this.baseline.set(f, (this.baseline.get(f) || 0) + 1)
+        })
+
+        console.log(`📋 已加载基线文件: ${baselinePath}`)
+        console.log(`📋 包含存量问题: ${issues.length} 条`)
+      }
+    } catch (error) {
+      console.warn('⚠️  基线文件加载失败:', error)
+    }
+  }
+
+  /**
+   * 保存基线文件
+   */
+  private saveBaseline(rootDir: string, results: CheckResult[]) {
+    try {
+      const baselinePath = path.join(rootDir, this.options.baselineFile || '.spec-baseline.json')
+      const fingerprints = results.map(res => this.getFingerprint(res))
+      const data = {
+        updatedAt: new Date().toISOString(),
+        total: fingerprints.length,
+        issues: Array.from(new Set(fingerprints))
+      }
+      fs.writeFileSync(baselinePath, JSON.stringify(data, null, 2))
+      console.log(`✅ 基线文件已更新: ${baselinePath} (${fingerprints.length} 条问题)`)
+    } catch (error) {
+      console.error('❌ 基线文件保存失败:', error)
     }
   }
 }

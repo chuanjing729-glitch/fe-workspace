@@ -1,0 +1,37 @@
+# 51jbs 前端工具链与代码开发规范
+
+本项目遵循由 `@51jbs/webpack-spec-plugin` 强制执行的严格代码规范。
+当生成或修改代码时，请务必遵守以下规则：
+
+## 1. 空安全 (Null Safety) - P0 级
+- **安全属性访问**：严禁直接进行深层属性访问，如 `obj.a.b.c`。请使用可选链 `obj?.a?.b?.c` 或使用 `@51jbs/core-utils` 提供的 `safeGet(obj, 'a.b.c')` 工具函数。
+- **函数调用**：在调用可能不存在的函数前，必须使用可选链调用：`callback?.()`。
+- **数组访问**：访问数组元素前必须检查长度，或使用可选索引访问：`arr?.[0]`。
+- **默认值处理**：使用空值合并运算符 `??` 设置默认值：`const name = input ?? '默认名称'`。
+- **格式化工具**：优先使用 `@51jbs/core-utils` 的 `safeFormat` 系列函数，它们在输入为空时默认返回 `-`。
+
+## 2. 内存管理 (Memory Management) - P0 级
+- **Vue2 资源清理**：必须在 `beforeDestroy` 生命周期钩子中清理 `setTimeout`、`setInterval` 以及所有的 window/DOM 事件监听器。
+- **自动清理 Mixin**：推荐使用 `@51jbs/vue2-toolkit` 中的 `AutoCleanupMixin` 来自动接管资源的回收。
+- **事件中心**：管理复杂的事件生命周期时，请使用 `@51jbs/core-utils` 的 `LifecycleEventHub`。
+
+## 3. 命名与声明规范 (Naming Conventions) - P1 级
+- **函数命名**：事件处理函数必须以 `handle` 或 `on` 开头（例如：`handleClick`, `onSelect`）。
+- **事件对象**：函数参数中应使用完整的 `event` 名称，严禁使用 `e` 或 `evt` 等简写。
+- **CSS BEM**：所有 CSS 类名必须遵循 BEM (Block__Element--Modifier) 规范。严禁使用 ID 选择器和通配符选择器 (`*`)。
+
+## 4. 微前端 (qiankun) 适配
+- **环境判定**：使用 `MicroAdapterMixin` 中的 `$_isMicroApp` 来判定当前是否运行在子应用沙箱中。
+- **状态同步**：使用 `$_setMicroState` 和 `$_initMicroState` 与主应用进行标准化的状态通信。
+- **请求撤回**：确保组件卸载时，通过 `HttpClient` 集成的 `AbortController` 自动取消所有正在进行的异步请求。
+
+## 5. 性能与质量 (Performance & Quality) - P1 级
+- **测试覆盖率**：新增逻辑的单元测试覆盖率需达到 95% 以上。
+- **图片资源**：单张图片建议控制在 500KB 以内，优先使用 WebP 格式。
+## 6. 文档自动化 (Documentation)
+- **实时同步**：更新 `packages/*/src` 下的代码时，应确保 `docs/packages/` 中的对应 Markdown 使用了 VitePress 的 Snippets 语法 (`<<< @/packages/...`) 进行引用，避免手写重复代码示例。
+- **自动触发**：项目已配置 `lint-staged`，在 commit 时会自动运行 `pnpm docs:sync` 同步 Readme 和包元数据。
+- **元数据同步**：修改 `package.json` 的版本或描述后，需运行 `pnpm docs:sync` 刷新前端展示。
+
+---
+*更多详细规范请参考项目 /docs/specs 目录。*

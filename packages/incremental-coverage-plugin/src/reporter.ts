@@ -86,6 +86,20 @@ export class CoverageReporter {
         fs.writeFileSync(jsonPath, JSON.stringify(result, null, 2), 'utf-8');
       }
 
+      // 6. 阈值检查 (Gatekeeping)
+      const threshold = this.options.threshold || 80;
+      if (result.overall.coverageRate < threshold) {
+        const errorMsg = `[IncrementalCoverage] ❌ 增量覆盖率评估未通过: 当前为 ${result.overall.coverageRate}%, 阈值要求为 ${threshold}%`;
+        console.error('\x1b[31m%s\x1b[0m', errorMsg); // 红色输出
+
+        // 如果在 CI 环境下，直接抛出错误以阻断流程
+        if (process.env.CI || this.options.failOnError) {
+          throw new Error(errorMsg);
+        }
+      } else {
+        console.log('\x1b[32m%s\x1b[0m', `[IncrementalCoverage] ✅ 增量覆盖率评估通过: ${result.overall.coverageRate}%`);
+      }
+
       return latestPath;
     } catch (error) {
       console.error('[CoverageReporter] 写入报告文件失败:', error);

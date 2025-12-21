@@ -7,6 +7,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "docs:dev": "vitepress dev docs",
+    "docs:sync": "node scripts/sync-package-docs.cjs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "publish": "node scripts/publish-packages.cjs",
@@ -17,6 +18,8 @@
     "publish:major": "node scripts/publish-packages.cjs \"\" major",
     "build": "pnpm -r --stream build",
     "test": "pnpm -r --stream test",
+    "test:coverage": "pnpm -r --stream exec jest --coverage --threshold 80",
+    "lint": "eslint . --ext .ts,.js,.vue --fix",
     "dev": "pnpm -r --stream --parallel dev",
     "publish:webpack-coverage-plugin": "node scripts/publish-packages.cjs @51jbs/webpack-coverage-plugin",
     "build:webpack-coverage-plugin": "pnpm --filter @51jbs/webpack-coverage-plugin run build",
@@ -44,7 +47,7 @@
     "vue": "^3.5.25"
   },
   "lint-staged": {
-    "packages/*/README.md": [
+    "packages/*/{README.md,src/**/*.ts,src/**/*.vue}": [
       "node scripts/sync-package-docs.cjs",
       "git add docs"
     ]

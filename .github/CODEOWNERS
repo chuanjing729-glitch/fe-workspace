@@ -1,0 +1,7 @@
+# 核心架构和全局配置
+/package.json @team-leads
+/.github/ @team-leads
+
+# 业务包所有权
+/packages/webpack-coverage-plugin/ @coverage-team
+/packages/core-utils/ @utils-team

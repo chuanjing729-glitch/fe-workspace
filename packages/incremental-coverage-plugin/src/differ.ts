@@ -91,58 +91,50 @@ export class CoverageDiffer {
             timestamp: Date.now(),  // 时间戳
         };
 
-        // 5. 处理每个变更的文件
-        let validFileCount = 0;
-        console.log('[CoverageDiffer] 待处理变更文件数:', gitDiff.files.length);
-        console.log('[CoverageDiffer] 当前覆盖率数据中的文件(前5个):', Object.keys(currentCoverage).slice(0, 5));
+        // 5. 归一化当前覆盖率数据（处理路径不一致问题）
+        const normalizedCoverage: CoverageMap = {};
+        const projectRoot = process.cwd();
+        for (const [key, data] of Object.entries(currentCoverage)) {
+            const absPath = path.isAbsolute(key) ? key : path.resolve(projectRoot, key);
+            normalizedCoverage[absPath] = data;
+        }
 
+        // 6. 处理每个变更的文件
+        let validFileCount = 0;
         for (const file of gitDiff.files) {
             // 过滤非源码文件
             const isValid = this.isValidSourceFile(file);
-            if (!isValid) {
-                // console.log(`[CoverageDiffer] 过滤掉文件: ${file}`);
-                continue;
-            }
+            if (!isValid) continue;
 
-            console.log(`[CoverageDiffer] 处理源码文件: ${file}`);
             validFileCount++;
-            const coverage = currentCoverage[file];
+            const changedLines = gitDiff.additions[file] || [];
+            if (changedLines.length === 0) continue; // 无新增行，跳过
+
+            // 查找覆盖率数据：尝试绝对路径和相对路径匹配
+            let coverage = normalizedCoverage[file];
+            if (!coverage) {
+                // 尝试相对路径匹配
+                const relativeFile = path.relative(projectRoot, file);
+                coverage = currentCoverage[relativeFile] || currentCoverage[file];
+            }
 
             if (!coverage) {
                 // 情况 1：文件没有覆盖率数据
-                // 可能原因：
-                // - 文件被 exclude 排除了
-                // - 文件没有被执行过
-                // - 文件是新增的但还没有测试
-                const changedLines = gitDiff.additions[file] || [];
-                if (changedLines.length > 0) {
-                    result.files.push({
-                        file,
-                        changedLines,
-                        uncoveredLines: changedLines,  // 所有行都未覆盖
-                        coverageRate: 0,               // 覆盖率 0%
-                    });
-                    result.overall.totalLines += changedLines.length;
-                }
+                result.files.push({
+                    file,
+                    changedLines,
+                    uncoveredLines: changedLines,
+                    coverageRate: 0,
+                });
+                result.overall.totalLines += changedLines.length;
                 continue;
             }
 
             // 情况 2：文件有覆盖率数据
-            // 计算变更行的覆盖情况
-            const changedLines = gitDiff.additions[file] || [];
-
-            // 找出哪些变更的行没有被覆盖
             const uncoveredLines = this.getUncoveredLines(coverage, changedLines);
-
-            // 计算覆盖的行数
             const coveredCount = changedLines.length - uncoveredLines.length;
+            const coverageRate = Math.round((coveredCount / changedLines.length) * 100);
 
-            // 计算覆盖率百分比
-            const coverageRate = changedLines.length > 0
-                ? Math.round((coveredCount / changedLines.length) * 100)
-                : 100;  // 如果没有变更行，默认 100%
-
-            // 添加到结果中
             result.files.push({
                 file,
                 changedLines,
@@ -150,19 +142,18 @@ export class CoverageDiffer {
                 coverageRate,
             });
 
-            // 累加到整体统计
             result.overall.totalLines += changedLines.length;
             result.overall.coveredLines += coveredCount;
         }
 
-        // 6. 计算整体覆盖率
+        // 7. 计算整体覆盖率
         if (result.overall.totalLines > 0) {
             result.overall.coverageRate = Math.round(
                 (result.overall.coveredLines / result.overall.totalLines) * 100
             );
         }
 
-        console.log(`[CoverageDiffer] 计算完成: ${validFileCount} 个有效文件, ${result.overall.totalLines} 行代码, 报告率 ${result.overall.coverageRate}%`);
+        console.log(`[CoverageDiffer] 计算完成: ${validFileCount} 个有效文件, ${result.overall.totalLines} 变更行, 覆盖率 ${result.overall.coverageRate}%`);
 
         // 7. 保存 baseline（如果需要）
         // 只在首次运行时保存，避免每次都更新 baseline
@@ -300,7 +291,10 @@ export class CoverageDiffer {
         // 2. 检查扩展名
         const ext = path.extname(file).toLowerCase();
         if (!ext) return false;
-        const validExts = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.css', '.scss', '.less'];
+        const validExts = [
+            '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte',
+            '.mjs', '.cjs', '.mts', '.cts'
+        ];
         if (!validExts.includes(ext)) return false;
 
         // 3. 获取项目相对路径
@@ -315,16 +309,22 @@ export class CoverageDiffer {
         // 4. 应用 include/exclude 配置
         const { include, exclude } = this.options;
 
-        // 简单匹配函数：支持简单的通配符 * 和 **
+        // 简单匹配函数：支持通配符 * 和 **
         const isMatch = (pattern: string, target: string) => {
             if (!pattern) return false;
-            // 简单处理：将 ** 替换为 .*，将 * 替换为 [^/]*
-            const regexStr = pattern
-                .replace(/[.+^${}()|[\]\\]/g, '\\$&') // 转义正则特有字符
-                .replace(/\\\*\\\*/g, '.*')           // 处理 **
-                .replace(/\\\*/g, '[^/]*');            // 处理 *
-            const regex = new RegExp(`^${regexStr}$|^${regexStr}/.*`);
-            return regex.test(target);
+            // 处理 pattern：如果是 src/** 且 target 是 packages/pkg/src/App.vue，也应该尝试匹配
+            // 这里我们做一个增强：如果 pattern 不以 / 或 **/ 开头，我们自动允许它匹配深层目录
+            let effectivePattern = pattern;
+            if (!pattern.startsWith('/') && !pattern.startsWith('**/')) {
+                effectivePattern = '**/' + pattern;
+            }
+
+            const regexStr = effectivePattern
+                .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+                .replace(/\\\*\\\*/g, '.*')
+                .replace(/\\\*/g, '[^/]*');
+            const regex = new RegExp(`^${regexStr}$`);
+            return regex.test(target) || regex.test('/' + target);
         };
 
         // Exclude 优先

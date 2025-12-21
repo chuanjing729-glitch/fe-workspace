@@ -11,14 +11,16 @@ import {
 
 describe('format模块测试', () => {
   describe('formatPhone', () => {
+    // #region example-phone
     test('格式化手机号', () => {
       expect(formatPhone('13800138000')).toBe('138****8000')
       expect(formatPhone('15912345678')).toBe('159****5678')
     })
+    // #endregion
 
     test('处理空值', () => {
-      expect(formatPhone('')).toBe('')
-      expect(formatPhone(null as any)).toBe('')
+      expect(formatPhone('')).toBe('-')
+      expect(formatPhone(null as any)).toBe('-')
     })
 
     test('处理包含非数字字符的手机号', () => {
@@ -49,9 +51,9 @@ describe('format模块测试', () => {
     })
 
     test('处理空值和无效值', () => {
-      expect(formatCurrency(null as any)).toBe('')
-      expect(formatCurrency(undefined as any)).toBe('')
-      expect(formatCurrency('abc')).toBe('')
+      expect(formatCurrency(null as any)).toBe('-')
+      expect(formatCurrency(undefined as any)).toBe('-')
+      expect(formatCurrency('abc')).toBe('-')
     })
   })
 
@@ -78,8 +80,8 @@ describe('format模块测试', () => {
     })
 
     test('处理空值和无效值', () => {
-      expect(formatDate('')).toBe('')
-      expect(formatDate('invalid date')).toBe('')
+      expect(formatDate('')).toBe('-')
+      expect(formatDate('invalid date')).toBe('-')
     })
   })
 
@@ -113,7 +115,7 @@ describe('format模块测试', () => {
     })
 
     test('处理空值', () => {
-      expect(formatBankCard('')).toBe('')
+      expect(formatBankCard('')).toBe('-')
     })
   })
 
@@ -131,7 +133,7 @@ describe('format模块测试', () => {
     })
 
     test('处理空值', () => {
-      expect(formatIdCard('')).toBe('')
+      expect(formatIdCard('')).toBe('-')
     })
   })
 
@@ -153,8 +155,8 @@ describe('format模块测试', () => {
     })
 
     test('处理空值', () => {
-      expect(formatPercent(null as any)).toBe('')
-      expect(formatPercent(undefined as any)).toBe('')
+      expect(formatPercent(null as any)).toBe('-')
+      expect(formatPercent(undefined as any)).toBe('-')
     })
   })
 
@@ -177,9 +179,9 @@ describe('format模块测试', () => {
     })
 
     test('处理空值和无效值', () => {
-      expect(formatNumber(null as any)).toBe('')
-      expect(formatNumber(undefined as any)).toBe('')
-      expect(formatNumber('abc')).toBe('')
+      expect(formatNumber(null as any)).toBe('-')
+      expect(formatNumber(undefined as any)).toBe('-')
+      expect(formatNumber('abc')).toBe('-')
     })
   })
 })

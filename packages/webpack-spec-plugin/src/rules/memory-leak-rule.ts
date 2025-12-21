@@ -1,4 +1,6 @@
+import * as ts from 'typescript'
 import { CheckResult, PluginOptions, RuleChecker } from '../types'
+import { ASTHelper } from '../utils/ast-helper'
 
 /**
  * 内存泄漏检查规则
@@ -14,43 +16,70 @@ import { CheckResult, PluginOptions, RuleChecker } from '../types'
  */
 function checkUnclearedTimers(content: string, filePath: string): CheckResult[] {
   const results: CheckResult[] = []
+  const scriptContent = /\.vue$/.test(filePath)
+    ? (content.match(/<script[^>]*>([\s\S]*?)<\/script>/)?.[1] || '')
+    : content
 
-  // 检查是否使用了 setTimeout/setInterval 但没有清理
-  const setTimeoutRegex = /\bsetTimeout\s*\(/g
-  const setIntervalRegex = /\bsetInterval\s*\(/g
-  const clearTimeoutRegex = /\bclearTimeout\s*\(/g
-  const clearIntervalRegex = /\bclearInterval\s*\(/g
+  if (!scriptContent) return results
 
-  const hasSetTimeout = setTimeoutRegex.test(content)
-  const hasSetInterval = setIntervalRegex.test(content)
-  const hasClearTimeout = clearTimeoutRegex.test(content)
-  const hasClearInterval = clearIntervalRegex.test(content)
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
 
-  // Vue 组件中检查
+  const activeTimers: Array<{ type: string, node: ts.Node }> = []
+  let hasClearInterval = false
+  let hasClearTimeout = false
+  let hasLifecycleCleanup = false
+
+  ASTHelper.traverse(sourceFile, node => {
+    // 检查 setInterval/setTimeout
+    if (ts.isCallExpression(node)) {
+      const funcName = node.expression.getText()
+      if (funcName === 'setInterval') {
+        activeTimers.push({ type: 'setInterval', node })
+      } else if (funcName === 'setTimeout') {
+        activeTimers.push({ type: 'setTimeout', node })
+      } else if (funcName === 'clearInterval') {
+        hasClearInterval = true
+      } else if (funcName === 'clearTimeout') {
+        hasClearTimeout = true
+      }
+    }
+
+    // 检查生命周期钩子 (Vue)
+    if (ts.isPropertyAssignment(node) || ts.isMethodDeclaration(node)) {
+      const name = node.name.getText()
+      if (['beforeDestroy', 'beforeUnmount', 'onBeforeUnmount'].includes(name)) {
+        hasLifecycleCleanup = true
+      }
+    }
+  })
+
+  // Vue 组件逻辑
   if (/\.vue$/.test(filePath)) {
-    if (hasSetInterval && !hasClearInterval) {
-      // 检查是否在 beforeUnmount/beforeDestroy 中清理
-      if (!/beforeUnmount|beforeDestroy|onBeforeUnmount/.test(content)) {
+    activeTimers.forEach(timer => {
+      if (timer.type === 'setInterval' && !hasClearInterval && !hasLifecycleCleanup) {
         results.push({
           type: 'error',
           rule: 'memory-leak/timer',
           message: '使用了 setInterval 但未在组件销毁时清理，可能导致内存泄漏',
-          file: filePath
+          file: filePath,
+          line: ASTHelper.getLine(timer.node, sourceFile)
         })
       }
-    }
 
-    if (hasSetTimeout && !hasClearTimeout) {
-      // setTimeout 通常不需要清理，但如果在长时间运行的组件中使用，建议清理
-      if (content.match(/setTimeout.*\d{4,}/)) { // 超过 1000ms 的定时器
-        results.push({
-          type: 'warning',
-          rule: 'memory-leak/timer',
-          message: '使用了长时间的 setTimeout，建议在组件销毁时清理',
-          file: filePath
-        })
+      if (timer.type === 'setTimeout' && !hasClearTimeout && !hasLifecycleCleanup) {
+        // 简单策略：如果参数看起来很大（大于1000ms），则警告
+        const args = (timer.node as ts.CallExpression).arguments
+        if (args.length >= 2 && ts.isNumericLiteral(args[1]) && parseInt(args[1].text) > 1000) {
+          results.push({
+            type: 'warning',
+            rule: 'memory-leak/timer',
+            message: '使用了长时间的 setTimeout，建议在组件销毁时清理',
+            file: filePath,
+            line: ASTHelper.getLine(timer.node, sourceFile)
+          })
+        }
       }
-    }
+    })
   }
 
   return results
@@ -61,36 +90,51 @@ function checkUnclearedTimers(content: string, filePath: string): CheckResult[] 
  */
 function checkUnclearedEventListeners(content: string, filePath: string): CheckResult[] {
   const results: CheckResult[] = []
+  const scriptContent = /\.vue$/.test(filePath)
+    ? (content.match(/<script[^>]*>([\s\S]*?)<\/script>/)?.[1] || '')
+    : content
 
-  const addEventListenerRegex = /addEventListener\s*\(['"]([^'"]+)['"]/g
-  const removeEventListenerRegex = /removeEventListener\s*\(['"]([^'"]+)['"]/g
+  if (!scriptContent) return results
 
-  const addedEvents = new Set<string>()
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
+
+  const addedEvents: Array<{ name: string, node: ts.Node }> = []
   const removedEvents = new Set<string>()
+  let hasLifecycleCleanup = false
 
-  let match: RegExpExecArray | null
+  ASTHelper.traverse(sourceFile, node => {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const methodName = node.expression.name.getText()
+      if (methodName === 'addEventListener' && node.arguments.length > 0) {
+        addedEvents.push({
+          name: node.arguments[0].getText().replace(/['"]/g, ''),
+          node
+        })
+      } else if (methodName === 'removeEventListener' && node.arguments.length > 0) {
+        removedEvents.add(node.arguments[0].getText().replace(/['"]/g, ''))
+      }
+    }
 
-  // 收集添加的事件
-  while ((match = addEventListenerRegex.exec(content)) !== null) {
-    addedEvents.add(match[1])
-  }
+    if (ts.isPropertyAssignment(node) || ts.isMethodDeclaration(node)) {
+      const name = node.name.getText()
+      if (['beforeDestroy', 'beforeUnmount', 'onBeforeUnmount'].includes(name)) {
+        hasLifecycleCleanup = true
+      }
+    }
+  })
 
-  // 收集移除的事件
-  while ((match = removeEventListenerRegex.exec(content)) !== null) {
-    removedEvents.add(match[1])
-  }
-
-  // 检查是否有未移除的事件
-  const unclearedEvents = [...addedEvents].filter(event => !removedEvents.has(event))
+  const unclearedEvents = addedEvents.filter(e => !removedEvents.has(e.name))
 
   if (unclearedEvents.length > 0 && /\.vue$/.test(filePath)) {
-    // 检查是否在生命周期钩子中清理
-    if (!/beforeUnmount|beforeDestroy|onBeforeUnmount/.test(content)) {
-      results.push({
-        type: 'error',
-        rule: 'memory-leak/event-listener',
-        message: `添加了事件监听器 (${unclearedEvents.join(', ')}) 但未在组件销毁时移除，可能导致内存泄漏`,
-        file: filePath
+    if (!hasLifecycleCleanup) {
+      unclearedEvents.forEach(e => {
+        results.push({
+          type: 'error',
+          rule: 'memory-leak/event-listener',
+          message: `添加了事件监听器 (${e.name}) 但未在组件销毁时移除，可能导致内存泄漏`,
+          file: filePath,
+          line: ASTHelper.getLine(e.node, sourceFile)
+        })
       })
     }
   }
@@ -144,14 +188,14 @@ function checkClosureLargeObject(content: string, filePath: string): CheckResult
 
   // 暂时禁用此检查，直到有更安全的 AST 解析方案。
   // 使用简单的正则检查 "closure" 是不可靠且危险的。
-    
+
   // 检查闭包中引用大数组或对象
   const largeArrayRegex = /\[\s*(?:[^[\]]*,\s*){50,}[^[\]]*\]/g // 超过 50 个元素的数组
-  
+
   if (largeArrayRegex.test(content)) {
     // 检查是否在函数闭包中
     const functionRegex = /function\s+[A-Za-z_$][A-Za-z0-9_$]*\s*\([^)]*\)\s*\{[\s\S]*?\[\s*(?:[^[\]]*,\s*){50,}[^[\]]*\][\s\S]*?\}/g
-    
+
     if (functionRegex.test(content)) {
       results.push({
         type: 'warning',

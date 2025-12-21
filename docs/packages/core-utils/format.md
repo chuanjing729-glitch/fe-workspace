@@ -29,22 +29,11 @@ import {
 
 格式化手机号（隐藏中间4位）
 
-**类型签名**
-```typescript
-function formatPhone(phone: string): string
-```
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{13-18}
 
-**参数**
-- `phone` - 手机号字符串
-
-**返回值**
-- 格式化后的手机号，中间4位显示为`****`
-
-**示例**
-```typescript
-formatPhone('13800138000') // '138****8000'
-formatPhone('138-0013-8000') // '138****8000'（自动去除非数字字符）
-```
+**示例 (源自测试用例)**
+<<< @/packages/core-utils/tests/format.test.ts#example-phone
 
 ---
 
@@ -52,28 +41,15 @@ formatPhone('138-0013-8000') // '138****8000'（自动去除非数字字符）
 
 格式化金额（千分位+货币符号）
 
-**类型签名**
-```typescript
-function formatCurrency(
-  amount: number | string, 
-  decimals?: number,
-  currency?: string
-): string
-```
-
-**参数**
-- `amount` - 金额数值或字符串
-- `decimals` - 小数位数，默认`2`
-- `currency` - 货币符号，默认`¥`
-
-**返回值**
-- 格式化后的金额字符串
+**源码实现**
+<<< @/packages/core-utils/src/format/index.ts{27-39}
 
 **示例**
 ```typescript
+import { formatCurrency } from '@51jbs/core-utils'
+
 formatCurrency(12345.67) // '¥12,345.67'
-formatCurrency(12345.67, 0) // '¥12,346'
-formatCurrency(1234.56, 2, '$') // '$1,234.56'
+formatCurrency('', 2, '¥', 'N/A') // 'N/A'
 ```
 
 ---

@@ -20,7 +20,7 @@ export interface RequestOptions extends RequestInit {
  */
 export class HttpClient {
   private config: RequestConfig
-  
+
   constructor(config: RequestConfig = {}) {
     this.config = {
       baseURL: config.baseURL || '',
@@ -33,23 +33,23 @@ export class HttpClient {
       mode: config.mode || 'cors'
     }
   }
-  
+
   /**
    * 构建完整URL
    */
   private buildURL(url: string, params?: Record<string, any>): string {
     const fullURL = url.startsWith('http') ? url : `${this.config.baseURL}${url}`
-    
+
     if (!params) return fullURL
-    
+
     const queryString = Object.keys(params)
       .filter(key => params[key] !== undefined && params[key] !== null)
       .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
       .join('&')
-    
+
     return queryString ? `${fullURL}?${queryString}` : fullURL
   }
-  
+
   /**
    * 请求拦截器
    */
@@ -62,7 +62,7 @@ export class HttpClient {
         Authorization: `Bearer ${token}`
       }
     }
-    
+
     // GET请求添加时间戳防止缓存
     if (config.method === 'GET' && !config.params) {
       config.params = {}
@@ -70,10 +70,10 @@ export class HttpClient {
     if (config.method === 'GET') {
       config.params!._t = Date.now()
     }
-    
+
     return config
   }
-  
+
   /**
    * 响应拦截器
    */
@@ -82,23 +82,23 @@ export class HttpClient {
       await this.handleError(response)
       throw new Error(`HTTP Error: ${response.status}`)
     }
-    
+
     const contentType = response.headers.get('content-type')
     if (contentType?.includes('application/json')) {
       const data = await response.json()
-      
+
       // 统一业务错误处理
       if (data.code && data.code !== 200) {
         this.handleBusinessError(data)
         throw new Error(data.message || 'Business Error')
       }
-      
+
       return data
     }
-    
+
     return response.text()
   }
-  
+
   /**
    * 获取Token
    */
@@ -108,13 +108,13 @@ export class HttpClient {
     }
     return null
   }
-  
+
   /**
    * 处理HTTP错误
    */
   private async handleError(response: Response): Promise<void> {
     const status = response.status
-    
+
     switch (status) {
       case 401:
         // 未授权，清除token
@@ -137,24 +137,24 @@ export class HttpClient {
         console.error(`[HTTP] 错误: ${status}`)
     }
   }
-  
+
   /**
    * 处理业务错误
    */
   private handleBusinessError(error: any): void {
     console.error('[HTTP] 业务错误:', error.message)
   }
-  
+
   /**
    * 发起请求
    */
   private async request(url: string, options: RequestOptions = {}): Promise<any> {
     // 请求拦截
     const config = this.requestInterceptor(options)
-    
+
     // 构建URL
     const fullURL = this.buildURL(url, config.params)
-    
+
     // 构建请求配置
     const fetchConfig: RequestInit = {
       method: config.method || 'GET',
@@ -166,33 +166,42 @@ export class HttpClient {
       mode: this.config.mode,
       body: config.body
     }
-    
+
     // 超时处理
     const timeout = config.timeout || this.config.timeout!
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
-    
+
+    // 监听外部传入的 signal (用于子应用销毁等场景)
+    if (config.signal) {
+      config.signal.addEventListener('abort', () => {
+        controller.abort()
+        clearTimeout(timeoutId)
+      }, { once: true })
+    }
+
     try {
       const response = await fetch(fullURL, {
         ...fetchConfig,
         signal: controller.signal
       })
-      
+
       clearTimeout(timeoutId)
-      
+
       // 响应拦截
       return await this.responseInterceptor(response)
     } catch (error) {
       clearTimeout(timeoutId)
-      
+
       if ((error as Error).name === 'AbortError') {
-        throw new Error(`请求超时 (${timeout}ms)`)
+        const isTimeout = !config.signal?.aborted;
+        throw new Error(isTimeout ? `请求超时 (${timeout}ms)` : '请求已取消')
       }
-      
+
       throw error
     }
   }
-  
+
   /**
    * GET 请求
    */
@@ -203,7 +212,7 @@ export class HttpClient {
       params
     })
   }
-  
+
   /**
    * POST 请求
    */
@@ -214,7 +223,7 @@ export class HttpClient {
       body: JSON.stringify(data)
     })
   }
-  
+
   /**
    * PUT 请求
    */
@@ -225,7 +234,7 @@ export class HttpClient {
       body: JSON.stringify(data)
     })
   }
-  
+
   /**
    * DELETE 请求
    */
@@ -235,7 +244,7 @@ export class HttpClient {
       method: 'DELETE'
     })
   }
-  
+
   /**
    * PATCH 请求
    */

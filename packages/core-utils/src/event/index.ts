@@ -13,7 +13,7 @@ interface EventMap {
  */
 export class EventBus {
   private events: EventMap = {}
-  
+
   /**
    * 订阅事件
    * @param event - 事件名
@@ -25,11 +25,11 @@ export class EventBus {
       this.events[event] = []
     }
     this.events[event].push(callback)
-    
+
     // 返回取消订阅函数
     return () => this.off(event, callback)
   }
-  
+
   /**
    * 发布事件
    * @param event - 事件名
@@ -40,7 +40,7 @@ export class EventBus {
       this.events[event].forEach(callback => callback(data))
     }
   }
-  
+
   /**
    * 取消订阅
    * @param event - 事件名
@@ -48,7 +48,7 @@ export class EventBus {
    */
   off(event: string, callback?: EventCallback): void {
     if (!this.events[event]) return
-    
+
     if (callback) {
       const index = this.events[event].indexOf(callback)
       if (index > -1) {
@@ -59,7 +59,7 @@ export class EventBus {
       this.events[event] = []
     }
   }
-  
+
   /**
    * 订阅一次性事件
    * @param event - 事件名
@@ -72,14 +72,14 @@ export class EventBus {
     }
     this.on(event, onceWrapper)
   }
-  
+
   /**
    * 清空所有事件
    */
   clear(): void {
     this.events = {}
   }
-  
+
   /**
    * 获取事件监听器数量
    */
@@ -113,8 +113,8 @@ export const globalEventBus = new EventBus()
  * @param detail - 事件详情
  */
 export function dispatchCustomEvent(
-  target: HTMLElement | Window | Document, 
-  eventName: string, 
+  target: HTMLElement | Window | Document,
+  eventName: string,
   detail?: any
 ): void {
   const event = new CustomEvent(eventName, {
@@ -146,9 +146,9 @@ export function delegate(
       handler(event, element)
     }
   }
-  
+
   parent.addEventListener(eventType, listener)
-  
+
   return () => {
     parent.removeEventListener(eventType, listener)
   }
@@ -172,9 +172,9 @@ export function waitForEvent(
       if (timer) clearTimeout(timer)
       resolve(event)
     }
-    
+
     target.addEventListener(eventName, handler, { once: true })
-    
+
     let timer: number | undefined
     if (timeout) {
       timer = window.setTimeout(() => {
@@ -183,4 +183,84 @@ export function waitForEvent(
       }, timeout)
     }
   })
+}
+
+/**
+ * 生命周期感知的事件中心 (LifecycleEventHub)
+ * 专门为微前端或组件化开发设计，支持统一挂载与一键销毁
+ */
+export class LifecycleEventHub extends EventBus {
+  private domListeners: Array<{ target: EventTarget, event: string, handler: EventListener }> = []
+
+  /**
+   * 重载 on 方法：
+   * 1. 如果传 2 个参数，则作为普通事件总线使用
+   * 2. 如果传 3 个参数，第一个参数为 EventTarget，则作为 DOM 事件绑定并自动追踪
+   */
+  // @ts-ignore
+  on(event: string, callback: EventCallback): () => void
+  on(target: EventTarget, event: string, handler: EventListener): void
+  on(first: string | EventTarget, second: string | EventCallback, third?: EventListener): any {
+    if (typeof first === 'string') {
+      // 普通 EventBus 行为
+      return super.on(first, second as EventCallback)
+    } else if (first instanceof EventTarget || (typeof first === 'object' && first !== null && 'addEventListener' in first)) {
+      // DOM 事件绑定行为
+      const target = first as EventTarget
+      const event = second as string
+      const handler = third as EventListener
+      this.bindDOM(target, event, handler)
+    }
+  }
+
+  /**
+   * 绑定 DOM 事件并自动加入追踪
+   */
+  bindDOM(
+    target: EventTarget,
+    event: string,
+    handler: EventListener,
+    options?: boolean | AddEventListenerOptions
+  ): void {
+    target.addEventListener(event, handler, options)
+    this.domListeners.push({ target, event, handler })
+  }
+
+  /**
+   * 解绑指定的 DOM 事件
+   */
+  unbindDOM(target: EventTarget, event: string, handler: EventListener): void {
+    target.removeEventListener(event, handler)
+    this.domListeners = this.domListeners.filter(l =>
+      !(l.target === target && l.event === event && l.handler === handler)
+    )
+  }
+
+  /**
+   * 清除所有订阅（公开 EventBus 的 clear 方法）
+   */
+  clear(): void {
+    super.clear()
+  }
+
+  /**
+   * 销毁所有监听器
+   */
+  destroy(): void {
+    // 1. 清除所有追踪的 DOM 事件
+    this.domListeners.forEach(({ target, event, handler }) => {
+      target.removeEventListener(event, handler)
+    })
+    this.domListeners = []
+
+    // 2. 清除所有内部事件订阅
+    this.clear()
+  }
+
+  /**
+   * 销毁别名，对齐通用接口
+   */
+  dispose(): void {
+    this.destroy()
+  }
 }

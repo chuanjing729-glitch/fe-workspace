@@ -184,4 +184,60 @@ export default {
   }
 }
 </script>
+
+---
+
+## 高阶进阶：自动化与微前端适配 (Advanced)
+
+针对复杂应用场景，推荐引入 `@51jbs/vue2-toolkit` 提供的 Mixins 以简化开发并确保质量。
+
+### 1. 自动资源回收 (AutoCleanup)
+
+**库地址**：`@51jbs/vue2-toolkit/mixins`
+
+无需手动编写 `beforeDestroy` 清理逻辑，一键预防内存泄漏。
+
+```vue
+<script>
+import { AutoCleanup } from '@51jbs/vue2-toolkit'
+
+export default {
+  mixins: [AutoCleanup],
+  mounted() {
+    // 所有的定时器、全局监听器将会在组件销毁时被 Mixin 自动清理
+    this.$_timers.push(setInterval(() => {
+      console.log('Safe Timer')
+    }, 1000))
+  }
+}
+</script>
+```
+
+### 2. 微前端环境适配 (MicroAdapter)
+
+**库地址**：`@51jbs/vue2-toolkit/mixins`
+
+专门用于 `qiankun` 环境，提供标准化的全局状态同步能力。
+
+```vue
+<script>
+import { MicroAdapter } from '@51jbs/vue2-toolkit'
+
+export default {
+  mixins: [MicroAdapter],
+  data() {
+    return {
+      // ✅ 混入自动提供 $_isMicroApp 判定
+    }
+  },
+  mounted() {
+    if (this.$_isMicroApp) {
+      console.log('Running in Micro Sandbox')
+      // 使用 $_setMicroState 与主应用同步状态
+      this.$_setMicroState({ user: 'chuanjing' })
+    }
+  }
+}
+</script>
+```
 ```

@@ -30,4 +30,5 @@ coverage/
 **/coverage/
 .coverage/
 **/.coverage/
-*/coverage/requirements/
+# SpecPlugin cache
+.spec-cache/

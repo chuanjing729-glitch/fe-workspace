@@ -21,6 +21,7 @@ export interface IncrementalCoverageOptions {
   threshold?: number;
   reportInterval?: number; // 报告生成的最小间隔（毫秒），默认 10000ms
   historyCount?: number;   // 保留的历史报告数量，默认 15
+  failOnError?: boolean;    // 覆盖率未达标时是否抛出错误（主要用于 CI）
 }
 
 export interface CoverageData {

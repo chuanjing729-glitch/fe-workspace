@@ -410,3 +410,29 @@ $s2: 8px;
 // 使用
 $responsive-size: strip-unit($font-size-base) * 1.2;
 ```
+
+---
+
+## 🛠️ 自动化规范检查 (Linting)
+
+为了确保 CSS 命名和结构的规范性，项目集成了 `@51jbs/webpack-spec-plugin`。该插件会在构建阶段自动执行以下检查：
+
+- **BEM 命名检查 (P1)**：自动识别不符合 `block__element--modifier` 结构的类名名。
+- **ID 选择器拦截 (P1)**：禁止使用 `#id` 选择器以防止优先级混乱。
+- **通用选择器拦截 (P1)**：禁止使用 `*` 通配符以优化性能。
+- **嵌套深度检测 (P1)**：当 CSS 嵌套超过 4 层时发出警告。
+
+### 存量治理：新老划断
+
+项目支持 `baseline` 基线机制。对于老代码中的不规范内容，可以先通过 `generateBaseline: true` 记录到快照中，后续开启 `useBaseline: true` 即可确保：**老代码不报错，新代码必须遵循规范**。
+
+**配置示例：**
+
+```javascript
+// webpack.config.js
+new SpecPlugin({
+  rules: { css: true },
+  useBaseline: true, // 开启基线过滤，忽略存量错误
+  baselineFile: '.spec-baseline.json'
+})
+```

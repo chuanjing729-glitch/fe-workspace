@@ -22,7 +22,7 @@
     "precision",
     "51jbs"
   ],
-  "author": "Chuanjing Li",
+  "author": "chuanjing.li",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^30.0.0",

@@ -7,6 +7,7 @@ import { RuleChecker, CheckResult, PluginOptions } from '../types'
  * 1. 选择器嵌套深度检查 (P1)
  * 2. 禁止使用 ID 选择器 (P1)
  * 3. 禁止使用通用选择器 (P1)
+ * 4. BEM 命名检查 (P1)
  */
 export const cssRule: RuleChecker = {
   name: 'css',
@@ -39,6 +40,9 @@ export const cssRule: RuleChecker = {
 
     // 3. 禁止通用选择器 (P1)
     results.push(...checkUniversalSelector(filePath, content, cssContent, cssStartIndex))
+
+    // 4. BEM 命名检查 (P1)
+    results.push(...checkBemNaming(filePath, content, cssContent, cssStartIndex))
 
     return results
   }
@@ -172,6 +176,57 @@ function checkUniversalSelector(
         type: 'warning',
         line: lineNumber
       })
+    }
+  }
+
+  return results
+}
+/**
+ * 检查 BEM 命名规范 (P1)
+ */
+function checkBemNaming(
+  filePath: string,
+  fullContent: string,
+  cssContent: string,
+  cssStartIndex: number
+): CheckResult[] {
+  const results: CheckResult[] = []
+  const lines = cssContent.split('\n')
+
+  // 匹配类名，支持字母、数字、连字符和下划线
+  const classPattern = /\.([a-z0-9_-]+)/g
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+    if (!line || line.startsWith('/*') || line.startsWith('//')) continue
+
+    let match
+    while ((match = classPattern.exec(line)) !== null) {
+      const className = match[1]
+
+      // 跳过过于短的类名或明确的工具类
+      if (className.length < 3) continue
+      if (/^(el-|v-|is-|has-|ant-)/.test(className)) continue
+
+      // BEM 检查：
+      // 1. 不应包含下划线超过 2 个或连字符过多
+      // 2. 推荐结构：block__element--modifier
+      const hasInvalidSeparator = /_{3,}|-{3,}/.test(className)
+      const isIncorrectBem = /([a-z0-9]+)__([a-z0-9-]+)(?:--([a-z0-9-]+))?/.test(className) === false &&
+        /^[a-z0-9]+(-[a-z0-9]+)*$/.test(className) === false
+
+      if (hasInvalidSeparator || (isIncorrectBem && !className.includes('__') && !className.includes('--'))) {
+        const position = cssStartIndex + cssContent.split('\n').slice(0, i).join('\n').length
+        const lineNumber = fullContent.substring(0, position).split('\n').length + 1
+
+        results.push({
+          rule: 'css/bem-naming',
+          message: `CSS 类名 "${className}" 不符合 BEM 命名规范，建议使用 block__element--modifier 结构`,
+          file: filePath,
+          type: 'warning',
+          line: lineNumber
+        })
+      }
     }
   }
 
