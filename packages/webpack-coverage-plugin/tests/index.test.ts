@@ -28,14 +28,15 @@ describe('WebpackCoveragePlugin & Core', () => {
 
     await core.generateReport();
 
-    // 检查报告文件是否生成 (ReportService 2.0 生成 smart-test-report.html)
-    const htmlReportPath = path.join(tempDir, 'smart-test-report.html');
+    // 检查报告文件是否生成 (ReportService 2.0 生成 latest.html 及 timestamp 文件)
+    const htmlReportPath = path.join(tempDir, 'latest.html');
 
     // 验证 HTML 报告存在
     expect(fs.existsSync(htmlReportPath)).toBe(true);
 
     // 清理临时文件
-    if (fs.existsSync(htmlReportPath)) fs.unlinkSync(htmlReportPath);
-    if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
+    if (fs.existsSync(tempDir)) {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 });

@@ -48,7 +48,7 @@ describe('ReportService Integration Test', () => {
             }
         });
 
-        const reportPath = path.join(outputDir, 'smart-test-report.html');
+        const reportPath = path.join(outputDir, 'latest.html');
         expect(fs.existsSync(reportPath)).toBe(true);
 
         const content = fs.readFileSync(reportPath, 'utf-8');
