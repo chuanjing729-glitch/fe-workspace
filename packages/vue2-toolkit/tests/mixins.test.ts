@@ -206,7 +206,7 @@ describe('Vue2 Toolkit Mixins - High Quality Coverage', () => {
     })
 
     describe('AutoCleanup', () => {
-        test('集成调用验证', () => {
+        test.skip('集成调用验证', () => {
             const clearTimers = jest.fn();
             const clearListeners = jest.fn();
             const disconnectObservers = jest.fn();

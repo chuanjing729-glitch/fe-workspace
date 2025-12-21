@@ -20,7 +20,7 @@ export default {
       return
     }
 
-    el.addEventListener('click', function(this: any, event: Event) {
+    const handler = function (this: any, event: Event) {
       const timerId = debounceMap.get(el)
       if (timerId) {
         clearTimeout(timerId)
@@ -31,14 +31,21 @@ export default {
       }, delay)
 
       debounceMap.set(el, newTimerId)
-    })
+    }
+
+      ; (el as any)._debounceHandler = handler
+    el.addEventListener('click', handler)
   },
 
-  unbind(el: HTMLElement) {
+  unbind(el: any) {
     const timerId = debounceMap.get(el)
     if (timerId) {
       clearTimeout(timerId)
       debounceMap.delete(el)
+    }
+    if ((el as any)._debounceHandler) {
+      el.removeEventListener('click', (el as any)._debounceHandler)
+      delete (el as any)._debounceHandler
     }
   }
 }
