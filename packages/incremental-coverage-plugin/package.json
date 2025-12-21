@@ -17,19 +17,19 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "types": "./dist/index.d.ts",
             "require": "./dist/index.js",
-            "import": "./dist/index.mjs",
-            "types": "./dist/index.d.ts"
+            "import": "./dist/index.mjs"
         },
         "./webpack": {
+            "types": "./dist/webpack.d.ts",
             "require": "./dist/webpack.js",
-            "import": "./dist/webpack.mjs",
-            "types": "./dist/webpack.d.ts"
+            "import": "./dist/webpack.mjs"
         },
         "./vite": {
+            "types": "./dist/vite.d.ts",
             "require": "./dist/vite.js",
-            "import": "./dist/vite.mjs",
-            "types": "./dist/vite.d.ts"
+            "import": "./dist/vite.mjs"
         }
     },
     "files": [
