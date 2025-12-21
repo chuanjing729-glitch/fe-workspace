@@ -1,6 +1,6 @@
 {
   "name": "@51jbs/webpack-spec-plugin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Webpack plugin for checking code specifications including naming, performance, and best practices",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
