@@ -33,6 +33,11 @@ export default withMermaid(defineConfig({
 
     sidebar,
 
+    outline: {
+      level: [2, 3],
+      label: '本页目录'
+    },
+
     search: {
       provider: 'local'
     },
