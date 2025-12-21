@@ -28,7 +28,7 @@ import * as domUtils from '@51jbs/core-utils';
 
 添加类名。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L10-L25)
 <<< @/packages/core-utils/src/dom/index.ts{10-25}
 
 **类型签名**
@@ -52,7 +52,7 @@ addClass(el, 'class1 class2');
 
 移除类名。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L32-L48)
 <<< @/packages/core-utils/src/dom/index.ts{32-48}
 
 **类型签名**
@@ -75,7 +75,7 @@ removeClass(el, 'active');
 
 检查是否有类名。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L56-L68)
 <<< @/packages/core-utils/src/dom/index.ts{56-68}
 
 **类型签名**
@@ -96,7 +96,7 @@ if (hasClass(el, 'active')) {
 
 切换类名。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L75-L83)
 <<< @/packages/core-utils/src/dom/index.ts{75-83}
 
 **类型签名**
@@ -115,7 +115,7 @@ toggleClass(el, 'active');
 
 获取滚动顶部距离（兼容不同浏览器）。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L89-L94)
 <<< @/packages/core-utils/src/dom/index.ts{89-94}
 
 **类型签名**
@@ -129,7 +129,7 @@ function getScrollTop(): number
 
 获取滚动左侧距离。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L100-L105)
 <<< @/packages/core-utils/src/dom/index.ts{100-105}
 
 **类型签名**
@@ -143,7 +143,7 @@ function getScrollLeft(): number
 
 获取元素到页面顶部的绝对距离。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L112-L122)
 <<< @/packages/core-utils/src/dom/index.ts{112-122}
 
 **类型签名**
@@ -157,7 +157,7 @@ function getElementTop(el: HTMLElement): number
 
 获取元素到页面左侧的绝对距离。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L129-L139)
 <<< @/packages/core-utils/src/dom/index.ts{129-139}
 
 **类型签名**
@@ -171,7 +171,7 @@ function getElementLeft(el: HTMLElement): number
 
 检查元素是否在视口中。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L147-L155)
 <<< @/packages/core-utils/src/dom/index.ts{147-155}
 
 **类型签名**
@@ -196,7 +196,7 @@ if (isInViewport(el, 100)) {
 
 平滑滚动到指定元素。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L162-L191)
 <<< @/packages/core-utils/src/dom/index.ts{162-191}
 
 **类型签名**
@@ -228,7 +228,7 @@ scrollToElement(element, { offset: 50, behavior: 'smooth' });
 
 创建 DOM 元素。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L200-L224)
 <<< @/packages/core-utils/src/dom/index.ts{200-224}
 
 **类型签名**
@@ -252,7 +252,7 @@ document.body.appendChild(div);
 
 移除 DOM 元素。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/dom/index.ts#L230-L234)
 <<< @/packages/core-utils/src/dom/index.ts{230-234}
 
 **类型签名**
