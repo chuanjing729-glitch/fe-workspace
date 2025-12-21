@@ -47,7 +47,7 @@ const ScenarioGeneral = {
   data() { return { apiMsg: '', pwd: '' } },
   methods: {
     async mockApi(code) {
-      if(code===200) this.apiMsg = 'Success';
+      if(code===2000) this.apiMsg = 'Success';
       else this.apiMsg = 'Error 500';
     }
   }

@@ -10,6 +10,9 @@
         <label>系统名称</label>
         <input type="text" v-model="settings.systemName" class="form-input">
       </div>
+     
+     
+     
       <div class="form-item">
         <label>主题色</label>
         <div class="color-picker">

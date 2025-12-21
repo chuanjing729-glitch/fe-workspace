@@ -31,6 +31,8 @@ export default {
         const role = vnode.context.role;
         if (role !== binding.value) {
           el.style.display = 'none';
+        } else{
+          console.log("hello")
         }
       },
       update(el, binding, vnode) {

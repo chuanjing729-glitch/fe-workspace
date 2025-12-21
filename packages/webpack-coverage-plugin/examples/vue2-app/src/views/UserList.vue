@@ -73,8 +73,12 @@ export default {
       if (role) item.role = role;
     },
     handleDelete(id) {
-      if (confirm('确认删除该用户吗？')) {
-        this.userList = this.userList.filter(u => u.id !== id);
+      const a = 1;
+      const b = 2;
+      if(a===b){
+        console.log("hello")
+      } else{
+        console.log("world")
       }
     }
   }

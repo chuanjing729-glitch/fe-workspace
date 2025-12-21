@@ -318,7 +318,12 @@ export class CoverageService implements ICoverageService {
             pick: 'lines'
         });
 
-        console.log('[CoverageService] Istanbul diff:', JSON.stringify(diff.total, null, 2));
+        // 改进日志输出
+        if (diff && diff.total) {
+            console.log('[CoverageService] Istanbul diff:', JSON.stringify(diff.total, null, 2));
+        } else {
+            console.log('[CoverageService] Istanbul diff: 无变化（代码未修改）');
+        }
 
         // 5. 获取 Git 变更并计算（复用传统逻辑）
         const changedFiles = await this.gitService.getChangedFiles();

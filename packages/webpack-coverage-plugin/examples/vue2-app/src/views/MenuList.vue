@@ -22,6 +22,9 @@
             <td>{{ item.name }}</td>
             <td>{{ item.path }}</td>
             <td>{{ item.icon }}</td>
+            
+            
+            
             <td>
               <button class="btn text" @click="handleEdit(item)">编辑</button>
               <button class="btn text danger" @click="handleDelete(item.id)">删除</button>
@@ -56,7 +59,7 @@ export default {
     },
     handleAdd() {
       const name = prompt('请输入菜单名称');
-      if (name) {
+      if (name === 0) {
         // 调用 Mock API
         MenuApi.addMenu({ name }).then(() => {
           alert('添加成功 (Mock)');

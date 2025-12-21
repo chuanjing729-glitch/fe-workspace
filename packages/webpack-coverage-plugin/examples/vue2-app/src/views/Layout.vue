@@ -12,11 +12,17 @@
       <router-link tag="div" to="/system" class="menu-item" active-class="active">
         <span class="icon">⚙️</span> 系统设置
       </router-link>
-      <!-- <router-link tag="div" to="/scenarios" class="menu-item" active-class="active">
+      <router-link tag="div" to="/scenarios" class="menu-item" active-class="active">
         <span class="icon">🧪</span> 高级场景
-      </router-link> -->
+      </router-link>
     </div>
 
+
+
+
+
+
+    
     <!-- Main Content -->
     <div class="main-container">
       <header class="header">
