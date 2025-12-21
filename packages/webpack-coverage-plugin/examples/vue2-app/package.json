@@ -12,6 +12,9 @@
     },
     "devDependencies": {
         "@51jbs/webpack-coverage-plugin": "../../",
+        "@babel/core": "^7.28.5",
+        "@babel/preset-env": "^7.28.5",
+        "babel-loader": "^10.0.0",
         "css-loader": "^6.10.0",
         "html-webpack-plugin": "^5.6.0",
         "style-loader": "^3.3.4",

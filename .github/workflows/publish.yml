@@ -35,13 +35,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org/'
+          cache: 'pnpm'
 
       - name: Configure Git
         run: |
@@ -62,11 +63,17 @@ jobs:
         continue-on-error: true
         run: |
           if [ -z "${{ github.event.inputs.package }}" ]; then
-            # 发布所有包
-            pnpm publish ${{ github.event.inputs.version-type }} --verbose
+            # 1. 批量更新版本 (不创建 git tag，防止 tag 泛滥，由最后一步统一提交)
+            pnpm -r exec npm version ${{ github.event.inputs.version-type }} --no-git-tag-version
+            git commit -am "chore: release all ${{ github.event.inputs.version-type }}"
+            # 2. 发布所有包
+            pnpm -r publish --no-git-checks
           else
-            # 发布指定包
-            pnpm publish:${{ github.event.inputs.package }} ${{ github.event.inputs.version-type }} --verbose
+            # 1. 更新指定包版本
+            pnpm --filter ${{ github.event.inputs.package }} exec npm version ${{ github.event.inputs.version-type }} --no-git-tag-version
+            git commit -am "chore: release ${{ github.event.inputs.package }} ${{ github.event.inputs.version-type }}"
+            # 2. 发布指定包
+            pnpm --filter ${{ github.event.inputs.package }} publish --no-git-checks
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

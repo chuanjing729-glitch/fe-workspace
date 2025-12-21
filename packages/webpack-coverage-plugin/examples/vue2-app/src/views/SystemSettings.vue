@@ -72,6 +72,11 @@ export default {
       const originalText = btn.innerText;
       btn.innerText = '保存中...';
       setTimeout(() => {
+        if(btn){
+          btn = 1
+        } else{
+          btn = 2
+        }
         alert('配置已生效！');
         btn.innerText = originalText;
       }, 800);

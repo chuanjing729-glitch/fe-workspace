@@ -5,6 +5,7 @@
   "description": "前端工程效率平台",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
@@ -18,11 +19,11 @@
     "test": "pnpm -r --stream test",
     "dev": "pnpm -r --stream --parallel dev",
     "publish:webpack-coverage-plugin": "node scripts/publish-packages.cjs @51jbs/webpack-coverage-plugin",
-    "build:webpack-coverage-plugin": "cd packages/webpack-coverage-plugin && npm run build",
-    "test:webpack-coverage-plugin": "cd packages/webpack-coverage-plugin && npm test",
+    "build:webpack-coverage-plugin": "pnpm --filter @51jbs/webpack-coverage-plugin run build",
+    "test:webpack-coverage-plugin": "pnpm --filter @51jbs/webpack-coverage-plugin test",
     "publish:webpack-api-tracker-plugin": "node scripts/publish-packages.cjs @51jbs/webpack-api-tracker-plugin",
-    "build:webpack-api-tracker-plugin": "cd packages/webpack-api-tracker-plugin && npm run build",
-    "test:webpack-api-tracker-plugin": "cd packages/webpack-api-tracker-plugin && npm test"
+    "build:webpack-api-tracker-plugin": "pnpm --filter @51jbs/webpack-api-tracker-plugin run build",
+    "test:webpack-api-tracker-plugin": "pnpm --filter @51jbs/webpack-api-tracker-plugin test"
   },
   "keywords": [
     "frontend",

@@ -7,6 +7,7 @@
       <button @click="coveredMethod">触发已覆盖代码</button>
       <button @click="uncoveredMethod" v-if="showHidden">触发原本未覆盖代码</button>
       <button @click="toggleHidden">显示/隐藏隐藏按钮</button>
+      <button @click="trulyUncovered">我是新增的未覆盖按钮</button>
     </div>
 
     <div class="log">
@@ -39,6 +40,10 @@ export default {
     toggleHidden() {
       this.showHidden = !this.showHidden;
       this.addLog('切换了按钮显示状态: ' + this.showHidden);
+    },
+    trulyUncovered() {
+      this.addLog('执行了 trulyUncovered (应该没发生)');
+      console.log('trulyUncovered executed');
     },
     addLog(text) {
       this.logs.unshift(new Date().toLocaleTimeString() + ': ' + text);

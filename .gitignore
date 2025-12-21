@@ -4,6 +4,10 @@ documents/
 # Dependencies
 node_modules/
 **/node_modules/
+.pnpm-store/
+# Lock files (force pnpm)
+package-lock.json
+yarn.lock
 
 # IDE-specific files
 .idea/
@@ -23,4 +27,7 @@ docs/.vitepress/cache/
 
 # Coverage reports
 coverage/
+**/coverage/
+.coverage/
+**/.coverage/
 */coverage/requirements/

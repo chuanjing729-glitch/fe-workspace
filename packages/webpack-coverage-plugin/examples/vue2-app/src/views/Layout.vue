@@ -16,12 +16,6 @@
         <span class="icon">🧪</span> 高级场景
       </router-link>
     </div>
-
-
-
-
-
-
     
     <!-- Main Content -->
     <div class="main-container">

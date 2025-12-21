@@ -59,12 +59,17 @@ export default {
     },
     handleAdd() {
       const name = prompt('请输入菜单名称');
-      if (name === 0) {
+      if (name !== 0) {
         // 调用 Mock API
         MenuApi.addMenu({ name }).then(() => {
           alert('添加成功 (Mock)');
           this.fetchData();
         });
+      }
+      if(name + 1 === 0) {
+        console.log('123')
+      }else{
+        console.log('456')
       }
     },
     handleEdit(item) {

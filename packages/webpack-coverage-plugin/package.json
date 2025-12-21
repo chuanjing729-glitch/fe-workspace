@@ -50,7 +50,7 @@
     "@babel/traverse": "^7.28.5",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^18.0.0",
+    "@types/node": "^20.0.0",
     "@types/webpack": "^5.28.5",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",
@@ -67,6 +67,7 @@
     "babel-plugin-istanbul": "^7.0.1",
     "express": "^5.2.1",
     "istanbul-diff": "^2.0.0",
+    "lodash": "^4.17.21",
     "simple-git": "^3.30.0"
   }
 }

@@ -310,8 +310,11 @@ export class CoverageService implements ICoverageService {
         // 2. 转换为 Istanbul 格式
         const currentCoverage = this.toIstanbulFormat(this.mergedMap);
 
-        // 3. 获取 baseline
-        const baselineCoverage = this.getIstanbulBaseline() || this.createEmptyIstanbulBaseline();
+        // 3. 获取 baseline（检查文件是否存在）
+        const existingBaseline = this.getIstanbulBaseline();
+        const baselineExists = existingBaseline !== null;
+        const baselineCoverage = existingBaseline || this.createEmptyIstanbulBaseline();
+
 
         // 4. 使用 istanbul-diff 计算差异
         const diff = istanbulDiff.diff(baselineCoverage, currentCoverage, {
@@ -322,7 +325,7 @@ export class CoverageService implements ICoverageService {
         if (diff && diff.total) {
             console.log('[CoverageService] Istanbul diff:', JSON.stringify(diff.total, null, 2));
         } else {
-            console.log('[CoverageService] Istanbul diff: 无变化（代码未修改）');
+            console.log('[CoverageService] Istanbul diff: 无变化（覆盖率数据与 baseline 相同）');
         }
 
         // 5. 获取 Git 变更并计算（复用传统逻辑）
@@ -376,8 +379,13 @@ export class CoverageService implements ICoverageService {
             );
         }
 
-        // 6. 保存当前覆盖率作为新 baseline
-        this.saveIstanbulBaseline(currentCoverage);
+        // 只在首次运行时保存 baseline（如果 baseline 文件不存在）
+        if (!baselineExists) {
+            console.log('[CoverageService] 首次运行，保存 baseline');
+            this.saveIstanbulBaseline(currentCoverage);
+        }
+        // 注意：不要每次都保存 baseline，否则 diff 永远为空
+        // 如需更新 baseline，请手动删除 .coverage/istanbul-baseline.json
 
         return result;
     }
