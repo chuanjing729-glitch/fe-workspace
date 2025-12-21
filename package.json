@@ -23,7 +23,8 @@
     "test:webpack-coverage-plugin": "pnpm --filter @51jbs/webpack-coverage-plugin test",
     "publish:webpack-api-tracker-plugin": "node scripts/publish-packages.cjs @51jbs/webpack-api-tracker-plugin",
     "build:webpack-api-tracker-plugin": "pnpm --filter @51jbs/webpack-api-tracker-plugin run build",
-    "test:webpack-api-tracker-plugin": "pnpm --filter @51jbs/webpack-api-tracker-plugin test"
+    "test:webpack-api-tracker-plugin": "pnpm --filter @51jbs/webpack-api-tracker-plugin test",
+    "clean:coverage": "find . -name \"node_modules\" -prune -o -type d \\( -name \"coverage\" -o -name \".coverage\" \\) -prune -exec rm -rf '{}' +"
   },
   "keywords": [
     "frontend",
