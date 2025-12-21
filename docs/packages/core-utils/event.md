@@ -27,7 +27,7 @@ import {
 
 事件总线类，实现发布订阅模式。
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L14-L89)
 <<< @/packages/core-utils/src/event/index.ts{14-89}
 
 **方法**
@@ -36,7 +36,7 @@ import {
 
 订阅事件
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L23-L31)
 <<< @/packages/core-utils/src/event/index.ts{23-31}
 
 ```typescript
@@ -58,7 +58,7 @@ unsubscribe()
 
 发布事件
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L38-L42)
 <<< @/packages/core-utils/src/event/index.ts{38-42}
 
 ```typescript
@@ -74,7 +74,7 @@ bus.emit('userLogin', { id: 1, name: '张三' })
 
 取消订阅
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L49-L61)
 <<< @/packages/core-utils/src/event/index.ts{49-61}
 
 ```typescript
@@ -91,7 +91,7 @@ bus.off('userLogin') // 取消该事件的所有回调
 
 订阅一次性事件
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L68-L74)
 <<< @/packages/core-utils/src/event/index.ts{68-74}
 
 ```typescript
@@ -109,7 +109,7 @@ bus.once('init', () => {
 
 清空所有事件
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L79-L81)
 <<< @/packages/core-utils/src/event/index.ts{79-81}
 
 ```typescript
@@ -120,7 +120,7 @@ clear(): void
 
 获取事件监听器数量
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L86-L88)
 <<< @/packages/core-utils/src/event/index.ts{86-88}
 
 ```typescript
@@ -133,7 +133,7 @@ listenerCount(event: string): number
 
 创建独立的事件总线实例
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L100-L102)
 <<< @/packages/core-utils/src/event/index.ts{100-102}
 
 **类型签名**
@@ -155,7 +155,7 @@ moduleBus.emit('moduleEvent', data)
 
 全局事件总线单例
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L107)
 <<< @/packages/core-utils/src/event/index.ts{107-107}
 
 **示例**
@@ -177,7 +177,7 @@ globalEventBus.emit('notification', '有新消息')
 
 触发自定义DOM事件
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L115-L126)
 <<< @/packages/core-utils/src/event/index.ts{115-126}
 
 **类型签名**
@@ -213,7 +213,7 @@ button.addEventListener('customClick', (e) => {
 
 事件委托
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L136-L155)
 <<< @/packages/core-utils/src/event/index.ts{136-155}
 
 **类型签名**
@@ -254,7 +254,7 @@ unlisten()
 
 等待事件触发（Promise封装）
 
-**源码实现**
+**源码实现** [查看源码](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/core-utils/src/event/index.ts#L164-L186)
 <<< @/packages/core-utils/src/event/index.ts{164-186}
 
 **类型签名**
