@@ -26,9 +26,8 @@ docs/.vitepress/cache/
 .DS_Store
 
 # Coverage reports
-coverage/
-**/coverage/
 .coverage/
 **/.coverage/
 # SpecPlugin cache
 .spec-cache/
+**/coverage

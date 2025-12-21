@@ -8,7 +8,8 @@ module.exports = {
   coverageDirectory: 'coverage',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleNameMapper: {
-    '^vue$': 'vue/dist/vue.runtime.common.js'
+    // 关键：强制使用完整版 Vue，支持 template 编译
+    '^vue$': 'vue/dist/vue.common.js'
   },
   transform: {
     '^.+\\.ts$': ['ts-jest', {
@@ -17,5 +18,6 @@ module.exports = {
         allowSyntheticDefaultImports: true
       }
     }]
-  }
+  },
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
 }

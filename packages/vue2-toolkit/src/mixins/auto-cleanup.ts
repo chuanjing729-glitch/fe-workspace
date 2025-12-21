@@ -39,6 +39,9 @@ export const AutoCleanupMixin = Vue.extend({
             if (typeof vm.$_disconnectAllObservers === 'function') {
                 vm.$_disconnectAllObservers()
             }
+            if (typeof vm.$_cancelAllRequests === 'function') {
+                vm.$_cancelAllRequests()
+            }
 
             console.log(`[AutoCleanup] Component ${this.$options.name || 'Anonymous'} resources cleared.`)
         } catch (error) {

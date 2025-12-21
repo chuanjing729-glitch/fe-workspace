@@ -1,18 +1,22 @@
 /**
- * Observer 管理 Mixin
- * 自动管理各种 Observer 的创建和清理
+ * 观察者管理 Mixin
+ * 统一管理 ResizeObserver, IntersectionObserver, MutationObserver
  */
-
-type ObserverType = ResizeObserver | IntersectionObserver | MutationObserver
 
 import Vue from 'vue'
 
+// 定义观察者接口，兼容不同类型的 Observer
+interface ObserverType {
+  disconnect: () => void
+  observe: (target: Element, options?: any) => void
+  unobserve?: (target: Element) => void
+}
+
 interface ObserverData {
   $_observers: ObserverType[]
-  $_createResizeObserver(target: Element, callback: ResizeObserverCallback): ResizeObserver | null
-  $_createIntersectionObserver(target: Element, callback: IntersectionObserverCallback, options?: IntersectionObserverInit): IntersectionObserver | null
-  $_createMutationObserver(target: Node, callback: MutationCallback, options?: MutationObserverInit): MutationObserver | null
-  $_disconnectObserver(observer: any): void
+  $_observeResize(target: Element, callback: ResizeObserverCallback): ResizeObserver | undefined
+  $_observeIntersection(target: Element, callback: IntersectionObserverCallback, options?: IntersectionObserverInit): IntersectionObserver | undefined
+  $_observeMutation(target: Element, callback: MutationCallback, options?: MutationObserverInit): MutationObserver | undefined
   $_disconnectAllObservers(): void
 }
 
@@ -23,119 +27,99 @@ export default Vue.extend({
       $_observers: [] as ObserverType[]
     }
   },
-  
+
   methods: {
     /**
      * 创建 ResizeObserver
-     * @param {Element} target - 目标元素
-     * @param {Function} callback - 回调函数
-     * @returns {ResizeObserver} Observer 实例
      */
-    $_createResizeObserver(
-      target: Element, 
-      callback: ResizeObserverCallback
-    ): ResizeObserver | null {
-      if (!target || typeof callback !== 'function') {
-        console.warn('[ObserverManager] Invalid parameters for $_createResizeObserver')
-        return null
-      }
-      
-      if ('ResizeObserver' in window) {
-        const observer = new ResizeObserver(callback)
-        observer.observe(target)
-        this.$_observers.push(observer)
-        return observer
-      } else {
+    $_observeResize(target: Element, callback: ResizeObserverCallback): ResizeObserver | undefined {
+      if (!target || typeof callback !== 'function') return
+
+      // 检查浏览器支持
+      if (typeof ResizeObserver === 'undefined') {
         console.warn('[ObserverManager] ResizeObserver is not supported in this browser')
-        return null
+        return
       }
+
+      const observer = new ResizeObserver(callback)
+      observer.observe(target)
+
+      if (this.$_observers) {
+        this.$_observers.push(observer)
+      }
+
+      return observer
     },
-    
+
     /**
      * 创建 IntersectionObserver
-     * @param {Element} target - 目标元素
-     * @param {Function} callback - 回调函数
-     * @param {Object} options - 配置选项
-     * @returns {IntersectionObserver} Observer 实例
      */
-    $_createIntersectionObserver(
-      target: Element, 
-      callback: IntersectionObserverCallback, 
-      options: IntersectionObserverInit = {}
-    ): IntersectionObserver | null {
-      if (!target || typeof callback !== 'function') {
-        console.warn('[ObserverManager] Invalid parameters for $_createIntersectionObserver')
-        return null
+    $_observeIntersection(
+      target: Element,
+      callback: IntersectionObserverCallback,
+      options?: IntersectionObserverInit
+    ): IntersectionObserver | undefined {
+      if (!target || typeof callback !== 'function') return
+
+      if (typeof IntersectionObserver === 'undefined') {
+        console.warn('[ObserverManager] IntersectionObserver is not supported')
+        return
       }
-      
-      if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver(callback, options)
-        observer.observe(target)
+
+      const observer = new IntersectionObserver(callback, options)
+      observer.observe(target)
+
+      if (this.$_observers) {
         this.$_observers.push(observer)
-        return observer
-      } else {
-        console.warn('[ObserverManager] IntersectionObserver is not supported in this browser')
-        return null
       }
+
+      return observer
     },
-    
+
     /**
      * 创建 MutationObserver
-     * @param {Element} target - 目标元素
-     * @param {Function} callback - 回调函数
-     * @param {Object} options - 配置选项
-     * @returns {MutationObserver} Observer 实例
      */
-    $_createMutationObserver(
-      target: Node, 
-      callback: MutationCallback, 
-      options: MutationObserverInit = { 
-        childList: true, 
-        subtree: true 
+    $_observeMutation(
+      target: Element,
+      callback: MutationCallback,
+      options: MutationObserverInit = { attributes: true, childList: true, subtree: true }
+    ): MutationObserver | undefined {
+      if (!target || typeof callback !== 'function') return
+
+      if (typeof MutationObserver === 'undefined') {
+        console.warn('[ObserverManager] MutationObserver is not supported')
+        return
       }
-    ): MutationObserver | null {
-      if (!target || typeof callback !== 'function') {
-        console.warn('[ObserverManager] Invalid parameters for $_createMutationObserver')
-        return null
-      }
-      
-      if ('MutationObserver' in window) {
-        const observer = new MutationObserver(callback)
-        observer.observe(target, options)
+
+      const observer = new MutationObserver(callback)
+      observer.observe(target, options)
+
+      if (this.$_observers) {
         this.$_observers.push(observer)
-        return observer
-      } else {
-        console.warn('[ObserverManager] MutationObserver is not supported in this browser')
-        return null
       }
+
+      return observer
     },
-    
-    /**
-     * 断开指定 Observer
-     */
-    $_disconnectObserver(observer: ObserverType) {
-      if (observer && typeof observer.disconnect === 'function') {
-        observer.disconnect()
-        const index = this.$_observers.indexOf(observer)
-        if (index > -1) {
-          this.$_observers.splice(index, 1)
-        }
-      }
-    },
-    
+
     /**
      * 断开所有 Observer
      */
     $_disconnectAllObservers() {
+      if (!this.$_observers || !Array.isArray(this.$_observers)) return
+
       this.$_observers.forEach(observer => {
-        if (observer && typeof observer.disconnect === 'function') {
-          observer.disconnect()
+        try {
+          if (observer && typeof observer.disconnect === 'function') {
+            observer.disconnect()
+          }
+        } catch (e) {
+          // Ignore cleanup errors
         }
       })
       this.$_observers = []
     }
   },
-  
+
   beforeDestroy() {
     // 自动断开所有 Observer
     (this as unknown as ObserverData).$_disconnectAllObservers()

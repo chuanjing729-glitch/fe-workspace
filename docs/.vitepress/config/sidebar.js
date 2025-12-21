@@ -178,7 +178,9 @@ export const sidebar = {
     {
       text: '使用指南',
       items: [
-        { text: '入门指南', link: '/guides/getting-started' }
+        { text: '入门指南', link: '/guides/getting-started' },
+        { text: '团队推广指南', link: '/guides/team-adoption-guide' },
+        { text: '测试覆盖率报告', link: '/guides/test-coverage-report' }
       ]
     }
   ]

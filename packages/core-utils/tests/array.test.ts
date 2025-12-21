@@ -112,4 +112,10 @@ describe('Array 模块测试', () => {
     expect(result.total).toBe(7)
     expect(result.totalPages).toBe(3)
   })
+
+  test('paginate: 非法输入', () => {
+    const result = paginate(null as any, 1, 10)
+    expect(result.data).toEqual([])
+    expect(result.total).toBe(0)
+  })
 })
