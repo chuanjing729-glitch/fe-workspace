@@ -177,6 +177,93 @@ function checkMemberExists(sourcePath: string, memberName: string): boolean {
 }
 
 /**
+ * 增强的守卫检测辅助函数
+ * 检查变量是否在守卫上下文中（安全访问）
+ * 
+ * 支持的守卫模式：
+ * 1. 逻辑与：rootObj && rootObj.detail
+ * 2. If 语句：if (rootObj) { ... }
+ * 3. 三元表达式：rootObj ? rootObj.detail : null
+ * 4. 空值合并：rootObj ?? defaultValue
+ * 5. 解构默认值：const { detail } = rootObj || {}
+ */
+function hasGuardContext(node: ts.Node, variableName: string): boolean {
+  let parent: ts.Node | undefined = node.parent
+
+  while (parent) {
+    // 1. 逻辑与运算符 (&&)
+    if (ts.isBinaryExpression(parent)) {
+      const op = parent.operatorToken.kind
+
+      // rootObj && rootObj.detail
+      if (op === ts.SyntaxKind.AmpersandAmpersandToken) {
+        const leftText = parent.left.getText()
+        // 检查左侧是否包含变量名的检查
+        if (leftText.includes(variableName) && parent.left !== node) {
+          return true
+        }
+      }
+
+      // 空值合并运算符 (??)
+      if (op === ts.SyntaxKind.QuestionQuestionToken) {
+        if (parent.left === node || isDescendantOf(node, parent.left)) {
+          return true
+        }
+      }
+
+      // 逻辑或用于默认值 (||)
+      if (op === ts.SyntaxKind.BarBarToken) {
+        if (parent.left === node || isDescendantOf(node, parent.left)) {
+          return true
+        }
+      }
+    }
+
+    // 2. If 语句
+    if (ts.isIfStatement(parent)) {
+      const condition = parent.expression.getText()
+      // 检查条件中是否包含变量检查
+      if (condition.includes(variableName) && !isDescendantOf(node, parent.expression)) {
+        return true
+      }
+    }
+
+    // 3. 三元表达式（条件运算符）
+    if (ts.isConditionalExpression(parent)) {
+      const condition = parent.condition.getText()
+      // rootObj ? rootObj.detail : null
+      if (condition.includes(variableName) && !isDescendantOf(node, parent.condition)) {
+        return true
+      }
+    }
+
+    // 4. While 循环条件
+    if (ts.isWhileStatement(parent)) {
+      const condition = parent.expression.getText()
+      if (condition.includes(variableName) && !isDescendantOf(node, parent.expression)) {
+        return true
+      }
+    }
+
+    parent = parent.parent
+  }
+
+  return false
+}
+
+/**
+ * 检查 node 是否是 ancestor 的后代节点
+ */
+function isDescendantOf(node: ts.Node, ancestor: ts.Node): boolean {
+  let current: ts.Node | undefined = node
+  while (current) {
+    if (current === ancestor) return true
+    current = current.parent
+  }
+  return false
+}
+
+/**
  * 检查不安全的属性访问 (P0)
  * 检测可能导致 "Cannot read property 'xxx' of undefined" 的代码
  */
@@ -204,33 +291,8 @@ function checkUnsafePropertyAccess(filePath: string, fullContent: string, script
       const safeObjects = ['this', 'window', 'document', 'console', 'Vue', 'Vuex', 'VueRouter', 'axios', 'lodash', '_', 'moment', 'dayjs', 'process', 'global', 'path', 'fs', 'ts', 'ASTHelper', 'Array', 'Object', 'String', 'Number', 'JSON', 'Math']
       if (safeObjects.includes(rootObj)) return
 
-      // 检查是否有空值校验 (简单检查：前面代码块中是否有 if(rootObj) 或 rootObj &&)
-      // 在 AST 中我们可以更精确地检查包裹它的语句
-      let hasGuard = false
-      let parent = node.parent
-      while (parent) {
-        if (ts.isBinaryExpression(parent) && parent.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
-          if (parent.left.getText().includes(rootObj)) {
-            hasGuard = true
-            break
-          }
-        }
-        if (ts.isIfStatement(parent)) {
-          if (parent.expression.getText().includes(rootObj)) {
-            hasGuard = true
-            break
-          }
-        }
-        if (ts.isConditionalExpression(parent)) {
-          if (parent.condition.getText().includes(rootObj)) {
-            hasGuard = true
-            break
-          }
-        }
-        parent = parent.parent
-      }
-
-      if (!hasGuard) {
+      // 使用增强的守卫检测
+      if (!hasGuardContext(node, rootObj)) {
         results.push({
           rule: 'null-safety/unsafe-property-access',
           message: `检测到潜在不安全的深层属性访问 "${fullMatch}"。建议使用可选链 (?.) 或 @51jbs/core-utils 的 safeGet 工具。`,
@@ -246,119 +308,178 @@ function checkUnsafePropertyAccess(filePath: string, fullContent: string, script
 }
 
 /**
- * 检查数组访问 (P0)
+ * 检查数组访问 (P0) - AST版本
  * 访问数组元素前应检查长度或使用可选链
  */
 function checkArrayAccess(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
   const results: CheckResult[] = []
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
 
-  // 匹配数组索引访问 arr[0] 或 arr[i]
-  const arrayAccessPattern = /(\w+)\[(\d+|\w+)\]/g
-  let match
+  ASTHelper.traverse(sourceFile, node => {
+    //检测 ElementAccessExpression: arr[0] 或 arr[index]
+    if (ts.isElementAccessExpression(node)) {
+      // 跳过已使用可选链的情况：arr?.[0]
+      if (node.questionDotToken) return
 
-  while ((match = arrayAccessPattern.exec(scriptContent)) !== null) {
-    const arrayName = match[1]
-    const index = match[2]
-    const fullMatch = match[0]
+      const arrayExpr = node.expression.getText()
+      const indexExpr = node.argumentExpression.getText()
 
-    // 跳过字符串索引（通常用于对象）
-    if (arrayName === 'arguments' || arrayName === 'this') {
-      continue
+      // 跳过安全的内置对象和特殊情况
+      const safeArrays = ['arguments', 'this', 'Array', 'Object', 'String', 'process']
+      if (safeArrays.includes(arrayExpr)) return
+
+      // 跳过字符串字面量索引（通常是对象属性访问）
+      if (node.argumentExpression.kind === ts.SyntaxKind.StringLiteral) return
+
+      // 使用增强的守卫检测
+      // 检查是否有 length 检查或其他守卫
+      const hasLengthGuard = hasArrayLengthGuard(node, arrayExpr)
+      const hasGeneralGuard = hasGuardContext(node, arrayExpr)
+
+      if (!hasLengthGuard && !hasGeneralGuard) {
+        results.push({
+          rule: 'null-safety/unsafe-array-access',
+          message: `不安全的数组访问：\"${arrayExpr}[${indexExpr}]\"，访问前应检查 ${arrayExpr}.length 或使用 ${arrayExpr}?.[${indexExpr}]`,
+          file: filePath,
+          type: 'error',
+          line: ASTHelper.getLine(node, sourceFile)
+        })
+      }
     }
-
-    // 检查前面是否有长度检查
-    const contextBefore = scriptContent.substring(Math.max(0, match.index - 100), match.index)
-    const hasLengthCheck = new RegExp(`${arrayName}\\.length`, 'm').test(contextBefore) ||
-      new RegExp(`if\\s*\\(\\s*${arrayName}`, 'm').test(contextBefore)
-
-    // 检查是否使用了可选链
-    const hasOptionalChain = scriptContent.substring(match.index, match.index + fullMatch.length + 5).includes('?.[')
-
-    if (!hasLengthCheck && !hasOptionalChain) {
-      const position = filePath.endsWith('.vue')
-        ? fullContent.indexOf(scriptContent) + match.index
-        : match.index
-
-      const lines = fullContent.substring(0, position).split('\n')
-      const line = lines.length
-
-      results.push({
-        rule: 'null-safety/unsafe-array-access',
-        message: `不安全的数组访问："${fullMatch}"，访问前应检查 ${arrayName}.length 或使用 ${arrayName}?.[${index}]`,
-        file: filePath,
-        type: 'error',
-        line
-      })
-    }
-  }
+  })
 
   return results
 }
 
 /**
- * 检查函数调用 (P0)
+ * 检查是否有数组长度守卫
+ */
+function hasArrayLengthGuard(node: ts.Node, arrayName: string): boolean {
+  let parent: ts.Node | undefined = node.parent
+
+  while (parent) {
+    if (ts.isBinaryExpression(parent)) {
+      const leftText = parent.left.getText()
+      const rightText = parent.right.getText()
+      // 检查 arr.length > 0, arr.length >= 1 等
+      if (leftText.includes(`${arrayName}.length`) || rightText.includes(`${arrayName}.length`)) {
+        return true
+      }
+    }
+
+    if (ts.isIfStatement(parent)) {
+      const conditionText = parent.expression.getText()
+      if (conditionText.includes(`${arrayName}.length`)) {
+        return true
+      }
+    }
+
+    parent = parent.parent
+  }
+
+  return false
+}
+
+
+/**
+ * 检查函数调用 (P0) - AST 版本
  * 调用函数前应检查是否为函数
  */
 function checkFunctionCall(filePath: string, fullContent: string, scriptContent: string, localImports: Map<string, string>): CheckResult[] {
   const results: CheckResult[] = []
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
 
-  // 匹配对象方法调用 obj.method()
-  const methodCallPattern = /(\w+)\.(\w+)\s*\(/g
-  let match
+  ASTHelper.traverse(sourceFile, node => {
+    // 检测 CallExpression: obj.method()
+    if (ts.isCallExpression(node)) {
+      const expression = node.expression
 
-  while ((match = methodCallPattern.exec(scriptContent)) !== null) {
-    const obj = match[1]
-    const method = match[2]
-    const fullMatch = match[0]
+      // 只检查属性访问形式的调用：obj.method()
+      if (ts.isPropertyAccessExpression(expression)) {
+        // 跳过已使用可选链的情况：obj?.method()
+        if (expression.questionDotToken) return
 
-    // 跳过常见的安全调用和第三方库
-    const safeObjects = ['this', 'console', 'Math', 'JSON', 'Object', 'Array', 'String', 'Number', 'Date', 'Vue', 'Vuex', 'VueRouter', 'axios', 'lodash', '_', 'moment', 'dayjs', 'path', 'fs', 'ts', 'ASTHelper', 'process', 'global']
-    if (safeObjects.includes(obj)) {
-      continue
-    }
+        const objExpr = expression.expression.getText()
+        const methodName = expression.name.getText()
 
-    // 如果是本地导入的对象访问，尝试检查方法是否存在
-    if (localImports.has(obj)) {
-      const sourcePath = localImports.get(obj)!
-      if (checkMemberExists(sourcePath, method)) {
-        continue
+        // 跳过安全的全局对象和常用库
+        const safeObjects = ['this', 'console', 'Math', 'JSON', 'Object', 'Array', 'String', 'Number', 'Date', 'Vue', 'Vuex', 'VueRouter', 'axios', 'lodash', '_', 'moment', 'dayjs', 'path', 'fs', 'ts', 'ASTHelper', 'process', 'global', 'window', 'document', 'Promise', 'Set', 'Map', 'WeakMap', 'WeakSet']
+        if (safeObjects.includes(objExpr)) return
+
+        // 如果是本地导入的对象访问，尝试检查方法是否存在
+        if (localImports.has(objExpr)) {
+          const sourcePath = localImports.get(objExpr)!
+          if (checkMemberExists(sourcePath, methodName)) {
+            return
+          }
+        }
+
+        // 跳过已知的数组方法
+        const arrayMethods = ['forEach', 'map', 'filter', 'reduce', 'find', 'some', 'every', 'findIndex', 'includes', 'indexOf', 'join', 'slice', 'splice']
+        if (arrayMethods.includes(methodName)) return
+
+        // 跳过 Vue 组件的 props
+        if (objExpr === 'props') return
+
+        // 使用增强的守卫检测
+        // 也检查是否有 typeof 检查
+        const hasTypeCheck = hasFunctionTypeGuard(node, `${objExpr}.${methodName}`)
+        const hasGeneralGuard = hasGuardContext(node, objExpr)
+
+        if (!hasTypeCheck && !hasGeneralGuard) {
+          results.push({
+            rule: 'null-safety/unsafe-function-call',
+            message: `不安全的函数调用：\"${objExpr}.${methodName}()\"，建议使用可选链 \"${objExpr}?.${methodName}()\" 或添加类型检查`,
+            file: filePath,
+            type: 'warning',
+            line: ASTHelper.getLine(node, sourceFile)
+          })
+        }
       }
     }
-
-    // 跳过已知的全局函数
-    const globalMethods = ['forEach', 'map', 'filter', 'reduce', 'find', 'some', 'every']
-    if (globalMethods.includes(method)) {
-      continue
-    }
-
-    // 检查是否有类型检查
-    const contextBefore = scriptContent.substring(Math.max(0, match.index - 100), match.index)
-    const hasTypeCheck = new RegExp(`typeof\\s+${obj}\\.${method}\\s*===\\s*['"]function['"]`, 'm').test(contextBefore) ||
-      new RegExp(`${obj}\\.${method}\\s*&&`, 'm').test(contextBefore)
-
-    // 检查是否使用可选链调用
-    const hasOptionalCall = scriptContent.substring(match.index, match.index + fullMatch.length + 2).includes('?.(')
-
-    if (!hasTypeCheck && !hasOptionalCall && obj !== 'props') {
-      const position = filePath.endsWith('.vue')
-        ? fullContent.indexOf(scriptContent) + match.index
-        : match.index
-
-      const lines = fullContent.substring(0, position).split('\n')
-      const line = lines.length
-
-      results.push({
-        rule: 'null-safety/unsafe-function-call',
-        message: `不安全的函数调用："${fullMatch}"，建议使用可选链 "${obj}?.${method}()" 或添加类型检查`,
-        file: filePath,
-        type: 'warning',
-        line
-      })
-    }
-  }
+  })
 
   return results
 }
+
+/**
+ * 检查是否有函数类型守卫
+ */
+function hasFunctionTypeGuard(node: ts.Node, functionExpr: string): boolean {
+  let parent: ts.Node | undefined = node.parent
+
+  while (parent) {
+    if (ts.isBinaryExpression(parent)) {
+      const leftText = parent.left.getText()
+      const rightText = parent.right.getText()
+
+      // 检查 typeof obj.method === 'function'
+      if ((leftText.includes(`typeof ${functionExpr}`) && rightText.includes('function')) ||
+        (rightText.includes(`typeof ${functionExpr}`) && leftText.includes('function'))) {
+        return true
+      }
+
+      // 检查 obj.method && ...
+      if (parent.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
+        if (leftText.includes(functionExpr)) {
+          return true
+        }
+      }
+    }
+
+    if (ts.isIfStatement(parent)) {
+      const conditionText = parent.expression.getText()
+      if (conditionText.includes(`typeof ${functionExpr}`) || conditionText.includes(functionExpr)) {
+        return true
+      }
+    }
+
+    parent = parent.parent
+  }
+
+  return false
+}
+
 
 /**
  * 检查 null/undefined 比较 (P1)
@@ -477,50 +598,68 @@ function checkDomElement(filePath: string, fullContent: string, scriptContent: s
 }
 
 /**
- * 检查解构赋值 (P1)
+ * 检查解构赋值 (P1) - AST 版本
  * 解构可能为空的对象时应提供默认值
  */
 function checkDestructuring(filePath: string, fullContent: string, scriptContent: string): CheckResult[] {
   const results: CheckResult[] = []
+  const sourceFile = ASTHelper.parse(scriptContent, filePath)
 
-  // 匹配解构赋值 const { a, b } = obj
-  const destructPattern = /const\s*\{\s*([^}]+)\}\s*=\s*(\w+)/g
-  let match
+  ASTHelper.traverse(sourceFile, node => {
+    // 检测变量声明中的对象解构
+    if (ts.isVariableDeclaration(node) && node.name.kind === ts.SyntaxKind.ObjectBindingPattern) {
+      const bindingPattern = node.name as ts.ObjectBindingPattern
 
-  while ((match = destructPattern.exec(scriptContent)) !== null) {
-    const properties = match[1]
-    const sourceObj = match[2]
+      // 获取初始化表达式
+      if (!node.initializer) return
 
-    // 跳过有默认值的情况
-    if (properties.includes('=') || sourceObj === 'this') {
-      continue
-    }
+      const initializerText = node.initializer.getText()
 
-    // 检查源对象是否可能为空
-    const contextBefore = scriptContent.substring(Math.max(0, match.index - 100), match.index)
-    const hasNullCheck = new RegExp(`if\\s*\\(\\s*${sourceObj}`, 'm').test(contextBefore) ||
-      new RegExp(`${sourceObj}\\s*=\\s*\\{`, 'm').test(contextBefore)
+      //跳过 this 对象
+      if (initializerText === 'this') return
 
-    if (!hasNullCheck) {
-      const position = filePath.endsWith('.vue')
-        ? fullContent.indexOf(scriptContent) + match.index
-        : match.index
+      // 检查是否有默认值：const { a } = obj || {}
+      const hasDefaultFallback = ts.isBinaryExpression(node.initializer) &&
+        (node.initializer.operatorToken.kind === ts.SyntaxKind.BarBarToken ||
+          node.initializer.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken)
 
-      const lines = fullContent.substring(0, position).split('\n')
-      const line = lines.length
+      if (hasDefaultFallback) return
+
+      // 检查解构模式中是否所有属性都有默认值
+      const allPropertiesHaveDefaults = bindingPattern.elements.every(element => {
+        return element.initializer !== undefined
+      })
+
+      if (allPropertiesHaveDefaults) return
+
+      // 跳过简单的对象字面量初始化
+      if (ts.isObjectLiteralExpression(node.initializer)) return
+
+      // 使用增强的守卫检测
+      // 对于简单标识符，检查它是否有守卫
+      if (ts.isIdentifier(node.initializer)) {
+        const varName = node.initializer.getText()
+        if (hasGuardContext(node, varName)) return
+      }
+
+      // 获取属性列表（用于错误消息）
+      const properties = bindingPattern.elements
+        .map(el => el.propertyName ? el.propertyName.getText() : el.name.getText())
+        .join(', ')
 
       results.push({
         rule: 'null-safety/unsafe-destructuring',
-        message: `不安全的解构赋值，"${sourceObj}" 可能为空，建议添加默认值：const { ${properties.trim()} } = ${sourceObj} || {}`,
+        message: `不安全的解构赋值，\"${initializerText}\" 可能为空，建议添加默认值：const { ${properties} } = ${initializerText} || {}`,
         file: filePath,
         type: 'warning',
-        line
+        line: ASTHelper.getLine(node, sourceFile)
       })
     }
-  }
+  })
 
   return results
 }
+
 
 /**
  * Vue2: 检查 Props 访问 (P0)

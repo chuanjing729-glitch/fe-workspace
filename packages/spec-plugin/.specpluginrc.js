@@ -5,19 +5,20 @@
 module.exports = {
   // 检查模式
   mode: 'incremental',
-  
+
   // 严格程度
   severity: 'normal',
-  
+
   // 启用的规则
   rules: {
     naming: true,
     comments: true,
     performance: true,
     imports: true,
-    assets: true
+    assets: true,
+    nullSafety: true  // 空指针安全检查（默认启用）
   },
-  
+
   // 性能预算
   performanceBudget: {
     maxImageSize: 500,
@@ -25,11 +26,11 @@ module.exports = {
     maxCssSize: 100,
     maxFontSize: 200
   },
-  
+
   // HTML 报告
   htmlReport: true,
   reportPath: 'spec-report.html',
-  
+
   // 排除文件
   exclude: [
     '**/node_modules/**',
