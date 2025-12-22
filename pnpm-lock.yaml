@@ -239,19 +239,6 @@ importers:
       '@babel/core':
         specifier: ^7.23.0
         version: 7.28.5
-      vite:
-        specifier: ^3.0.0 || ^4.0.0 || ^5.0.0
-        version: 5.4.21(@types/node@20.19.27)(terser@5.44.1)
-      webpack:
-        specifier: ^4.0.0 || ^5.0.0
-        version: 5.104.0(esbuild@0.27.2)
-    devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.27
-      '@vitest/coverage-v8':
-        specifier: ^1.6.1
-        version: 1.6.1(vitest@1.6.1(@types/node@20.19.27)(jsdom@27.3.0)(terser@5.44.1))
       babel-plugin-istanbul:
         specifier: ^7.0.0
         version: 7.0.1
@@ -268,17 +255,30 @@ importers:
         specifier: ^3.1.6
         version: 3.2.0
       simple-git:
-        specifier: ^3.15.0
-        version: 3.30.0
+        specifier: 3.15.0
+        version: 3.15.0
+      unplugin:
+        specifier: ^1.14.1
+        version: 1.16.1
+      vite:
+        specifier: ^3.0.0 || ^4.0.0 || ^5.0.0
+        version: 5.4.21(@types/node@20.19.27)(terser@5.44.1)
+      webpack:
+        specifier: ^4.0.0 || ^5.0.0
+        version: 5.104.0(esbuild@0.27.2)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
+      '@vitest/coverage-v8':
+        specifier: ^1.6.1
+        version: 1.6.1(vitest@1.6.1(@types/node@20.19.27)(jsdom@27.3.0)(terser@5.44.1))
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(postcss@8.5.6)(typescript@5.9.3)
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
-      unplugin:
-        specifier: ^1.14.1
-        version: 1.16.1
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.27)(jsdom@27.3.0)(terser@5.44.1)
@@ -7422,6 +7422,9 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  simple-git@3.15.0:
+    resolution: {integrity: sha512-FiWoMPlcYHQ+ApRihUsGjC/ZmIlWj62S6MBCwOunczvXcLQt+9ZdrysDrR6QVepkRQfEAaBXrN2QtJKrN6zbtg==}
+
   simple-git@3.15.1:
     resolution: {integrity: sha512-73MVa5984t/JP4JcQt0oZlKGr42ROYWC3BcUZfuHtT3IHKPspIvL0cZBnvPXF7LL3S/qVeVHVdYYmJ3LOTw4Rg==}
 
@@ -8762,6 +8765,13 @@ snapshots:
   '@51jbs/incremental-coverage-plugin@file:packages/incremental-coverage-plugin(vite@5.4.21(@types/node@20.19.27)(terser@5.44.1))(webpack@4.47.0)':
     dependencies:
       '@babel/core': 7.28.5
+      babel-plugin-istanbul: 7.0.1
+      istanbul-diff: 1.1.4
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-reports: 3.2.0
+      simple-git: 3.15.0
+      unplugin: 1.16.1
     optionalDependencies:
       vite: 5.4.21(@types/node@20.19.27)(terser@5.44.1)
       webpack: 4.47.0(webpack-cli@3.3.12)
@@ -17352,6 +17362,14 @@ snapshots:
   signal-exit@3.0.7: {}
 
   signal-exit@4.1.0: {}
+
+  simple-git@3.15.0:
+    dependencies:
+      '@kwsites/file-exists': 1.1.1
+      '@kwsites/promise-deferred': 1.1.1
+      debug: 4.4.3(supports-color@6.1.0)
+    transitivePeerDependencies:
+      - supports-color
 
   simple-git@3.15.1:
     dependencies:
