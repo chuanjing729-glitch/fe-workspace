@@ -93,9 +93,13 @@ export const sidebar = {
 
   '/packages/incremental-coverage-plugin/': [
     {
-      text: '增量覆盖率插件',
+      text: '增量覆盖率插件 (Incremental Coverage)',
       items: [
-        { text: '总览', link: '/packages/incremental-coverage-plugin/' }
+        { text: '总览', link: '/packages/incremental-coverage-plugin/' },
+        { text: '快速开始', link: '/packages/incremental-coverage-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/incremental-coverage-plugin/features' },
+        { text: '技术架构', link: '/packages/incremental-coverage-plugin/architecture' },
+        { text: 'API 参考', link: '/packages/incremental-coverage-plugin/api' }
       ]
     }
   ],

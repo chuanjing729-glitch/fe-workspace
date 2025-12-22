@@ -1,5 +1,5 @@
 ---
-title: architecture_zh
+title: architecture
 editLink: true
 ---
 
