@@ -11,5 +11,15 @@ export default defineConfig({
     clean: true,
     splitting: false,
     sourcemap: true,
+    target: 'node14',
+    noExternal: [
+        'simple-git',
+        'istanbul-diff',
+        'unplugin',
+        'babel-plugin-istanbul',
+        'istanbul-lib-coverage',
+        'istanbul-lib-report',
+        'istanbul-reports'
+    ],
     external: ['webpack', 'vite', 'webpack-sources'],
 });
