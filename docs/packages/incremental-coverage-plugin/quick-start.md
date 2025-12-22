@@ -1,8 +1,3 @@
----
-title: quick-start
-editLink: true
----
-
 # 快速开始
 
 > 本指南将帮助你在 **15 分钟内**完成 Webpack 项目的接入。
@@ -11,7 +6,7 @@ editLink: true
 
 ## � 开始前检查
 
-请确保已完成 [安装指南](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/installation.md) 中的所有步骤。
+请确保已完成 [安装指南](./installation.md) 中的所有步骤。
 
 ---
 
@@ -63,7 +58,7 @@ my-project/
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.23.0",
     "babel-loader": "^9.1.0",
-    "@51jbs/incremental-coverage-plugin": "^1.0.0",
+    "@51jbs/incremental-coverage-plugin": "^1.0.3",
     "vue": "^2.7.0",
     "vue-loader": "^15.10.0",
     "vue-template-compiler": "^2.7.0",
@@ -198,7 +193,7 @@ module.exports = {
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.23.0",
     "babel-loader": "^8.3.0",
-    "@51jbs/incremental-coverage-plugin": "^1.0.0",
+    "@51jbs/incremental-coverage-plugin": "^1.0.3",
     "html-webpack-plugin": "^4.5.2",
     "vue": "^2.7.0",
     "vue-loader": "^15.10.0",
@@ -394,7 +389,7 @@ var __coverage__ = {
 2. include 配置不匹配
 3. 未执行任何代码
 
-**解决方案**：参考 [故障排查文档](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/troubleshooting.md)
+**解决方案**：参考 [故障排查文档](./troubleshooting.md)
 
 ### 问题 2：未检测到 Git 变更
 
@@ -447,7 +442,7 @@ gitDiffBase: 'develop'
 
 ## 🎯 下一步
 
-- [查看功能特性](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/features.md) 了解更多高级用法
-- [技术架构](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/architecture.md) 了解插件工作原理
-- [API 参考](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/api.md) 查看完整配置项
-- [故障排查](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/troubleshooting.md) 解决常见问题
+- [查看功能特性](./features.md) 了解更多高级用法
+- [技术架构](./architecture.md) 了解插件工作原理
+- [API 参考](./api.md) 查看完整配置项
+- [故障排查](./troubleshooting.md) 解决常见问题
