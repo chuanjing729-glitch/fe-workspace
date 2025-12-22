@@ -40,7 +40,7 @@ pnpm add @51jbs/incremental-coverage-plugin -D
 
 ### 2. 安装必要的 Babel 依赖（如果尚未安装）
 
-> ⚠️ **注意**：从 v2.0.0 开始，插件已经内置了 `@babel/core` 等依赖。但如果您的项目还没有配置 Babel，需要额外安装：
+> ⚠️ **注意**：插件已经内置了 `@babel/core` 等依赖。但如果您的项目还没有配置 Babel，需要额外安装：
 
 ```bash
 npm install @babel/preset-env babel-loader --save-dev

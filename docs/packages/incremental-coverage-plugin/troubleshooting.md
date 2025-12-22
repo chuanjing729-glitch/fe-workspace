@@ -164,7 +164,7 @@ Require stack:
 
 ### 原因
 
-从 v2.0.0 开始，`@babel/core` 已包含在插件依赖中。但可能是以下原因：
+插件已包含在插件依赖中。但可能是以下原因：
 
 1. 使用了旧版本的插件
 2. npm install 时出错
@@ -176,7 +176,7 @@ Require stack:
 # 1. 检查插件版本
 npm ls @51jbs/incremental-coverage-plugin
 
-# 2. 如果版本 < 2.0.0，升级
+# 2. 升级到最新版本
 npm install @51jbs/incremental-coverage-plugin@latest --save-dev
 
 # 3. 清理并重新安装

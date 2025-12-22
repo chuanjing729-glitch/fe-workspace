@@ -26,10 +26,35 @@ editLink: true
 | **GitService** | 自动提取 Git Diff 变更行号 |
 | **CoverageReporter** | 生成可视化 HTML 报告与 JSON 结构化数据 |
 
+## 📦 安装
+
+### 前置要求
+
+- Node.js >= 16.0.0
+- Git 仓库（必需）
+- **Webpack 4 或 5**（完全支持）
+- **webpack-dev-server 3.x 或 4.x**（自动适配）
+
+### 快速安装
+
+```bash
+npm install @51jbs/incremental-coverage-plugin --save-dev
+```
+
+### 验证安装
+
+```bash
+npm ls @51jbs/incremental-coverage-plugin
+```
+
+> 💡 **提示**：插件已内置所有必要依赖（包括 `@babel/core`、`istanbul-lib-*`），无需额外安装。
+
 ## 📚 快速导航
 
-- [**快速开始**](./quick-start.md): 3 分钟完成 Webpack 项目接入。
+- [**安装指南**](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/docs/installation.md): 详细的安装步骤和前置要求检查。
+- [**快速开始**](./quick-start.md): 15 分钟完成 Webpack 项目接入。
 - [**功能特性**](./features.md): 深入了解增量计算与生产级保护机制。
+- [**故障排查**](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/docs/troubleshooting.md): 常见问题诊断和解决方案。
 - [**技术架构**](./architecture.md): 查看整体设计方案与时序图。
 - [**API 参考**](./api.md): 查看详细的配置项说明。
 
