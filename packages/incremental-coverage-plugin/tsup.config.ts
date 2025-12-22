@@ -11,6 +11,7 @@ export default defineConfig({
     clean: true,
     splitting: false,
     sourcemap: true,
+    shims: true,
     target: 'node14',
     noExternal: [
         'simple-git',
