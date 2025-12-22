@@ -11,5 +11,5 @@ export default defineConfig({
     clean: true,
     splitting: false,
     sourcemap: true,
-    external: ['webpack', 'vite'],
+    external: ['webpack', 'vite', 'webpack-sources'],
 });

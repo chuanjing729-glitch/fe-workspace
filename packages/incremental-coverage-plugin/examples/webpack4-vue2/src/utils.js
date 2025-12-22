@@ -1,3 +1,4 @@
+// Test change for coverage detection
 /**
  * 工具函数模块
  * 用于测试不同的代码覆盖场景

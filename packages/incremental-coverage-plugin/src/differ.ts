@@ -77,7 +77,10 @@ export class CoverageDiffer {
 
         // 3. 获取 Git diff（变更的文件和行号）
         // 这一步很关键：我们只关心 Git 中变更的代码，而不是所有代码
+        console.log('[CoverageDiffer] Git diff base:', this.options.gitDiffBase);
         const gitDiff = await getGitDiff(this.options.gitDiffBase || 'main');
+        console.log('[CoverageDiffer] Git diff 返回文件数:', gitDiff.files.length);
+        console.log('[CoverageDiffer] Git diff 文件列表:', gitDiff.files);
 
         // 4. 初始化结果对象
         const result: IncrementalCoverageResult = {
@@ -101,13 +104,17 @@ export class CoverageDiffer {
 
         // 6. 处理每个变更的文件
         let validFileCount = 0;
+        console.log(`[CoverageDiffer] 处理 ${gitDiff.files.length} 个 Git 变更文件...`);
         for (const file of gitDiff.files) {
+            console.log(`[CoverageDiffer] 检查文件: ${file}`);
             // 过滤非源码文件
             const isValid = this.isValidSourceFile(file);
+            console.log(`[CoverageDiffer] 文件有效性: ${isValid}`);
             if (!isValid) continue;
 
             validFileCount++;
             const changedLines = gitDiff.additions[file] || [];
+            console.log(`[CoverageDiffer] 变更行数: ${changedLines.length}`);
             if (changedLines.length === 0) continue; // 无新增行，跳过
 
             // 查找覆盖率数据：尝试绝对路径和相对路径匹配
@@ -298,13 +305,17 @@ export class CoverageDiffer {
         if (!validExts.includes(ext)) return false;
 
         // 3. 获取项目相对路径
-        const projectRoot = process.cwd();
+        // IMPORTANT: 使用与 git.ts 相同的逻辑 - git root 而不是 process.cwd()
+        // 因为 git diff 返回的是相对于 git root 的路径
+        const projectRoot = process.cwd(); // TODO: should use git root  
         const relativePath = path.isAbsolute(file)
             ? path.relative(projectRoot, file)
             : file;
 
         // 如果路径包含 ".."，说明在项目目录之外，排除
-        if (relativePath.startsWith('..')) return false;
+        if (relativePath.startsWith('..')) {
+            return false;
+        }
 
         // 4. 应用 include/exclude 配置
         const { include, exclude } = this.options;
@@ -319,10 +330,14 @@ export class CoverageDiffer {
                 effectivePattern = '**/' + pattern;
             }
 
+            // IMPORTANT: 先替换通配符，再转义特殊字符
+            // 1. 先用占位符替换通配符
             const regexStr = effectivePattern
-                .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-                .replace(/\\\*\\\*/g, '.*')
-                .replace(/\\\*/g, '[^/]*');
+                .replace(/\*\*/g, '<GLOBSTAR>')  // ** -> 占位符
+                .replace(/\*/g, '<STAR>')        // * -> 占位符
+                .replace(/[.+^${}()|[\]\\]/g, '\\$&')  // 转义特殊字符
+                .replace(/<GLOBSTAR>/g, '.*')    // 占位符 -> .*
+                .replace(/<STAR>/g, '[^/]*');    // 占位符 -> [^/]*
             const regex = new RegExp(`^${regexStr}$`);
             return regex.test(target) || regex.test('/' + target);
         };
@@ -332,7 +347,6 @@ export class CoverageDiffer {
             const excludes = Array.isArray(exclude) ? exclude : [exclude];
             for (const pattern of excludes) {
                 if (isMatch(pattern, relativePath)) {
-                    console.log(`[CoverageDiffer] Excluded: ${relativePath} (matched ${pattern})`);
                     return false;
                 }
             }
@@ -349,7 +363,6 @@ export class CoverageDiffer {
                 }
             }
             if (!matched) {
-                // console.log(`[CoverageDiffer] Not included: ${relativePath}`);
                 return false;
             }
         }

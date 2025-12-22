@@ -48,7 +48,7 @@ module.exports = {
 
         // Incremental Coverage Plugin
         WebpackIncrementalCoveragePlugin({
-            include: ['src/**/*.{js,vue}'],
+            include: ['src/**', '**/src/**'],  // 匹配 src 下的所有文件
             exclude: ['**/*.test.js', '**/*.spec.js'],
             gitDiffBase: 'main',
             threshold: 50,  // 降低阈值便于测试

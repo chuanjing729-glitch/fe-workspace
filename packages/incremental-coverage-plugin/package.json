@@ -45,7 +45,11 @@
         "release": "echo 'Run: npm publish' && exit 1"
     },
     "dependencies": {
+        "@babel/core": "^7.23.0",
         "babel-plugin-istanbul": "^7.0.0",
+        "istanbul-lib-coverage": "^3.2.2",
+        "istanbul-lib-report": "^3.0.1",
+        "istanbul-reports": "^3.1.6",
         "istanbul-diff": "^1.1.0",
         "simple-git": "^3.25.0",
         "unplugin": "^1.14.1"

@@ -182,18 +182,14 @@ export const IncrementalCoveragePlugin = createUnplugin<IncrementalCoverageOptio
             rules.forEach(injectBabel);
 
             // 2. 设置中间件接收覆盖率数据
-            // 直接修改 devServer 配置
+            // 自动检测并兼容 webpack-dev-server 3.x 和 4.x
             if (!compiler.options.devServer) {
                 compiler.options.devServer = {};
             }
 
-            const originalSetupMiddlewares = compiler.options.devServer.setupMiddlewares;
-            compiler.options.devServer.setupMiddlewares = (middlewares: any, devServer: any) => {
-                if (originalSetupMiddlewares) {
-                    middlewares = originalSetupMiddlewares(middlewares, devServer);
-                }
-
-                devServer.app?.post('/coverage', async (req: any, res: any) => {
+            // 提取通用的覆盖率处理函数
+            const createCoverageHandler = () => {
+                return async (req: any, res: any) => {
                     const startTime = Date.now();
 
                     // 定义处理逻辑
@@ -284,23 +280,68 @@ export const IncrementalCoveragePlugin = createUnplugin<IncrementalCoverageOptio
                         console.error('[IncrementalCoverage] 中间件处理异常:', error);
                         res.status(500).json({ success: false, error: String(error) });
                     }
-                });
-
-                console.log('[IncrementalCoverage] 中间件已注册');
-                return middlewares;
+                };
             };
+
+            const coverageHandler = createCoverageHandler();
+
+            // 检测使用哪种 API
+            // webpack-dev-server 4.x/5.x 使用 setupMiddlewares
+            // webpack-dev-server 3.x 使用 before
+            const hasSetupMiddlewares = 'setupMiddlewares' in (compiler.options.devServer || {});
+            const hasBefore = 'before' in (compiler.options.devServer || {});
+
+            // 尝试通过检测 webpack-dev-server 版本来决定使用哪个 API
+            let useSetupMiddlewares = hasSetupMiddlewares;
+
+            // 如果两者都未配置，尝试检测 webpack-dev-server 版本
+            if (!hasSetupMiddlewares && !hasBefore) {
+                try {
+                    const wdsVersion = require('webpack-dev-server/package.json').version;
+                    const majorVersion = parseInt(wdsVersion.split('.')[0], 10);
+                    useSetupMiddlewares = majorVersion >= 4;
+                    console.log(`[IncrementalCoverage] 检测到 webpack-dev-server v${wdsVersion}，使用 ${useSetupMiddlewares ? 'setupMiddlewares' : 'before'} API`);
+                } catch (e) {
+                    // 如果无法检测版本，默认使用 before API (更安全的回退)
+                    console.warn('[IncrementalCoverage] 无法检测 webpack-dev-server 版本，默认使用 before API');
+                    useSetupMiddlewares = false;
+                }
+            }
+
+            if (useSetupMiddlewares) {
+                // webpack-dev-server 4.x/5.x
+                const originalSetupMiddlewares = compiler.options.devServer.setupMiddlewares;
+                compiler.options.devServer.setupMiddlewares = (middlewares: any, devServer: any) => {
+                    if (originalSetupMiddlewares) {
+                        middlewares = originalSetupMiddlewares(middlewares, devServer);
+                    }
+
+                    devServer.app?.post('/coverage', coverageHandler);
+                    console.log('[IncrementalCoverage] 中间件已注册 (webpack-dev-server 4.x+)');
+                    return middlewares;
+                };
+            } else {
+                // webpack-dev-server 3.x
+                const originalBefore = compiler.options.devServer.before;
+                compiler.options.devServer.before = (app: any, server: any, compiler: any) => {
+                    if (originalBefore) {
+                        originalBefore(app, server, compiler);
+                    }
+
+                    app.post('/coverage', coverageHandler);
+                    console.log('[IncrementalCoverage] 中间件已注册 (webpack-dev-server 3.x)');
+                };
+            }
 
             // 3. 监听编译完成，注入客户端脚本
             compiler.hooks.compilation.tap('IncrementalCoveragePlugin', (compilation: any) => {
                 // 3.1 生成客户端脚本文件
-                compilation.hooks.processAssets.tap(
-                    {
-                        name: 'IncrementalCoveragePlugin',
-                        stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-                    },
-                    () => {
-                        // Incremental Coverage Client Script (Hardened + Overlay)
-                        const clientScript = `
+                // Webpack 4 使用 additionalAssets，Webpack 5+ 使用 processAssets
+                const isWebpack4 = !compiler.webpack || !compiler.webpack.Compilation || !compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS;
+
+                const emitClientScript = () => {
+                    // Incremental Coverage Client Script (Hardened + Overlay)
+                    const clientScript = `
                         (function () {
                             console.log('[Coverage Client] 启动 v2.2 with Overlay');
 
@@ -507,12 +548,53 @@ export const IncrementalCoveragePlugin = createUnplugin<IncrementalCoverageOptio
 })();
                         `.trim();
 
+                    // Webpack 4 和 5 使用不同的 API 来添加资源
+                    if (isWebpack4) {
+                        // Webpack 4: 使用 RawSource from webpack-sources
+                        // 尝试从 webpack 内部获取，如果失败则尝试独立包
+                        let RawSource;
+                        try {
+                            // 先尝试从 webpack 内部获取 (Webpack 4 通常会包含)
+                            const webpack = require('webpack');
+                            RawSource = webpack.sources?.RawSource;
+                            if (!RawSource) {
+                                // 如果 webpack.sources 不存在，尝试独立包
+                                ({ RawSource } = require('webpack-sources'));
+                            }
+                        } catch (e) {
+                            // 最后的回退：尝试独立的 webpack-sources 包
+                            try {
+                                ({ RawSource } = require('webpack-sources'));
+                            } catch (e2) {
+                                console.error('[IncrementalCoverage] 无法加载 webpack-sources:', e2);
+                                throw new Error('webpack-sources is required for Webpack 4. Please install it: npm install webpack-sources');
+                            }
+                        }
+                        compilation.assets['coverage-client.js'] = new RawSource(clientScript);
+                    } else {
+                        // Webpack 5: 使用 compiler.webpack.sources.RawSource
                         compilation.emitAsset(
                             'coverage-client.js',
                             new compiler.webpack.sources.RawSource(clientScript)
                         );
                     }
-                );
+                };
+
+                if (isWebpack4) {
+                    // Webpack 4: 使用 additionalAssets hook
+                    compilation.hooks.additionalAssets.tap('IncrementalCoveragePlugin', emitClientScript);
+                    console.log('[IncrementalCoverage] 使用 Webpack 4 API (additionalAssets)');
+                } else {
+                    // Webpack 5+: 使用 processAssets hook
+                    compilation.hooks.processAssets.tap(
+                        {
+                            name: 'IncrementalCoveragePlugin',
+                            stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+                        },
+                        emitClientScript
+                    );
+                    console.log('[IncrementalCoverage] 使用 Webpack 5+ API (processAssets)');
+                }
 
                 // 3.2 集成 HtmlWebpackPlugin，自动注入 script 标签
                 const HtmlWebpackPlugin = compiler.options.plugins?.find(
