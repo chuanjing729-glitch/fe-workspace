@@ -14,6 +14,11 @@
 
 [查看详情](/packages/coverage-plugin/)
 
+### Incremental Coverage Plugin (增量覆盖率插件)
+专注于 Webpack 环境的轻量级增量代码覆盖率检测工具。支持 Git Diff 精准过滤，从 "全量覆盖率" 进化为 "本次变更覆盖率"，让自测更聚焦。
+
+[查看详情](/packages/incremental-coverage-plugin/)
+
 ### API Tracker Plugin (API 契约守卫)
 由于 API 契约跟踪和变更检测的专业工具。支持 OpenAPI 导出与多分支协作，彻底解决联调痛点。
 

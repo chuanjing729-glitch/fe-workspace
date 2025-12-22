@@ -97,9 +97,11 @@ export const sidebar = {
       items: [
         { text: '总览', link: '/packages/incremental-coverage-plugin/' },
         { text: '快速开始', link: '/packages/incremental-coverage-plugin/quick-start' },
+        { text: '安装指南', link: '/packages/incremental-coverage-plugin/installation' },
         { text: '功能特性', link: '/packages/incremental-coverage-plugin/features' },
         { text: '技术架构', link: '/packages/incremental-coverage-plugin/architecture' },
-        { text: 'API 参考', link: '/packages/incremental-coverage-plugin/api' }
+        { text: 'API 参考', link: '/packages/incremental-coverage-plugin/api' },
+        { text: '常见问题', link: '/packages/incremental-coverage-plugin/troubleshooting' }
       ]
     }
   ],
