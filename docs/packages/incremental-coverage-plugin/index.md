@@ -51,10 +51,10 @@ npm ls @51jbs/incremental-coverage-plugin
 
 ## 📚 快速导航
 
-- [**安装指南**](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/docs/installation.md): 详细的安装步骤和前置要求检查。
+- [**安装指南**](./installation.md): 详细的安装步骤和前置要求检查。
 - [**快速开始**](./quick-start.md): 15 分钟完成 Webpack 项目接入。
 - [**功能特性**](./features.md): 深入了解增量计算与生产级保护机制。
-- [**故障排查**](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/docs/troubleshooting.md): 常见问题诊断和解决方案。
+- [**故障排查**](./troubleshooting.md): 常见问题诊断和解决方案。
 - [**技术架构**](./architecture.md): 查看整体设计方案与时序图。
 - [**API 参考**](./api.md): 查看详细的配置项说明。
 
