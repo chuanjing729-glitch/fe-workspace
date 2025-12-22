@@ -1,4 +1,4 @@
-# 快速开始
+1# 快速开始
 
 > 本指南将帮助你在 **15 分钟内**完成 Webpack 项目的接入。
 
@@ -58,7 +58,7 @@ my-project/
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.23.0",
     "babel-loader": "^9.1.0",
-    "@51jbs/incremental-coverage-plugin": "^1.0.3",
+    "@51jbs/incremental-coverage-plugin": "^1.0.1",
     "vue": "^2.7.0",
     "vue-loader": "^15.10.0",
     "vue-template-compiler": "^2.7.0",
@@ -193,7 +193,7 @@ module.exports = {
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.23.0",
     "babel-loader": "^8.3.0",
-    "@51jbs/incremental-coverage-plugin": "^1.0.3",
+    "@51jbs/incremental-coverage-plugin": "^1.0.4",
     "html-webpack-plugin": "^4.5.2",
     "vue": "^2.7.0",
     "vue-loader": "^15.10.0",
