@@ -1,12 +1,12 @@
-# webpack-api-tracker-plugin 核心方案设计需求文档
+# api-tracker-plugin 核心方案设计需求文档
 
 ## 1. 概述
 
 ### 1.1 目的
-本文档旨在定义 webpack-api-tracker-plugin 工具的需求，该工具目标是作为接口契约的"看门人"，负责数据的同步、清洗、脱敏与变动分析，与 webpack-coverage-plugin 协同工作，提供完整的质量保障解决方案。
+本文档旨在定义 api-tracker-plugin 工具的需求，该工具目标是作为接口契约的"看门人"，负责数据的同步、清洗、脱敏与变动分析，与 coverage-plugin 协同工作，提供完整的质量保障解决方案。
 
 ### 1.2 范围
-本工具将独立运行，专注于接口契约管理，同时通过配置方式与 webpack-coverage-plugin 进行联动，实现API变更对代码覆盖率的智能影响分析。
+本工具将独立运行，专注于接口契约管理，同时通过配置方式与 coverage-plugin 进行联动，实现API变更对代码覆盖率的智能影响分析。
 
 ## 2. 功能需求
 
@@ -81,7 +81,7 @@
 - 实现合约指纹生成机制
 
 ### 3.3 第三阶段：插件协同与集成
-- 实现与 webpack-coverage-plugin 的文件级通信
+- 实现与 coverage-plugin 的文件级通信
 - 实现 API 变更通知机制
 - 实现差异报告生成功能
 - 完善文档和示例
@@ -109,7 +109,7 @@
 - 能够正确采集和处理 API 数据
 - 能够准确识别 API 变动并分级
 - 能够生成合约指纹并进行版本管理
-- 能够与 webpack-coverage-plugin 协同工作
+- 能够与 coverage-plugin 协同工作
 - 提供完整的安全隔离机制
 
 ### 5.2 功能详细要求
@@ -133,7 +133,7 @@
 - 支持环境变量配置
 
 #### 5.2.4 插件协同要求
-- 支持通过配置文件与 webpack-coverage-plugin 通信
+- 支持通过配置文件与 coverage-plugin 通信
 - 提供 API 变更通知机制
 - 支持覆盖率数据重置功能
 - 提供协同工作流文档
@@ -192,17 +192,17 @@
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
 | collaboration.enabled | boolean | `true` | 是否启用协同功能 |
-| collaboration.coveragePluginPath | string | `'./node_modules/webpack-coverage-plugin'` | 覆盖率插件路径 |
+| collaboration.coveragePluginPath | string | `'./node_modules/coverage-plugin'` | 覆盖率插件路径 |
 | collaboration.onApiChange | string | `'warn'` | API 变更时的行为 ('reset' \| 'warn') |
 | collaboration.notifyCoveragePlugin | boolean | `true` | 是否通知覆盖率插件 |
 
 ## 7. 与其他插件的协同
 
 ### 7.1 独立运行模式
-webpack-api-tracker-plugin 可以独立运行，不依赖其他插件，提供完整的 API 数据采集和分析功能。
+api-tracker-plugin 可以独立运行，不依赖其他插件，提供完整的 API 数据采集和分析功能。
 
 ### 7.2 联动运行模式
-当与 webpack-coverage-plugin 配合使用时，可以通过配置实现以下功能：
+当与 coverage-plugin 配合使用时，可以通过配置实现以下功能：
 - 自动通知 API 变更
 - 触发覆盖率数据重置
 - 在覆盖率报告中显示 API 变更影响
@@ -265,7 +265,7 @@ webpack-api-tracker-plugin 可以独立运行，不依赖其他插件，提供�
 - 提供详细的更新日志
 
 ### 10.3 npm 包管理
-- 发布到 npm 公共仓库 (@51jbs/webpack-api-tracker-plugin)
+- 发布到 npm 公共仓库 (@51jbs/api-tracker-plugin)
 - 支持 CDN 引入 (unpkg, jsDelivr)
 - 提供 UMD、ES Module、CommonJS 等多种格式
 - 包含完整的类型定义文件 (index.d.ts)

@@ -14,20 +14,20 @@
 
 [查看详情](/packages/vue2-toolkit/)
 
-### Webpack 规范检查插件
+### Spec Plugin (工程规范助手)
 集成在 Webpack 构建流程中的代码质量检查工具。
 
-[查看详情](/packages/webpack-spec-plugin/)
+[查看详情](/packages/spec-plugin/)
 
-### Webpack 覆盖率插件
+### Coverage Plugin (覆盖率助手)
 用于在开发阶段收集代码覆盖率并生成增量自测报告的 Webpack 插件。
 
-[查看详情](/packages/webpack-coverage-plugin/)
+[查看详情](/packages/coverage-plugin/)
 
-### Webpack API 跟踪插件
-用于跟踪 API 契约变化并在开发阶段提供实时通知的 Webpack 插件。该插件作为接口契约的"看门人"，负责数据的同步、清洗、脱敏与变动分析，并与 `webpack-coverage-plugin` 协同工作，提供完整的质量保障解决方案。
+### API Tracker Plugin (API 契约守卫)
+用于跟踪 API 契约变化并在开发阶段提供实时通知的 Webpack 插件。该插件作为接口契约的"看门人"，负责数据的同步、清洗、脱敏与变动分析，并与 `coverage-plugin` 协同工作，提供完整的质量保障解决方案。
 
-[查看详情](/packages/webpack-api-tracker-plugin/)
+[查看详情](/packages/api-tracker-plugin/)
 
 ## 使用建议
 

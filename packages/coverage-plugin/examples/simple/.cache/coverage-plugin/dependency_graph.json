@@ -1,0 +1,16 @@
+{
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/coverage-plugin/examples/simple/index.js": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/coverage-plugin/examples/simple/index.js",
+    "imports": [],
+    "exports": [],
+    "dependencies": [],
+    "hash": "963ff07a084c33a228bf3af81d4307f8ee20530991ef26f8eff51e3ff4471349"
+  },
+  "/Users/chuanjing.li/Documents/fe-workspace/packages/coverage-plugin/examples/simple/webpack.config.js": {
+    "filePath": "/Users/chuanjing.li/Documents/fe-workspace/packages/coverage-plugin/examples/simple/webpack.config.js",
+    "imports": [],
+    "exports": [],
+    "dependencies": [],
+    "hash": "f360de04cde10ca7bb5a5a9d89eae29ee132717ab3bfe13043d8d007b9fa01c3"
+  }
+}

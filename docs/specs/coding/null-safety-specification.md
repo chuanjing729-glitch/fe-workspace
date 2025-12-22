@@ -621,7 +621,7 @@ const displayValue = safeFormat(value, (v) => `${v}%`, '0%')
 在 `webpack.config.js` 中启用空指针防护检查：
 
 ```javascript
-const SpecPlugin = require('@51jbs/webpack-spec-plugin')
+const SpecPlugin = require('@51jbs/spec-plugin')
 
 module.exports = {
   plugins: [

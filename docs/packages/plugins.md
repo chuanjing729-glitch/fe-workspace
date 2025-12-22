@@ -1,20 +1,20 @@
-# Webpack 插件
+# 前端工程插件集
 
-前端工程效率平台提供了一系列高质量的 Webpack 插件，帮助提升构建质量和开发效率。
+前端工程效率平台提供了一系列高质量的工程化插件，涵盖规范校验、质量评估、API治理等全生命周期。
 
 ## 插件列表
 
-### Webpack 规范检查插件
-集成在 Webpack 构建流程中的代码质量检查工具。提供7大检查维度、57项规则，构建时自动检测代码质量问题。
+### Spec Plugin (工程规范助手)
+集成在构建流程中的自动守卫。提供7大检查维度、57项规则，确保每一行代码都符合团队共识。
 
-[查看详情](/packages/webpack-spec-plugin/)
+[查看详情](/packages/spec-plugin/)
 
-### Webpack 覆盖率插件
-用于在开发阶段收集代码覆盖率并生成增量自测报告的 Webpack 插件。支持动态插桩、实时收集。
+### Coverage Plugin (覆盖率助手)
+基于 Unplugin 的下一代增量覆盖率方案。支持 Webpack/Vite/Rspack，提供即时的自测反馈。
 
-[查看详情](/packages/webpack-coverage-plugin/)
+[查看详情](/packages/coverage-plugin/)
 
-### Webpack API 跟踪插件
-用于跟踪 API 契约变化并在开发阶段提供实时通知的 Webpack 插件。该插件作为接口契约的"看门人"，负责数据的同步、清洗、脱敏与变动分析。
+### API Tracker Plugin (API 契约守卫)
+由于 API 契约跟踪和变更检测的专业工具。支持 OpenAPI 导出与多分支协作，彻底解决联调痛点。
 
-[查看详情](/packages/webpack-api-tracker-plugin/)
+[查看详情](/packages/api-tracker-plugin/)

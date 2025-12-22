@@ -1,0 +1,14 @@
+{
+    "name": "rspack-diff-coverage-example",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "rspack serve",
+        "build": "rspack build"
+    },
+    "devDependencies": {
+        "@rspack/cli": "latest",
+        "@rspack/core": "latest",
+        "@51jbs/coverage-plugin": "../../"
+    }
+}

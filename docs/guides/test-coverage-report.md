@@ -6,7 +6,7 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **@51jbs/core-utils** | **83.65%** | **92.08%** | **91.17%** | ✅ Excellent |
 | **@51jbs/vue2-toolkit** | **~50%** | **65.4%** | **63.2%** | 🌿 Good |
-| **@51jbs/webpack-spec-plugin** | 0% | 0% | 0% | ❌ Pending |
+| **@51jbs/spec-plugin** | 0% | 0% | 0% | ❌ Pending |
 
 > **Last Updated**: 2025-12-21 (After "Saturation Rescue" Sprint)
 
@@ -60,7 +60,7 @@
 ## 🚀 Next Steps (下一步计划)
 
 1.  **Directives**: 引入 E2E 测试 (Cypress/Playwright) 来补充 `v-resize` 等依赖真实浏览器渲染行为的指令测试。
-2.  **Webpack Plugins**: 开始建设 `@51jbs/webpack-spec-plugin` 的测试套件，重点关注 AST 分析逻辑的准确性。
+2.  **Webpack Plugins**: 开始建设 `@51jbs/spec-plugin` 的测试套件，重点关注 AST 分析逻辑的准确性。
 
 ---
 

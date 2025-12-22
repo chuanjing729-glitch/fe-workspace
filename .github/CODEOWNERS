@@ -3,5 +3,5 @@
 /.github/ @team-leads
 
 # 业务包所有权
-/packages/webpack-coverage-plugin/ @coverage-team
+/packages/coverage-plugin/ @coverage-team
 /packages/core-utils/ @utils-team

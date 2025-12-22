@@ -1,6 +1,17 @@
+---
+title: incremental-coverage-plugin
+order: 1
+editLink: true
+---
+
 # Incremental Coverage Plugin
 
 **轻量级增量覆盖率插件** - 基于 babel-plugin-istanbul 和 istanbul-diff
+
+[![npm version](https://img.shields.io/npm/v/@51jbs/incremental-coverage-plugin.svg)](https://www.npmjs.com/package/@51jbs/incremental-coverage-plugin)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
 
 ## ✨ 特性
 
@@ -12,11 +23,15 @@
 - ✅ **生产就绪**: 具备防抖上报、故障重试、报告自动清理及优雅退出保护
 - ✅ **精美报告**: 生成带时间戳的历史报告及 `latest.html` 视图
 
+---
+
 ## 📦 安装
 
 ```bash
 npm install @51jbs/incremental-coverage-plugin --save-dev
 ```
+
+---
 
 ## 🚀 快速开始
 
@@ -37,6 +52,8 @@ module.exports = {
 };
 ```
 
+---
+
 ## ⚙️ 配置选项
 
 | 选项 | 类型 | 默认值 | 说明 |
@@ -49,6 +66,8 @@ module.exports = {
 | `historyCount` | `number` | `15` | 保留的历史报告数量 |
 | `outputDir` | `string` | `'.coverage'` | 报告输出目录 |
 | `reportFormat` | `'html'\|'json'\|'both'` | `'html'` | 报告格式 |
+
+---
 
 ## 📊 工作原理
 
@@ -68,6 +87,8 @@ module.exports = {
 7. 输出结果
 ```
 
+---
+
 ## 📁 输出文件
 
 运行后会在 `.coverage/` 目录生成以下文件：
@@ -79,3 +100,96 @@ module.exports = {
 ├── coverage-report-*.html     # 历史报告
 └── coverage-report-*.json     # JSON 格式报告（如果启用）
 ```
+
+---
+
+## 🎨 报告示例
+
+HTML 报告包含：
+- 📊 整体覆盖率统计
+- 📁 文件级别的覆盖率详情
+- 🎯 未覆盖行的具体位置
+- ✅ 通过/失败状态
+
+---
+
+## 🏗️ 架构设计
+
+本插件采用模块化设计，职责清晰：
+
+- **Plugin**: 主控制器，协调各模块
+- **CoverageCollector**: 收集和合并覆盖率数据
+- **CoverageDiffer**: 使用 istanbul-diff 计算增量
+- **CoverageReporter**: 生成 HTML/JSON 报告
+- **GitService**: Git 集成，获取变更信息
+
+详细架构文档请查看 [docs/architecture_zh.md](./architecture_zh.md)
+
+---
+
+## 🔧 开发
+
+```bash
+# 安装依赖
+npm install
+
+# 构建
+npm run build
+
+# 开发模式（监听文件变化）
+npm run dev
+
+# 运行测试
+npm test
+
+# 类型检查
+npm run typecheck
+```
+
+---
+
+## 📚 文档
+
+- [技术架构文档](./architecture_zh.md) - 详细的架构设计和实现原理
+- [API 文档](./api.md) - 完整的 API 参考（待补充）
+- [开发指南](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/docs/development.md) - 如何参与开发（待补充）
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+在提交 PR 前，请确保：
+- ✅ 代码通过 TypeScript 类型检查
+- ✅ 添加了必要的测试
+- ✅ 更新了相关文档
+
+---
+
+## 📄 许可证
+
+[MIT](https://github.com/chuanjing729-glitch/fe-workspace/blob/main/packages/incremental-coverage-plugin/LICENSE)
+
+---
+
+## 🙏 致谢
+
+本项目基于以下优秀的开源项目：
+
+- [babel-plugin-istanbul](https://github.com/istanbuljs/babel-plugin-istanbul) - 代码插桩
+- [istanbul-diff](https://github.com/istanbuljs/istanbul-diff) - 增量覆盖率计算
+- [unplugin](https://github.com/unjs/unplugin) - 统一的插件接口
+- [simple-git](https://github.com/steveukx/git-js) - Git 操作
+
+---
+
+## 📞 联系方式
+
+- 作者: chuanjing729
+- 仓库: [GitHub](https://github.com/chuanjing729-glitch/fe-workspace)
+- 问题反馈: [Issues](https://github.com/chuanjing729-glitch/fe-workspace/issues)
+
+---
+
+**让测试覆盖率变得简单高效！** 🚀

@@ -5,10 +5,10 @@ export const sidebar = {
       text: 'Webpack 插件',
       items: [
         { text: '总览', link: '/packages/plugins' },
-        { text: 'Webpack 规范检查插件', link: '/packages/webpack-spec-plugin/' },
-        { text: 'Webpack 覆盖率插件', link: '/packages/webpack-coverage-plugin/' },
+        { text: 'Spec Plugin (工程规范助手)', link: '/packages/spec-plugin/' },
+        { text: 'Coverage Plugin (覆盖率助手)', link: '/packages/coverage-plugin/' },
         { text: '增量覆盖率插件', link: '/packages/incremental-coverage-plugin/' },
-        { text: 'Webpack API 跟踪插件', link: '/packages/webpack-api-tracker-plugin/' }
+        { text: 'API Tracker Plugin (API 契约守卫)', link: '/packages/api-tracker-plugin/' }
       ]
     }
   ],
@@ -63,30 +63,30 @@ export const sidebar = {
   ],
 
   // Webpack 插件详情页
-  '/packages/webpack-spec-plugin/': [
+  '/packages/spec-plugin/': [
     {
-      text: 'Webpack 规范检查插件',
+      text: 'Spec Plugin (工程规范助手)',
       items: [
-        { text: '总览', link: '/packages/webpack-spec-plugin/' },
-        { text: '快速开始', link: '/packages/webpack-spec-plugin/quick-start' },
-        { text: '功能特性', link: '/packages/webpack-spec-plugin/features' },
-        { text: '真实项目验证', link: '/packages/webpack-spec-plugin/validation-report' },
-        { text: '生产环境评估', link: '/packages/webpack-spec-plugin/production-evaluation' },
-        { text: '更新日志', link: '/packages/webpack-spec-plugin/changelog' }
+        { text: '总览', link: '/packages/spec-plugin/' },
+        { text: '快速开始', link: '/packages/spec-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/spec-plugin/features' },
+        { text: '真实项目验证', link: '/packages/spec-plugin/validation-report' },
+        { text: '生产环境评估', link: '/packages/spec-plugin/production-evaluation' },
+        { text: '更新日志', link: '/packages/spec-plugin/changelog' }
       ]
     }
   ],
 
-  '/packages/webpack-coverage-plugin/': [
+  '/packages/coverage-plugin/': [
     {
-      text: 'Webpack 覆盖率插件',
+      text: 'Coverage Plugin (覆盖率助手)',
       items: [
-        { text: '总览', link: '/packages/webpack-coverage-plugin/' },
-        { text: '快速开始', link: '/packages/webpack-coverage-plugin/quick-start' },
-        { text: '功能特性', link: '/packages/webpack-coverage-plugin/features' },
-        { text: '真实项目验证', link: '/packages/webpack-coverage-plugin/validation-report' },
-        { text: '生产环境评估', link: '/packages/webpack-coverage-plugin/production-evaluation' },
-        { text: '更新日志', link: '/packages/webpack-coverage-plugin/changelog' }
+        { text: '总览', link: '/packages/coverage-plugin/' },
+        { text: '快速开始', link: '/packages/coverage-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/coverage-plugin/features' },
+        { text: '真实项目验证', link: '/packages/coverage-plugin/validation-report' },
+        { text: '生产环境评估', link: '/packages/coverage-plugin/production-evaluation' },
+        { text: '更新日志', link: '/packages/coverage-plugin/changelog' }
       ]
     }
   ],
@@ -100,16 +100,16 @@ export const sidebar = {
     }
   ],
 
-  '/packages/webpack-api-tracker-plugin/': [
+  '/packages/api-tracker-plugin/': [
     {
-      text: 'Webpack API 跟踪插件',
+      text: 'API Tracker Plugin (API 契约守卫)',
       items: [
-        { text: '总览', link: '/packages/webpack-api-tracker-plugin/' },
-        { text: '快速开始', link: '/packages/webpack-api-tracker-plugin/quick-start' },
-        { text: '功能特性', link: '/packages/webpack-api-tracker-plugin/features' },
-        { text: '真实项目验证', link: '/packages/webpack-api-tracker-plugin/validation-report' },
-        { text: '生产环境评估', link: '/packages/webpack-api-tracker-plugin/production-evaluation' },
-        { text: '更新日志', link: '/packages/webpack-api-tracker-plugin/changelog' }
+        { text: '总览', link: '/packages/api-tracker-plugin/' },
+        { text: '快速开始', link: '/packages/api-tracker-plugin/quick-start' },
+        { text: '功能特性', link: '/packages/api-tracker-plugin/features' },
+        { text: '真实项目验证', link: '/packages/api-tracker-plugin/validation-report' },
+        { text: '生产环境评估', link: '/packages/api-tracker-plugin/production-evaluation' },
+        { text: '更新日志', link: '/packages/api-tracker-plugin/changelog' }
       ]
     }
   ],

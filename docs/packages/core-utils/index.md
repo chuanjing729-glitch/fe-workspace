@@ -1,3 +1,9 @@
+---
+title: core-utils
+order: 1
+editLink: true
+---
+
 # @51jbs/core-utils
 
 > 纯 JS 工具库，框架无关，提供深拷贝、日期、数字精确计算等核心功能

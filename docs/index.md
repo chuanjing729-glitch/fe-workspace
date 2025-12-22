@@ -21,19 +21,19 @@ hero:
 
 features:
   - icon: 🔍
-    title: Webpack 规范检查插件
+    title: Spec Plugin (工程规范助手)
     details: 7大检查维度、57项规则，构建时自动检测代码质量问题，准确率100%
-    link: /packages/webpack-spec-plugin/
+    link: /packages/spec-plugin/
     
   - icon: 📊
-    title: Webpack 覆盖率插件
-    details: 动态插桩、实时收集、增量报告，提升自测质量
-    link: /packages/webpack-coverage-plugin/
+    title: Coverage Plugin (覆盖率助手)
+    details: 跨框架支持 (Vite/Webpack/Rspack)、动态插桩、实时收集、增量报告。
+    link: /packages/coverage-plugin/
     
   - icon: 🔄
-    title: Webpack API跟踪插件
-    details: API契约跟踪和变更检测，保障接口稳定性
-    link: /packages/webpack-api-tracker-plugin/
+    title: API Tracker Plugin (API 契约守卫)
+    details: API 契约追踪、深度变更检测与 OpenAPI 自动导出。
+    link: /packages/api-tracker-plugin/
     
   - icon: 📝
     title: 完整规范体系
@@ -61,28 +61,28 @@ features:
 - [设计规范](/specs/design/) - 技术方案设计、架构设计
 - [性能优化规范](/specs/optimization/) - 性能、内存、资源优化
 
-### 🔍 Webpack 规范检查插件
+### 🔍 Spec Plugin (工程规范助手)
 强大的代码质量检查工具，集成在 Webpack 构建流程中，自动检测57项代码问题。
 
-- [插件文档](/packages/webpack-spec-plugin/) - 完整使用文档
-- [快速开始](/packages/webpack-spec-plugin/quick-start) - 5分钟快速集成
-- [功能特性](/packages/webpack-spec-plugin/features) - 7大检查维度
-- [真实项目验证](/packages/webpack-spec-plugin/validation-report) - mall-portal-front 验证报告
+- [插件文档](/packages/spec-plugin/) - 完整使用文档
+- [快速开始](/packages/spec-plugin/quick-start) - 5分钟快速集成
+- [功能特性](/packages/spec-plugin/features) - 7大检查维度
+- [真实项目验证](/packages/spec-plugin/validation-report) - mall-portal-front 验证报告
 
-### 📊 Webpack 覆盖率插件
-用于在开发阶段收集代码覆盖率，并生成增量自测报告。
+### 📊 Coverage Plugin (覆盖率助手)
+基于 Unplugin 的通用覆盖率方案，即时反馈变更影响。
 
-- [插件文档](/packages/webpack-coverage-plugin/) - 完整使用文档
-- [快速开始](/packages/webpack-coverage-plugin/) - 5分钟快速集成
-- [功能特性](/packages/webpack-coverage-plugin/) - 覆盖率收集与报告
-- [真实项目验证](/packages/webpack-coverage-plugin/) - mall-portal-front 验证报告
+- [插件文档](/packages/coverage-plugin/) - 完整使用文档
+- [快速开始](/packages/coverage-plugin/) - 5分钟快速集成
+- [功能特性](/packages/coverage-plugin/) - 覆盖率收集与报告
+- [真实项目验证](/packages/coverage-plugin/) - mall-portal-front 验证报告
 
-### 🔄 Webpack API跟踪插件
+### 🔄 API Tracker Plugin (API 契约守卫)
 用于 API 契约跟踪和变更检测的 Webpack 插件。
 
-- [插件文档](/packages/webpack-api-tracker-plugin/) - 完整使用文档
-- [快速开始](/packages/webpack-api-tracker-plugin/) - 5分钟快速集成
-- [功能特性](/packages/webpack-api-tracker-plugin/) - API跟踪与变更检测
+- [插件文档](/packages/api-tracker-plugin/) - 完整使用文档
+- [快速开始](/packages/api-tracker-plugin/) - 5分钟快速集成
+- [功能特性](/packages/api-tracker-plugin/) - API跟踪与变更检测
 
 ### 🛠️ 前端工具库
 常用的前端工具函数集，提供200+个高质量、零依赖的实用函数。
@@ -95,9 +95,9 @@ features:
 
 - [Core Utils 更新日志](/changelog/core-utils) - 核心工具库变更记录
 - [Vue2 Toolkit 更新日志](/changelog/vue2-toolkit) - Vue2工具库变更记录
-- [Webpack Spec Plugin 更新日志](/changelog/webpack-spec-plugin) - 插件变更记录
-- [Webpack Coverage Plugin 更新日志](/changelog/webpack-coverage-plugin) - 插件变更记录
-- [Webpack API Tracker Plugin 更新日志](/changelog/webpack-api-tracker-plugin) - 插件变更记录
+- [Spec Plugin 更新日志](/changelog/spec-plugin) - 插件变更记录
+- [Coverage Plugin 更新日志](/changelog/coverage-plugin) - 插件变更记录
+- [API Tracker Plugin 更新日志](/changelog/api-tracker-plugin) - 插件变更记录
 
 ### 🤖 AI 编码助手
 提升开发效率和代码质量的AI工具，包含完整的使用规范和技巧。
@@ -111,7 +111,7 @@ features:
 
 ## 🎯 核心特性
 
-### Webpack 规范检查插件
+### Spec Plugin (工程规范助手)
 
 **核心亮点**：
 - ✅ **7 大检查维度**：命名、注释、边界处理、性能、安全、内存、导入
@@ -122,12 +122,12 @@ features:
 
 **快速开始**：
 ```bash
-npm install @51jbs/webpack-spec-plugin --save-dev
+npm install @51jbs/spec-plugin --save-dev
 ```
 
-[查看完整文档 →](/packages/webpack-spec-plugin/)
+[查看完整文档 →](/packages/spec-plugin/)
 
-### Webpack 覆盖率插件
+### Coverage Plugin (覆盖率助手)
 
 **核心亮点**：
 - ✅ **动态插桩**：DevServer启动时自动插桩
@@ -138,27 +138,27 @@ npm install @51jbs/webpack-spec-plugin --save-dev
 
 **快速开始**：
 ```bash
-npm install @51jbs/webpack-coverage-plugin
+npm install @51jbs/coverage-plugin
 ENABLE_SELF_TEST=true npm run dev
 ```
 
-[查看完整文档 →](/packages/webpack-coverage-plugin/)
+[查看完整文档 →](/packages/coverage-plugin/)
 
-### Webpack API跟踪插件
+### API Tracker Plugin (API 契约守卫)
 
 **核心亮点**：
-- ✅ **API契约跟踪**：数据同步、清洗、脱敏
-- ✅ **变更检测**：API变更检测和报告
-- ✅ **多种采集模式**：OpenAPI/爬虫
-- ✅ **插件协同**：与覆盖率插件集成
-- ✅ **运行时通知**：API变更气泡提醒
+- ✅ **API 契约跟踪**：支持 OpenAPI 指纹采集与深度变更分析
+- ✅ **破坏性变更检测**：实时拦截字段增删与类型漂移
+- ✅ **多源适配**：兼容本地定义与远程 Swagger 爬取
+- ✅ **插件协同**：集成 Coverage Plugin 提供全链路质量报告
+- ✅ **气泡 UI**：开发环境实时看板，展示接口健康度
 
 **快速开始**：
 ```bash
-npm install webpack-api-tracker-plugin
+npm install @51jbs/api-tracker-plugin --save-dev
 ```
 
-[查看完整文档 →](/packages/webpack-api-tracker-plugin/)
+[查看完整文档 →](/packages/api-tracker-plugin/)
 
 ---
 

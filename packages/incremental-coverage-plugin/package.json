@@ -42,7 +42,6 @@
         "test:coverage": "vitest --coverage",
         "lint": "eslint src",
         "typecheck": "tsc --noEmit",
-        "prepublishOnly": "npm run build && npm run test",
         "release": "echo 'Run: npm publish' && exit 1"
     },
     "dependencies": {

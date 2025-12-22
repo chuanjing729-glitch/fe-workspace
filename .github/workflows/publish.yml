@@ -11,11 +11,11 @@ on:
           - ""
           - "core-utils"
           - "vue2-toolkit"
-          - "webpack-spec-plugin"
+          - "spec-plugin"
           - "incremental-coverage-plugin"
-          - "webpack-coverage-plugin"
+          - "coverage-plugin"
 
-          - "webpack-api-tracker-plugin"
+          - "api-tracker-plugin"
       version-type:
         description: "版本更新类型"
         required: true

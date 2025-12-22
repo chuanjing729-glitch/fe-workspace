@@ -415,7 +415,7 @@ $responsive-size: strip-unit($font-size-base) * 1.2;
 
 ## 🛠️ 自动化规范检查 (Linting)
 
-为了确保 CSS 命名和结构的规范性，项目集成了 `@51jbs/webpack-spec-plugin`。该插件会在构建阶段自动执行以下检查：
+为了确保 CSS 命名和结构的规范性，项目集成了 `@51jbs/spec-plugin`。该插件会在构建阶段自动执行以下检查：
 
 - **BEM 命名检查 (P1)**：自动识别不符合 `block__element--modifier` 结构的类名名。
 - **ID 选择器拦截 (P1)**：禁止使用 `#id` 选择器以防止优先级混乱。
