@@ -1,6 +1,6 @@
 {
     "name": "@51jbs/incremental-coverage-plugin",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Lightweight incremental coverage plugin based on babel-plugin-istanbul and istanbul-diff",
     "keywords": [
         "coverage",
@@ -55,7 +55,7 @@
         "istanbul-lib-coverage": "^3.2.2",
         "istanbul-lib-report": "^3.0.1",
         "istanbul-reports": "^3.1.6",
-        "simple-git": "^3.25.0",
+        "simple-git": "^3.15.0",
         "tsup": "^8.0.0",
         "typescript": "^5.3.0",
         "unplugin": "^1.14.1",
