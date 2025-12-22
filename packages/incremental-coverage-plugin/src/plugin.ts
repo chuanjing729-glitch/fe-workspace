@@ -105,8 +105,8 @@ export const IncrementalCoveragePlugin = createUnplugin<IncrementalCoverageOptio
                 if (!rule || typeof rule !== 'object' || processed.has(rule)) return;
                 processed.add(rule);
 
-                // 检查 direct loader
-                const isBabel = rule.loader && (rule.loader.includes('babel-loader') || rule.loader === 'babel-loader');
+                // 1. 检查 direct loader (对象形式)
+                const isBabel = rule.loader && (typeof rule.loader === 'string') && (rule.loader.includes('babel-loader') || rule.loader === 'babel-loader');
                 if (isBabel) {
                     if (!rule.options) rule.options = {};
                     if (typeof rule.options === 'object') {
@@ -129,15 +129,51 @@ export const IncrementalCoveragePlugin = createUnplugin<IncrementalCoverageOptio
                     }
                 }
 
-                // 检查 use 数组或对象
+                // 2. 检查 use 数组或对象
                 if (rule.use) {
-                    const useArr = Array.isArray(rule.use) ? rule.use : [rule.use];
-                    useArr.forEach((u: any) => {
-                        if (u && typeof u === 'object') injectBabel(u);
-                    });
+                    if (Array.isArray(rule.use)) {
+                        rule.use.forEach((u: any, index: number) => {
+                            if (typeof u === 'object') {
+                                injectBabel(u);
+                            } else if (typeof u === 'string' && (u.includes('babel-loader') || u === 'babel-loader')) {
+                                // 将字符串转换为对象
+                                rule.use[index] = {
+                                    loader: u,
+                                    options: {
+                                        plugins: [[
+                                            'babel-plugin-istanbul',
+                                            {
+                                                extension: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
+                                                include: options.include,
+                                                exclude: options.exclude || ['**/*.spec.ts', '**/*.test.ts', '**/node_modules/**']
+                                            }
+                                        ]]
+                                    }
+                                };
+                                console.log('[IncrementalCoverage] 已将字符串 babel-loader 转换为对象并注入');
+                            }
+                        });
+                    } else if (typeof rule.use === 'object') {
+                        injectBabel(rule.use);
+                    } else if (typeof rule.use === 'string' && (rule.use.includes('babel-loader') || rule.use === 'babel-loader')) {
+                        rule.use = {
+                            loader: rule.use,
+                            options: {
+                                plugins: [[
+                                    'babel-plugin-istanbul',
+                                    {
+                                        extension: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
+                                        include: options.include,
+                                        exclude: options.exclude || ['**/*.spec.ts', '**/*.test.ts', '**/node_modules/**']
+                                    }
+                                ]]
+                            }
+                        };
+                        console.log('[IncrementalCoverage] 已将 rule.use 字符串转换为对象并注入');
+                    }
                 }
 
-                // 递归 oneOf 等
+                // 3. 递归 oneOf 等
                 if (rule.oneOf && Array.isArray(rule.oneOf)) {
                     rule.oneOf.forEach(injectBabel);
                 }
@@ -159,73 +195,86 @@ export const IncrementalCoveragePlugin = createUnplugin<IncrementalCoverageOptio
 
                 devServer.app?.post('/coverage', async (req: any, res: any) => {
                     const startTime = Date.now();
+
+                    // 定义处理逻辑
+                    const handleCoverage = async (payload: any) => {
+                        let coverageData;
+
+                        // 处理压缩数据
+                        if (payload.data && req.headers['x-coverage-compressed']) {
+                            try {
+                                const compressed = payload.data;
+                                const decompressed = Buffer.from(compressed, 'base64').toString();
+                                coverageData = JSON.parse(decodeURIComponent(decompressed));
+
+                                console.log('[IncrementalCoverage] 数据已解压缩 (压缩率: ' +
+                                    Math.round((1 - compressed.length / JSON.stringify(coverageData).length) * 100) + '%)');
+                            } catch (e) {
+                                console.warn('[IncrementalCoverage] 解压失败，回退到原始数据:', e);
+                                coverageData = payload.data ? payload.data : payload;
+                            }
+                        } else {
+                            coverageData = payload;
+                        }
+
+                        // 合并并计算
+                        const merged = collector.merge(coverageData);
+                        const result = await differ.calculate(merged);
+                        pendingResult = result;
+
+                        // 防抖逻辑
+                        const now = Date.now();
+                        const elapsed = now - lastReportTime;
+                        const interval = options.reportInterval || 10000;
+
+                        if (elapsed >= interval) {
+                            await reporter.generate(result);
+                            lastReportTime = now;
+                            if (reportTimer) {
+                                clearTimeout(reportTimer);
+                                reportTimer = null;
+                            }
+                        } else if (!reportTimer) {
+                            console.log(`[IncrementalCoverage] 报告生成冷却中，将在 ${interval - elapsed}ms 后尝试...`);
+                            reportTimer = setTimeout(async () => {
+                                if (pendingResult) {
+                                    await reporter.generate(pendingResult);
+                                    lastReportTime = Date.now();
+                                }
+                                reportTimer = null;
+                            }, interval - elapsed);
+                        }
+
+                        res.json({
+                            status: 'ok',
+                            coverage: {
+                                rate: result.overall.coverageRate,
+                                coveredLines: result.overall.coveredLines,
+                                totalLines: result.overall.totalLines,
+                                fileCount: result.files.length
+                            }
+                        });
+                    };
+
                     try {
+                        // 1. 如果 body-parser 已经处理了 body
+                        if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+                            await handleCoverage(req.body);
+                            return;
+                        }
+
+                        // 2. 否则，手动收集流数据
                         let chunks: Buffer[] = [];
                         req.on('data', (chunk: Buffer) => { chunks.push(chunk); });
                         req.on('end', async () => {
                             try {
                                 const body = Buffer.concat(chunks).toString();
+                                if (!body) {
+                                    res.status(400).json({ success: false, error: 'Empty body' });
+                                    return;
+                                }
                                 const payload = JSON.parse(body);
-                                let coverageData;
-
-                                // 处理压缩数据
-                                if (payload.data && req.headers['x-coverage-compressed']) {
-                                    try {
-                                        const compressed = payload.data;
-                                        // 更加稳健的 Base64 解法
-                                        const decompressed = Buffer.from(compressed, 'base64').toString();
-                                        coverageData = JSON.parse(decodeURIComponent(decompressed));
-
-                                        console.log('[IncrementalCoverage] 数据已解压缩 (压缩率: ' +
-                                            Math.round((1 - compressed.length / JSON.stringify(coverageData).length) * 100) + '%)');
-                                    } catch (e) {
-                                        console.warn('[IncrementalCoverage] 解压失败，回退到原始数据:', e);
-                                        coverageData = payload.data ? payload.data : payload;
-                                    }
-                                } else {
-                                    coverageData = payload;
-                                }
-
-                                const fileCount = Object.keys(coverageData).length;
-
-                                // 合并并计算
-                                const merged = collector.merge(coverageData);
-                                const result = await differ.calculate(merged);
-                                pendingResult = result;
-
-                                // 防抖逻辑
-                                const now = Date.now();
-                                const elapsed = now - lastReportTime;
-                                const interval = options.reportInterval || 10000;
-
-                                if (elapsed >= interval) {
-                                    await reporter.generate(result);
-                                    lastReportTime = now;
-                                    if (reportTimer) {
-                                        clearTimeout(reportTimer);
-                                        reportTimer = null;
-                                    }
-                                } else if (!reportTimer) {
-                                    console.log(`[IncrementalCoverage] 报告生成冷却中，将在 ${interval - elapsed}ms 后尝试...`);
-                                    reportTimer = setTimeout(async () => {
-                                        if (pendingResult) {
-                                            await reporter.generate(pendingResult);
-                                            lastReportTime = Date.now();
-                                        }
-                                        reportTimer = null;
-                                    }, interval - elapsed);
-                                }
-
-                                const duration = Date.now() - startTime;
-                                res.json({
-                                    status: 'ok',
-                                    coverage: {
-                                        rate: result.overall.coverageRate,
-                                        coveredLines: result.overall.coveredLines,
-                                        totalLines: result.overall.totalLines,
-                                        fileCount: result.files.length
-                                    }
-                                });
+                                await handleCoverage(payload);
                             } catch (parseError) {
                                 console.error('[IncrementalCoverage] 接收数据解析失败:', parseError);
                                 res.status(400).json({ success: false, error: 'Invalid data format' });

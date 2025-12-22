@@ -7,6 +7,7 @@
  * @module collector
  */
 
+import * as path from 'path';
 import type { CoverageMap, CoverageData } from './types';
 
 /**
@@ -53,8 +54,12 @@ export class CoverageCollector {
      * // 结果：s['0'] = 3（累加）
      */
     merge(newCoverage: CoverageMap): CoverageMap {
+        const projectRoot = process.cwd();
         // 遍历新数据的每个文件
-        for (const [filePath, data] of Object.entries(newCoverage)) {
+        for (const [key, data] of Object.entries(newCoverage)) {
+            // 归一化路径，确保绝对路径/相对路径都能匹配
+            const filePath = path.isAbsolute(key) ? key : path.resolve(projectRoot, key);
+
             if (!this.coverageMap[filePath]) {
                 // 首次出现的文件，直接存储
                 this.coverageMap[filePath] = data;

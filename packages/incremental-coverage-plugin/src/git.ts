@@ -57,9 +57,10 @@ export async function getGitDiff(base: string = 'main'): Promise<GitDiffResult> 
         // 创建在该 root 下运行的实例
         const git = simpleGit(topLevel);
 
-        // 1. 获取 diff 摘要
-        // 注意：不传第二个参数表示对比工作区
-        const diffSummary = await git.diffSummary([base]);
+        // 1. 获取变更的文件列表
+        // 使用 --name-only 可以获得纯净的文件路径，避免 diffSummary 中可能出现的 {a => b} 格式
+        const filesRaw = await git.raw(['diff', '--name-only', base]);
+        const changedFiles = filesRaw.split('\n').filter(f => f.trim().length > 0);
 
         // 初始化结果对象
         const result: GitDiffResult = {
@@ -69,8 +70,7 @@ export async function getGitDiff(base: string = 'main'): Promise<GitDiffResult> 
         };
 
         // 2. 遍历变更的文件
-        for (const fileSummary of diffSummary.files) {
-            const relativeFile = fileSummary.file;
+        for (const relativeFile of changedFiles) {
             const absoluteFile = path.resolve(topLevel, relativeFile);
 
             // 记录绝对路径
@@ -144,7 +144,7 @@ export async function getGitDiff(base: string = 'main'): Promise<GitDiffResult> 
  * 
  * @private
  */
-function parseDiff(diffText: string): { additions: number[]; deletions: number[] } {
+export function parseDiff(diffText: string): { additions: number[]; deletions: number[] } {
     const additions: number[] = [];
     const deletions: number[] = [];
 
