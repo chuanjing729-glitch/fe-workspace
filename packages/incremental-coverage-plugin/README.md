@@ -41,7 +41,7 @@ npm install @51jbs/incremental-coverage-plugin --save-dev
 npm ls @51jbs/incremental-coverage-plugin
 ```
 
-> 💡 **提示**：从 v2.0.0 开始，插件已内置所有必要依赖（包括 `@babel/core`、`istanbul-lib-*`），无需额外安装。
+> 💡 **提示**：插件已内置所有必要依赖（包括 `@babel/core`、`istanbul-lib-*`），无需额外安装。
 
 ## 📚 快速导航
 
